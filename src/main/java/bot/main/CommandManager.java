@@ -1,22 +1,21 @@
 package bot.main;
 
+import bot.command.CommandContext;
+import bot.command.ICommand;
+import bot.command.commands.*;
+import bot.command.commands.admin.AddReactionRoleCommand;
+import bot.command.commands.admin.ReactionCommand;
+import bot.command.commands.admin.RemoveReactionRoleCommand;
+import bot.command.commands.admin.SetPrefixCommand;
+import bot.command.commands.fun.*;
+import bot.command.commands.moderation.KickCommand;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-
-import bot.command.CommandContext;
-import bot.command.ICommand;
-import bot.command.commands.*;
-import bot.command.commands.AddReactionRoleCommand;
-import bot.command.commands.admin.*;
-import bot.command.commands.admin.ReactionCommand;
-import bot.command.commands.admin.RemoveReactionRoleCommand;
-import bot.command.commands.fun.*;
-import bot.command.commands.moderation.*;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandManager {
     private final List<ICommand> commands = new ArrayList<>();
@@ -33,7 +32,6 @@ public class CommandManager {
         addCommand(new KickCommand());
         addCommand(new InstagramCommand());
         addCommand(new GithubCommand());
-        addCommand(new WebhookCommand());
         addCommand(new SetPrefixCommand());
         addCommand(new ReactionCommand());
         addCommand(new AddReactionRoleCommand());

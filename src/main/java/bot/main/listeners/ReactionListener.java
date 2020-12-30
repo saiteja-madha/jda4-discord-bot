@@ -1,93 +1,61 @@
 package bot.main.listeners;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import bot.database.SQLiteDataSource;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
-import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
+import bot.database.DataSource;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+
+import javax.annotation.Nonnull;
 
 public class ReactionListener extends ListenerAdapter {
 
-	@Override
-	public void onMessageReactionAdd(MessageReactionAddEvent event) {
-		
-		if (event.getChannelType() == ChannelType.TEXT) {
-			
-			long guildId = event.getGuild().getIdLong();
-			
-			if (!event.getUser().isBot()) {
-				long channelId = event.getChannel().getIdLong();
-				long messageId = event.getMessageIdLong();
-				
-				if (!event.getReactionEmote().isEmoji())
-					return;
-				
-				String emote = event.getReactionEmote().getEmoji();
+    @Override
+    public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
+        if (event.getUser().isBot() || !event.getReactionEmote().isEmoji())
+            return;
 
-				try (Connection conn = SQLiteDataSource.getConnection();
-						final PreparedStatement preparedStatement = conn
-						.prepareStatement("SELECT role_id FROM reaction_roles WHERE guild_id = ? AND channel_id = ? AND message_id = ? AND emote = ?")) {
+        long guildId = event.getGuild().getIdLong();
+        long channelId = event.getChannel().getIdLong();
+        long messageId = event.getMessageIdLong();
+        String emote = event.getReactionEmote().getEmoji();
 
-					preparedStatement.setLong(1, guildId);
-					preparedStatement.setLong(2, channelId);
-					preparedStatement.setLong(3, messageId);
-					preparedStatement.setString(4, emote);
+        try {
+            long roleId = DataSource.INS.getReactionRoleId(guildId, channelId, messageId, emote);
+            if (roleId != 0) {
+                Role role = event.getGuild().getRoleById(roleId);
+                if (role == null)
+                    DataSource.INS.removeReactionRole(guildId, channelId, messageId, emote);
+                else
+                    event.getGuild().addRoleToMember(event.getMember(), role).queue();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-					try (final ResultSet resultSet = preparedStatement.executeQuery()) {
-						if (resultSet.next()) {
-							long roleId = resultSet.getLong("role_id");
-							event.getGuild().addRoleToMember(event.getMember(), event.getGuild().getRoleById(roleId))
-									.queue();
-						}
-					}
+    }
 
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+    @Override
+    public void onGuildMessageReactionRemove(@Nonnull GuildMessageReactionRemoveEvent event) {
+        if (event.getUser() == null || event.getMember() == null || event.getUser().isBot() || !event.getReactionEmote().isEmoji())
+            return;
 
-		}
+        long guildId = event.getGuild().getIdLong();
+        long channelId = event.getChannel().getIdLong();
+        long messageId = event.getMessageIdLong();
+        String emote = event.getReactionEmote().getEmoji();
 
-	}
-
-	@Override
-	public void onMessageReactionRemove(MessageReactionRemoveEvent event) {
-
-		if (event.getChannelType() == ChannelType.TEXT) {
-			
-			long guildId = event.getGuild().getIdLong();
-			
-			if (!event.getUser().isBot() || event.getReactionEmote().isEmoji()) {
-				long channelId = event.getChannel().getIdLong();
-				long messageId = event.getMessageIdLong();
-				String emote = event.getReactionEmote().getEmoji();
-
-				try (Connection conn = SQLiteDataSource.getConnection();
-						final PreparedStatement preparedStatement = conn
-						.prepareStatement("SELECT role_id FROM reaction_roles WHERE guild_id = ? AND channel_id = ? AND message_id = ? AND emote = ?")) {
-
-					preparedStatement.setLong(1, guildId);
-					preparedStatement.setLong(2, channelId);
-					preparedStatement.setLong(3, messageId);
-					preparedStatement.setString(4, emote);
-
-					try (final ResultSet resultSet = preparedStatement.executeQuery()) {
-						if (resultSet.next()) {
-							long roleId = resultSet.getLong("role_id");
-							event.getGuild().removeRoleFromMember(event.getMember(), event.getGuild().getRoleById(roleId))
-									.queue();
-						}
-					}
-
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+        try {
+            long roleId = DataSource.INS.getReactionRoleId(guildId, channelId, messageId, emote);
+            if (roleId != 0) {
+                Role role = event.getGuild().getRoleById(roleId);
+                if (role == null)
+                    DataSource.INS.removeReactionRole(guildId, channelId, messageId, emote);
+                else
+                    event.getGuild().removeRoleFromMember(event.getMember(), role).queue();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

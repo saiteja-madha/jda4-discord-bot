@@ -1,15 +1,11 @@
 package bot.main.listeners;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import javax.annotation.Nonnull;
 
+import bot.database.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import bot.database.SQLiteDataSource;
 import bot.main.CommandManager;
 import bot.main.Config;
 import bot.main.MemoryMap;
@@ -32,7 +28,7 @@ public class GuildMessageListener extends ListenerAdapter {
         }
 
         final long guildId = event.getGuild().getIdLong();
-        String prefix = MemoryMap.PREFIXES.computeIfAbsent(guildId, this::getPrefix);
+        String prefix = MemoryMap.PREFIXES.computeIfAbsent(guildId, DataSource.INS::getPrefix);
         
         String raw = event.getMessage().getContentRaw();
 
@@ -47,34 +43,6 @@ public class GuildMessageListener extends ListenerAdapter {
         if (raw.startsWith(prefix)) {
         	manager.handle(event, prefix);
         }
-    }
-    
-    private String getPrefix(long guildId) {
-        try (final PreparedStatement preparedStatement = SQLiteDataSource
-                .getConnection()
-                .prepareStatement("SELECT prefix FROM guild_settings WHERE guild_id = ?")) {
-
-            preparedStatement.setString(1, String.valueOf(guildId));
-
-            try (final ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getString("prefix");
-                }
-            }
-
-            try (final PreparedStatement insertStatement = SQLiteDataSource
-                    .getConnection()
-                    .prepareStatement("INSERT INTO guild_settings(guild_id) VALUES(?)")) {
-
-                insertStatement.setString(1, String.valueOf(guildId));
-
-                insertStatement.execute();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return Config.get("prefix");
     }
     
 }

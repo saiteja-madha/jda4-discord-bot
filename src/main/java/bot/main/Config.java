@@ -7,7 +7,10 @@ public class Config {
     private static final Dotenv dotenv = Dotenv.load();
 
     public static String get(String key) {
-        return dotenv.get(key.toUpperCase());
+        String value = dotenv.get(key.toUpperCase());
+        System.out.println();
+        return value;
+
     }
 
 }
