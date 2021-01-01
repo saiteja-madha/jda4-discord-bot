@@ -1,28 +1,33 @@
 package bot.command.commands.moderation;
 
-import java.util.List;
-
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import org.jetbrains.annotations.NotNull;
 
-public class KickCommand implements ICommand {
+import java.util.List;
+
+public class KickCommand extends ICommand {
+
+    public KickCommand() {
+        this.name = "kick";
+        this.help = "Kick a member off the server";
+        this.usage = "<@member> [reason]";
+        this.argsCount = 2;
+        this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
+        this.botPermissions = new Permission[]{Permission.KICK_MEMBERS};
+    }
+
     @Override
-    public void handle(CommandContext ctx) {
+    public void handle(@NotNull CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
         final Message message = ctx.getMessage();
         final Member member = ctx.getMember();
         final List<String> args = ctx.getArgs();
 
-        if (args.size() < 2 || message.getMentionedMembers().isEmpty()) {
-            channel.sendMessage("Missing arguments").queue();
-            return;
-        } 
-
-        
         final Member target = message.getMentionedMembers().get(0);
 
         if (!member.canInteract(target) || !member.hasPermission(Permission.KICK_MEMBERS)) {
@@ -43,19 +48,9 @@ public class KickCommand implements ICommand {
                 .kick(target, reason)
                 .reason(reason)
                 .queue(
-                        (__) -> channel.sendMessage("Kick was successful").queue(),
-                        (error) -> channel.sendMessageFormat("Could not kick %s", error.getMessage()).queue()
+                        (__) -> ctx.reply("Kick was successful"),
+                        (error) -> ctx.reply("Could not kick " + error.getMessage())
                 );
     }
 
-    @Override
-    public String getName() {
-        return "kick";
-    }
-
-    @Override
-    public String getHelp() {
-        return "Kick a member off the server\n" +
-                "```Usage: [prefix]kick <@user> <reason>```";
-    }
 }

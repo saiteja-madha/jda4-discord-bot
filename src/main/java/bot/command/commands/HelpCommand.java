@@ -1,29 +1,29 @@
 package bot.command.commands;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
+import bot.command.CommandContext;
+import bot.command.ICommand;
+import bot.main.CommandManager;
+import bot.main.MemoryMap;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
-import bot.command.CommandContext;
-import bot.command.ICommand;
-import bot.main.CommandManager;
-import bot.main.Config;
-import bot.main.MemoryMap;
-
-public class HelpCommand implements ICommand {
+public class HelpCommand extends ICommand {
 
     private final CommandManager manager;
 
     public HelpCommand(CommandManager manager) {
+        this.name = "help";
+        this.help = "Shows the list with commands in the bot";
+        this.usage = "<command>";
+        this.aliases = Arrays.asList("commands", "cmds", "commandlist");
         this.manager = manager;
     }
 
     @Override
-    public void handle(CommandContext ctx) {
+    public void handle(@NotNull CommandContext ctx) {
         List<String> args = ctx.getArgs();
-        TextChannel channel = ctx.getChannel();
 
         if (args.isEmpty()) {
             StringBuilder builder = new StringBuilder();
@@ -33,12 +33,12 @@ public class HelpCommand implements ICommand {
 
             manager.getCommands().stream().map(ICommand::getName).forEach(
                     (it) -> builder.append('`')
-                    				.append(prefix)
-                    				.append(it)
-                    				.append("`\n")
+                            .append(prefix)
+                            .append(it)
+                            .append("`\n")
             );
 
-            channel.sendMessage(builder.toString()).queue();
+            ctx.reply(builder.toString());
             return;
         }
 
@@ -46,31 +46,12 @@ public class HelpCommand implements ICommand {
         ICommand command = manager.getCommand(search);
 
         if (command == null) {
-            channel.sendMessage("Nothing found for " + search).queue();
+            ctx.reply("Nothing found for " + search);
             return;
         }
-        
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle((Config.get("prefix")) + command.getName())
-        	.setColor(0x33FFBB)
-        	.setDescription(command.getHelp().replace("[prefix]", MemoryMap.PREFIXES.get(ctx.getGuild().getIdLong())));
-        
-        channel.sendMessage(builder.build()).queue();
+
+        command.sendUsage(ctx);
+
     }
 
-    @Override
-    public String getName() {
-        return "help";
-    }
-
-    @Override
-    public String getHelp() {
-        return "Shows the list with commands in the bot\n" +
-                "```Usage: [prefix]help <command>```";
-    }
-
-    @Override
-    public List<String> getAliases() {
-        return Arrays.asList("commands", "cmds", "commandlist");
-    }
 }

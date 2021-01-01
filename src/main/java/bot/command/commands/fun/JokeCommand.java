@@ -1,23 +1,25 @@
 package bot.command.commands.fun;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import com.fasterxml.jackson.databind.JsonNode;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
+import org.jetbrains.annotations.NotNull;
 
-public class JokeCommand implements ICommand {
+public class JokeCommand extends ICommand {
+
+    public JokeCommand() {
+        this.name = "joke";
+        this.help = "Shows a random joke";
+    }
+
     @Override
-    public void handle(CommandContext ctx) {
-        final TextChannel channel = ctx.getChannel();
-
+    public void handle(@NotNull CommandContext ctx) {
         WebUtils.ins.getJSONObject("https://apis.duncte123.me/joke").async((json) -> {
             if (!json.get("success").asBoolean()) {
-                channel.sendMessage("Something went wrong, try again later").queue();
-                System.out.println(json);
+                ctx.reply("Something went wrong, try again later");
                 return;
             }
 
@@ -30,18 +32,8 @@ public class JokeCommand implements ICommand {
                     .setTitle(title, url)
                     .setDescription(body);
 
-            channel.sendMessage(embed.build()).queue();
+            ctx.reply(embed.build());
         });
     }
 
-    @Override
-    public String getName() {
-        return "joke";
-    }
-
-    @Override
-    public String getHelp() {
-        return "Shows a random joke\n" +
-        "```Usage: [prefix]joke```";
-    }
 }

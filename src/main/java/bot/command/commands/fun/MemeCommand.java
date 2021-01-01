@@ -1,23 +1,25 @@
 package bot.command.commands.fun;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import com.fasterxml.jackson.databind.JsonNode;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
+import org.jetbrains.annotations.NotNull;
 
-public class MemeCommand implements ICommand {
+public class MemeCommand extends ICommand {
+
+    public MemeCommand() {
+        this.name = "meme";
+        this.help = "Shows a random meme";
+    }
+
     @Override
-    public void handle(CommandContext ctx) {
-        final TextChannel channel = ctx.getChannel();
-
+    public void handle(@NotNull CommandContext ctx) {
         WebUtils.ins.getJSONObject("https://apis.duncte123.me/meme").async((json) -> {
             if (!json.get("success").asBoolean()) {
-                channel.sendMessage("Something went wrong, try again later").queue();
-                System.out.println(json);
+                ctx.reply("Something went wrong, try again later");
                 return;
             }
 
@@ -27,18 +29,8 @@ public class MemeCommand implements ICommand {
             final String image = data.get("image").asText();
             final EmbedBuilder embed = EmbedUtils.embedImageWithTitle(title, url, image);
 
-            channel.sendMessage(embed.build()).queue();
+            ctx.reply(embed.build());
         });
     }
 
-    @Override
-    public String getName() {
-        return "meme";
-    }
-
-    @Override
-    public String getHelp() {
-        return "Shows a random meme\n" +
-        "```Usage: [prefix]meme```";
-    }
 }

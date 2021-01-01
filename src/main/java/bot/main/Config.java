@@ -1,5 +1,6 @@
 package bot.main;
 
+
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Config {
@@ -8,9 +9,9 @@ public class Config {
 
     public static String get(String key) {
         String value = dotenv.get(key.toUpperCase());
-        System.out.println();
+        if (value == null)
+            throw new NullPointerException("Null value for key: " + key);
         return value;
-
     }
 
 }

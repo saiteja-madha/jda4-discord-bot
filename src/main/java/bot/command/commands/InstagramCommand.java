@@ -1,33 +1,45 @@
 package bot.command.commands;
 
-import java.util.Collections;
-import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import com.fasterxml.jackson.databind.JsonNode;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
+import org.jetbrains.annotations.NotNull;
 
-public class InstagramCommand implements ICommand {
+import java.util.Collections;
+import java.util.List;
+
+public class InstagramCommand extends ICommand {
+
+    public InstagramCommand() {
+        this.name = "instagram";
+        this.help = "Shows instagram statistics of a user with the latest image";
+        this.usage = "<username>";
+        this.aliases = Collections.singletonList("insta");
+        this.argsCount = 1;
+    }
+
+    private String getLatestImage(JsonNode json) {
+        if (!json.isArray() || json.size() == 0)
+            return null;
+
+        return json.get(0).get("url").asText();
+    }
+
+    private String toEmote(boolean bool) {
+        return bool ? "✅" : "❌";
+    }
+
     @Override
-    public void handle(CommandContext ctx) {
+    public void handle(@NotNull CommandContext ctx) {
         final List<String> args = ctx.getArgs();
-        final TextChannel channel = ctx.getChannel();
-
-        if (args.isEmpty()) {
-            channel.sendMessage("You must provide a username to look up").queue();
-            return;
-        }
-
         final String usn = args.get(0);
 
         WebUtils.ins.getJSONObject("https://apis.duncte123.me/insta/" + usn).async((json) -> {
             if (!json.get("success").asBoolean()) {
-                channel.sendMessage(json.get("error").get("message").asText()).queue();
+                ctx.reply(json.get("error").get("message").asText());
                 return;
             }
 
@@ -53,39 +65,9 @@ public class InstagramCommand implements ICommand {
                     ))
                     .setImage(getLatestImage(json.get("images")));
 
-            channel.sendMessage(embed.build()).queue();
+            ctx.reply(embed.build());
+
         });
     }
 
-    @Override
-    public String getName() {
-        return "instagram";
-    }
-
-    @Override
-    public List<String> getAliases() {
-        return Collections.singletonList("insta");
-    }
-
-    @Override
-    public String getHelp() {
-        return "Shows instagram statistics of a user with the latest image\n" +
-                "```Usage: [prefix]instagram <username>```";
-    }
-
-    private String getLatestImage(JsonNode json) {
-        if (!json.isArray()) {
-            return null;
-        }
-
-        if (json.size() == 0) {
-            return null;
-        }
-
-        return json.get(0).get("url").asText();
-    }
-
-    private String toEmote(boolean bool) {
-        return bool ? "✅" : "❌";
-    }
 }

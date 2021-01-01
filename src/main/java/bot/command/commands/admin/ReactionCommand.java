@@ -1,48 +1,47 @@
 package bot.command.commands.admin;
 
-import java.util.List;
-
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import org.jetbrains.annotations.NotNull;
 
-public class ReactionCommand implements ICommand {
+import java.util.List;
 
-	@Override
-	public void handle(CommandContext ctx) {
-        final TextChannel channel = ctx.getChannel();
+public class ReactionCommand extends ICommand {
+
+    public ReactionCommand() {
+        this.name = "react";
+        this.help = "Reacts with an emoji to the mentioned message";
+        this.usage = "<#channel> <messageid> <emote>";
+        this.argsCount = 3;
+        this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+    }
+
+    @Override
+    public void handle(@NotNull CommandContext ctx) {
         final Message message = ctx.getMessage();
-        final List<String> args = ctx.getArgs();	
-		List<TextChannel> channels = message.getMentionedChannels();
-		
-		if (args.size() < 3 || channels.isEmpty()) {
-			channel.sendMessage("Missing arguments").queue();
-			return;
-		}
-		
-		TextChannel tc = channels.get(0);
-		String messageIdString = args.get(1);
-		
-		try {
-			Long messageId = Long.parseLong(messageIdString);
-			String emote = args.get(2);
+        final List<String> args = ctx.getArgs();
+        List<TextChannel> channels = message.getMentionedChannels();
 
-			tc.addReactionById(messageId, emote).queue();			
-		} catch (NumberFormatException e) {
-			
-		}				
-	}
+        if (channels.isEmpty()) {
+            ctx.reply("Please mention the channel where the messageId exists");
+            return;
+        }
 
-	@Override
-	public String getName() {
-		return "react";
-	}
+        TextChannel tc = channels.get(0);
+        String messageIdString = args.get(1);
 
-	@Override
-	public String getHelp() {
-        return "Reacts with an emoji to the mentioned message\n" +
-                "```Usage: [prefix]react <#channel> <messageid> <emote>```";
-	}
+        try {
+            long messageId = Long.parseLong(messageIdString);
+            String emote = args.get(2);
+            tc.addReactionById(messageId, emote).queue();
+        } catch (NumberFormatException e) {
+            ctx.reply("Did you provide a valid messageId?");
+        } catch (Exception ex) {
+            ctx.reply("Failed to react! Did you provide valid arguments?");
+        }
+    }
 
 }

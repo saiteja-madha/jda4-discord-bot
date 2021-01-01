@@ -1,37 +1,36 @@
 package bot.command.commands;
 
-import java.util.function.Consumer;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import me.duncte123.botcommons.web.ContentType;
 import me.duncte123.botcommons.web.WebParserUtils;
 import me.duncte123.botcommons.web.WebUtils;
-import net.dv8tion.jda.api.entities.TextChannel;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import org.jetbrains.annotations.NotNull;
 
-public class HasteCommand implements ICommand {
+import java.util.function.Consumer;
+
+public class HasteCommand extends ICommand {
 
     private static final String HASTE_SERVER = "https://hasteb.in/";
 
+    public HasteCommand() {
+        this.name = "haste";
+        this.help = "Posts some text to hastebin";
+        this.usage = "<text>";
+        this.argsCount = 1;
+    }
+
     @Override
-    public void handle(CommandContext ctx) {
-        final TextChannel channel = ctx.getChannel();
-
-        if (ctx.getArgs().isEmpty()) {
-            channel.sendMessage("Missing arguments").queue();
-            return;
-        }
-
+    public void handle(@NotNull CommandContext ctx) {
         final String invoke = this.getName();
         final String contentRaw = ctx.getMessage().getContentRaw();
         final int index = contentRaw.indexOf(invoke) + invoke.length();
         final String body = contentRaw.substring(index).trim();
 
-        this.createPaste(body, (text) -> channel.sendMessage(text).queue());
+        this.createPaste(body, ctx::reply);
     }
 
     private void createPaste(String text, Consumer<String> callback) {
@@ -51,14 +50,4 @@ public class HasteCommand implements ICommand {
         );
     }
 
-    @Override
-    public String getName() {
-        return "haste";
-    }
-
-    @Override
-    public String getHelp() {
-        return "Posts some text to hastebin\n" +
-                "```Usage: [prefix]haste <text>```";
-    }
 }
