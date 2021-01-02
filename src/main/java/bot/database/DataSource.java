@@ -1,11 +1,11 @@
 package bot.database;
 
-import bot.database.sqlite.SQLiteDS;
-import com.mongodb.lang.Nullable;
+import bot.database.mongo.MongoDS;
+import org.jetbrains.annotations.Nullable;
 
 public interface DataSource {
 
-    DataSource INS = new SQLiteDS();
+    DataSource INS = new MongoDS();
 
     String getPrefix(long guildId);
 

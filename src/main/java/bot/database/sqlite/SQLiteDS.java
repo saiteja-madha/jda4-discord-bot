@@ -2,7 +2,6 @@ package bot.database.sqlite;
 
 import bot.database.DataSource;
 import bot.main.Config;
-import bot.main.MemoryMap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
@@ -98,7 +97,6 @@ public class SQLiteDS implements DataSource {
 
     @Override
     public void setPrefix(long guildId, String newPrefix) {
-        MemoryMap.PREFIXES.put(guildId, newPrefix);
 
         try (final PreparedStatement preparedStatement = getConnection()
                 .prepareStatement("UPDATE guild_settings SET prefix = ? WHERE guild_id = ?")) {

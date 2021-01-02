@@ -1,18 +1,16 @@
 package bot.main.listeners;
 
-import javax.annotation.Nonnull;
-
 import bot.database.DataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import bot.main.CommandManager;
 import bot.main.Config;
-import bot.main.MemoryMap;
 import me.duncte123.botcommons.BotCommons;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
 
 public class GuildMessageListener extends ListenerAdapter {
 
@@ -21,15 +19,15 @@ public class GuildMessageListener extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
-        User user = event.getAuthor();        
+        User user = event.getAuthor();
 
         if (user.isBot() || event.isWebhookMessage()) {
             return;
         }
 
         final long guildId = event.getGuild().getIdLong();
-        String prefix = MemoryMap.PREFIXES.computeIfAbsent(guildId, DataSource.INS::getPrefix);
-        
+        String prefix = DataSource.INS.getPrefix(guildId);
+
         String raw = event.getMessage().getContentRaw();
 
         if (raw.equalsIgnoreCase(prefix + "shutdown")
@@ -41,8 +39,8 @@ public class GuildMessageListener extends ListenerAdapter {
         }
 
         if (raw.startsWith(prefix)) {
-        	manager.handle(event, prefix);
+            manager.handle(event, prefix);
         }
     }
-    
+
 }
