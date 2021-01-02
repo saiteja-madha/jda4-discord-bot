@@ -1,13 +1,14 @@
 package bot.database;
 
 import bot.database.mongo.MongoDS;
+import bot.database.objects.GuildSettings;
 import org.jetbrains.annotations.Nullable;
 
 public interface DataSource {
 
     DataSource INS = new MongoDS();
 
-    String getPrefix(long guildId);
+    GuildSettings getSettings(long guildId);
 
     void setPrefix(long guildId, String newPrefix);
 

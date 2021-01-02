@@ -26,7 +26,7 @@ public class GuildMessageListener extends ListenerAdapter {
         }
 
         final long guildId = event.getGuild().getIdLong();
-        String prefix = DataSource.INS.getPrefix(guildId);
+        String prefix = DataSource.INS.getSettings(guildId).prefix;
 
         String raw = event.getMessage().getContentRaw();
 

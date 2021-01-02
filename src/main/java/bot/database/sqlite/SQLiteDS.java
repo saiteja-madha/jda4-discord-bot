@@ -1,6 +1,7 @@
 package bot.database.sqlite;
 
 import bot.database.DataSource;
+import bot.database.objects.GuildSettings;
 import bot.main.Config;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -69,7 +70,7 @@ public class SQLiteDS implements DataSource {
     }
 
     @Override
-    public String getPrefix(long guildId) {
+    public GuildSettings getSettings(long guildId) {
         try (final PreparedStatement preparedStatement = getConnection()
                 .prepareStatement("SELECT prefix FROM guild_settings WHERE guild_id = ?")) {
 
@@ -77,7 +78,7 @@ public class SQLiteDS implements DataSource {
 
             try (final ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return resultSet.getString("prefix");
+                    return new GuildSettings(resultSet.getString("prefix"));
                 }
             }
 
@@ -92,7 +93,7 @@ public class SQLiteDS implements DataSource {
             e.printStackTrace();
         }
 
-        return Config.get("prefix");
+        return new GuildSettings();
     }
 
     @Override

@@ -27,7 +27,7 @@ public class MongoDS implements DataSource {
     private final MongoClient mongoClient;
 
     // Caching
-    private final Map<Long, GuildSettings> settings = new HashMap();
+    private final Map<Long, GuildSettings> settings = new HashMap<>();
 
     public MongoDS() {
         ConnectionString connString = new ConnectionString(Config.get("MONGO_CONNECTION_STRING"));
@@ -41,15 +41,10 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public String getPrefix(long guildId) {
-        return this.getSettingsCache(guildId).prefix;
-//        Bson filter = Filters.eq("guild_id", guildId);
-//        MongoCollection<Document> settingsCollection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
-//        Document document = settingsCollection.find(filter).first();
-//        if (document == null)
-//            return Config.get("PREFIX");
-//        else
-//            return (String) document.get("prefix");
+    public GuildSettings getSettings(long guildId) {
+        if (!settings.containsKey(guildId))
+            settings.put(guildId, getSettingsCache(guildId));
+        return settings.get(guildId);
     }
 
     @Override
@@ -72,14 +67,8 @@ public class MongoDS implements DataSource {
         return 0;
     }
 
-    private GuildSettings getSettingsCache(long guildId) {
-        if (!settings.containsKey(guildId))
-            settings.put(guildId, getSettings(guildId));
-        return settings.get(guildId);
-    }
-
     @NotNull
-    private GuildSettings getSettings(long guildId) {
+    private GuildSettings getSettingsCache(long guildId) {
         Bson filter = Filters.eq("guild_id", guildId);
         MongoCollection<Document> settingsCollection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
         Document document = settingsCollection.find(filter).first();
