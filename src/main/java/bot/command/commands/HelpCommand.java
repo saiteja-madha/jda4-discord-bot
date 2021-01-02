@@ -3,7 +3,6 @@ package bot.command.commands;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.main.CommandManager;
-import bot.main.MemoryMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -26,14 +25,12 @@ public class HelpCommand extends ICommand {
         List<String> args = ctx.getArgs();
 
         if (args.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
-            String prefix = MemoryMap.PREFIXES.get(ctx.getGuild().getIdLong());
-
-            builder.append("List of commands\n");
+            StringBuilder builder = new StringBuilder()
+                    .append("List of commands\n");
 
             manager.getCommands().stream().map(ICommand::getName).forEach(
                     (it) -> builder.append('`')
-                            .append(prefix)
+                            .append(ctx.getPrefix())
                             .append(it)
                             .append("`\n")
             );
