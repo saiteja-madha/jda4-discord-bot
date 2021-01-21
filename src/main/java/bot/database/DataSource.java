@@ -3,8 +3,12 @@ package bot.database;
 import bot.database.mongo.MongoDS;
 import bot.database.objects.GuildSettings;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface DataSource {
+
+    Logger LOGGER = LoggerFactory.getLogger(DataSource.class);
 
     DataSource INS = new MongoDS();
 

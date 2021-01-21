@@ -10,15 +10,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class KickCommand extends ICommand {
+public class SoftBanCommand extends ICommand {
 
-    public KickCommand() {
-        this.name = "kick";
-        this.help = "Kick a member off the server";
+    public SoftBanCommand() {
+        this.name = "softban";
+        this.help = "kicks a user from the server and delete that users messages";
         this.usage = "<@member(s)> [reason]";
         this.argsCount = 2;
         this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
-        this.botPermissions = new Permission[]{Permission.KICK_MEMBERS};
+        this.botPermissions = new Permission[]{Permission.BAN_MEMBERS};
     }
 
     @Override
@@ -27,7 +27,7 @@ public class KickCommand extends ICommand {
         List<Member> targetMembers = message.getMentionedMembers();
 
         if (targetMembers.isEmpty()) {
-            ctx.reply("Please @mention the member(s) you want to kick!");
+            ctx.reply("Please @mention the member(s) you want to softban!");
             return;
         }
 
@@ -38,8 +38,8 @@ public class KickCommand extends ICommand {
         targetMembers
                 .stream()
                 // Filter out members with which bot and command author can interact
-                .filter(target -> ModerationUtils.canInteract(ctx.getMember(), target, "kick", ctx.getChannel()))
-                .forEach(member -> ModerationUtils.kick(message, member, reason));
+                .filter(target -> ModerationUtils.canInteract(ctx.getMember(), target, "ban", ctx.getChannel()))
+                .forEach(member -> ModerationUtils.softBan(message, member, reason));
 
     }
 

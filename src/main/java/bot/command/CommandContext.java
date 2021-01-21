@@ -1,5 +1,6 @@
 package bot.command;
 
+import bot.utils.BotUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -69,11 +70,11 @@ public class CommandContext {
     }
 
     public void reply(String message) {
-        this.getChannel().sendMessage(message).queue(null, null);
+        BotUtils.sendMsg(this.getChannel(), message);
     }
 
     public void reply(MessageEmbed embed) {
-        this.getChannel().sendMessage(embed).queue(null, null);
+        BotUtils.sendEmbed(this.getChannel(), embed);
     }
 
 }

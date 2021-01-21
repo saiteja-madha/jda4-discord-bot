@@ -8,10 +8,10 @@ import bot.command.commands.admin.ReactionCommand;
 import bot.command.commands.admin.RemoveReactionRoleCommand;
 import bot.command.commands.admin.SetPrefixCommand;
 import bot.command.commands.fun.*;
-import bot.command.commands.moderation.KickCommand;
+import bot.command.commands.moderation.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,13 +30,22 @@ public class CommandManager {
         addCommand(new DogCommand());
         addCommand(new AnimalCommand());
         addCommand(new JokeCommand());
-        addCommand(new KickCommand());
         addCommand(new InstagramCommand());
         addCommand(new GithubCommand());
         addCommand(new SetPrefixCommand());
         addCommand(new ReactionCommand());
         addCommand(new AddReactionRoleCommand());
         addCommand(new RemoveReactionRoleCommand());
+
+        // Moderation Commands
+        addCommand(new KickCommand());
+        addCommand(new SoftBanCommand());
+        addCommand(new BanCommand());
+        addCommand(new PurgeAttachmentCommand());
+        addCommand(new PurgeBotsCommand());
+        addCommand(new PurgeCommand());
+        addCommand(new PurgeLinksCommand());
+        addCommand(new PurgeUserCommand());
     }
 
     private void addCommand(ICommand cmd) {

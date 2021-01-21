@@ -15,15 +15,12 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class MongoDS implements DataSource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoDS.class);
     private final MongoClient mongoClient;
 
     // Caching
@@ -72,10 +69,7 @@ public class MongoDS implements DataSource {
         Bson filter = Filters.eq("guild_id", guildId);
         MongoCollection<Document> settingsCollection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
         Document document = settingsCollection.find(filter).first();
-        if (document == null)
-            return new GuildSettings();
-        else
-            return new GuildSettings((String) document.get("prefix"));
+        return (document == null) ? new GuildSettings() : new GuildSettings((String) document.get("prefix"));
     }
 
 }
