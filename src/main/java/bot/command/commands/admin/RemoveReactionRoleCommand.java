@@ -16,7 +16,7 @@ public class RemoveReactionRoleCommand extends ICommand {
         this.name = "removerr";
         this.help = "Remove reaction role to the mentioned message";
         this.usage = "<#channel> <messageid>";
-        this.argsCount = 2;
+        this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
     }
 
@@ -35,10 +35,9 @@ public class RemoveReactionRoleCommand extends ICommand {
         String messageIdString = args.get(1);
 
         try {
-            long messageId = Long.parseLong(messageIdString);
-            tc.retrieveMessageById(messageId).queue((msg) -> msg.clearReactions().queue((__) -> {
+            tc.retrieveMessageById(messageIdString).queue((msg) -> msg.clearReactions().queue((__) -> {
                 try {
-                    DataSource.INS.removeReactionRole(ctx.getGuild().getIdLong(), tc.getIdLong(), messageId, null);
+                    DataSource.INS.removeReactionRole(ctx.getGuild().getIdLong(), tc.getId(), messageIdString, null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

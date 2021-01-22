@@ -14,7 +14,7 @@ public class PurgeUserCommand extends ICommand {
         this.name = "purgeuser";
         this.help = "deletes the specified amount of messages for the mentioned user";
         this.usage = "<@user> <amount>";
-        this.argsCount = 2;
+        this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.MESSAGE_MANAGE, Permission.MESSAGE_HISTORY};
         this.botPermissions = new Permission[]{Permission.MESSAGE_MANAGE, Permission.MESSAGE_HISTORY};
     }

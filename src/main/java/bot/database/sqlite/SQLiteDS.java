@@ -1,8 +1,8 @@
 package bot.database.sqlite;
 
+import bot.Config;
 import bot.database.DataSource;
 import bot.database.objects.GuildSettings;
-import bot.main.Config;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.sql.*;
 
 
-public class SQLiteDS implements DataSource {
+public class SQLiteDS {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLiteDS.class);
     private final HikariDataSource ds;
@@ -69,7 +69,6 @@ public class SQLiteDS implements DataSource {
         return ds.getConnection();
     }
 
-    @Override
     public GuildSettings getSettings(long guildId) {
         try (final PreparedStatement preparedStatement = getConnection()
                 .prepareStatement("SELECT prefix FROM guild_settings WHERE guild_id = ?")) {
@@ -78,7 +77,7 @@ public class SQLiteDS implements DataSource {
 
             try (final ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return new GuildSettings(resultSet.getString("prefix"));
+                    return new GuildSettings(resultSet);
                 }
             }
 
@@ -96,7 +95,6 @@ public class SQLiteDS implements DataSource {
         return new GuildSettings();
     }
 
-    @Override
     public void setPrefix(long guildId, String newPrefix) {
 
         try (final PreparedStatement preparedStatement = getConnection()
@@ -111,7 +109,6 @@ public class SQLiteDS implements DataSource {
         }
     }
 
-    @Override
     public void addReactionRole(long guildId, long channelId, long messageId, long roleId, String emote) {
         try (final PreparedStatement insertStatement = getConnection()
                 .prepareStatement("INSERT INTO reaction_roles (guild_id, channel_id, message_id, emote, role_id) VALUES (?, ?, ?, ?, ?)")) {
@@ -139,7 +136,6 @@ public class SQLiteDS implements DataSource {
         }
     }
 
-    @Override
     public void removeReactionRole(long guildId, long channelId, long messageId, String emote) throws SQLException {
         try (final PreparedStatement insertStatement = getConnection()
                 .prepareStatement("DELETE FROM reaction_roles WHERE guild_id = ? AND channel_id = ? AND message_id = ?")) {
@@ -160,7 +156,6 @@ public class SQLiteDS implements DataSource {
         }
     }
 
-    @Override
     public long getReactionRoleId(long guildId, long channelId, long messageId, String emote) throws Exception {
         try (Connection conn = getConnection();
              final PreparedStatement preparedStatement = conn

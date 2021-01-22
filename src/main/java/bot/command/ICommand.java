@@ -15,7 +15,7 @@ public abstract class ICommand {
     protected List<String> aliases = Collections.emptyList();
     protected String help = "No help available";
     protected String usage = "";
-    protected int argsCount = 0;
+    protected int minArgsCount = 0;
     protected int maxCharCount = 3000;
     protected Permission[] userPermissions = new Permission[0];
     protected Permission[] botPermissions = new Permission[0];
@@ -41,7 +41,7 @@ public abstract class ICommand {
             return false;
         }
 
-        if (this.argsCount > 0 && (ctx.getArgs().isEmpty() || ctx.getArgs().size() < this.argsCount)) {
+        if (this.minArgsCount > 0 && (ctx.getArgs().isEmpty() || ctx.getArgs().size() < this.minArgsCount)) {
             ctx.reply("Missing command arguments");
             return false;
         }

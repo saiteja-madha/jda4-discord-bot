@@ -1,9 +1,12 @@
 package bot.utils;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class BotUtils {
 
@@ -25,6 +28,26 @@ public class BotUtils {
         channel.sendMessage(embed)
                 .queue((m) -> m.delete().queueAfter(time, TimeUnit.SECONDS, null, (error) -> { /* Ignore */ })
                         , null);
+    }
+
+    public static void sendDM(User user, EmbedBuilder embed, Consumer<? super Object> success, Consumer<? super Throwable> error) {
+        if (user == null)
+            return;
+
+        user.openPrivateChannel()
+                .flatMap((channel) -> channel.sendMessage(embed.build()))
+                .queue(success, error);
+
+    }
+
+    public static void sendDM(User user, String message) {
+        if (user == null)
+            return;
+
+        user.openPrivateChannel()
+                .flatMap((channel) -> channel.sendMessage(message))
+                .queue(null, (error) -> { /* Ignore */ });
+
     }
 
 }

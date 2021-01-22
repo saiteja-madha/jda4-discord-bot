@@ -17,8 +17,8 @@ public class AddReactionRoleCommand extends ICommand {
         this.name = "addrr";
         this.help = "Reacts with an emoji to the mentioned message";
         this.usage = "<#channel> <messageid> <emote> <@role>";
-        this.argsCount = 4;
-        this.userPermissions = new Permission[] { Permission.MANAGE_SERVER };
+        this.minArgsCount = 4;
+        this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
     }
 
     @Override
@@ -42,7 +42,7 @@ public class AddReactionRoleCommand extends ICommand {
             String emote = args.get(2);
 
             tc.addReactionById(messageId, emote).queue();
-            DataSource.INS.addReactionRole(ctx.getGuild().getIdLong(), tc.getIdLong(), messageId, role.getIdLong(), emote);
+            DataSource.INS.addReactionRole(ctx.getGuild().getIdLong(), tc.getId(), Long.toUnsignedString(messageId), role.getId(), emote);
             ctx.reply("Successfully added reaction role!");
 
         } catch (NumberFormatException e) {

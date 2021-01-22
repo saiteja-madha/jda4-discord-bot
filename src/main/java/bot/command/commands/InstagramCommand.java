@@ -18,7 +18,7 @@ public class InstagramCommand extends ICommand {
         this.help = "Shows instagram statistics of a user with the latest image";
         this.usage = "<username>";
         this.aliases = Collections.singletonList("insta");
-        this.argsCount = 1;
+        this.minArgsCount = 1;
     }
 
     private String getLatestImage(JsonNode json) {

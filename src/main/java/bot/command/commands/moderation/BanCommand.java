@@ -16,7 +16,7 @@ public class BanCommand extends ICommand {
         this.name = "ban";
         this.help = "ban a member off the server";
         this.usage = "<@member(s)> [reason]";
-        this.argsCount = 2;
+        this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.BAN_MEMBERS};
         this.botPermissions = new Permission[]{Permission.BAN_MEMBERS};
     }

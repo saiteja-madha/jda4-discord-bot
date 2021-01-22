@@ -13,7 +13,7 @@ public class PurgeBotsCommand extends ICommand {
         this.name = "purgebots";
         this.help = "deletes the specified amount of messages from bots";
         this.usage = "<amount>";
-        this.argsCount = 1;
+        this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.MESSAGE_MANAGE, Permission.MESSAGE_HISTORY};
         this.botPermissions = new Permission[]{Permission.MESSAGE_MANAGE, Permission.MESSAGE_HISTORY};
     }

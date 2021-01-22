@@ -2,7 +2,7 @@ package bot.command.commands;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
-import bot.main.CommandManager;
+import bot.handlers.CommandHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -10,9 +10,9 @@ import java.util.List;
 
 public class HelpCommand extends ICommand {
 
-    private final CommandManager manager;
+    private final CommandHandler manager;
 
-    public HelpCommand(CommandManager manager) {
+    public HelpCommand(CommandHandler manager) {
         this.name = "help";
         this.help = "Shows the list with commands in the bot";
         this.usage = "<command>";

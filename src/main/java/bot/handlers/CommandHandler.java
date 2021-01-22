@@ -1,4 +1,4 @@
-package bot.main;
+package bot.handlers;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
@@ -7,6 +7,8 @@ import bot.command.commands.admin.AddReactionRoleCommand;
 import bot.command.commands.admin.ReactionCommand;
 import bot.command.commands.admin.RemoveReactionRoleCommand;
 import bot.command.commands.admin.SetPrefixCommand;
+import bot.command.commands.admin.flag.FlagtrChannels;
+import bot.command.commands.admin.flag.FlagtrCommand;
 import bot.command.commands.fun.*;
 import bot.command.commands.moderation.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -17,11 +19,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class CommandManager {
+public class CommandHandler {
 
     private final List<ICommand> commands = new ArrayList<>();
 
-    public CommandManager() {
+    public CommandHandler() {
         addCommand(new PingCommand());
         addCommand(new HelpCommand(this));
         addCommand(new HasteCommand());
@@ -32,7 +34,6 @@ public class CommandManager {
         addCommand(new JokeCommand());
         addCommand(new InstagramCommand());
         addCommand(new GithubCommand());
-        addCommand(new SetPrefixCommand());
         addCommand(new ReactionCommand());
         addCommand(new AddReactionRoleCommand());
         addCommand(new RemoveReactionRoleCommand());
@@ -46,6 +47,13 @@ public class CommandManager {
         addCommand(new PurgeCommand());
         addCommand(new PurgeLinksCommand());
         addCommand(new PurgeUserCommand());
+
+        //* ADMIN COMMANDS **//
+        addCommand(new SetPrefixCommand());
+        // Flag Translations
+        addCommand(new FlagtrCommand());
+        addCommand(new FlagtrChannels());
+
     }
 
     private void addCommand(ICommand cmd) {

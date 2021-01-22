@@ -1,8 +1,8 @@
 package bot.database.mongo;
 
+import bot.Config;
 import bot.database.DataSource;
 import bot.database.objects.GuildSettings;
-import bot.main.Config;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -13,10 +13,12 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MongoDS implements DataSource {
@@ -34,42 +36,86 @@ public class MongoDS implements DataSource {
                 .build();
         mongoClient = MongoClients.create(settings);
         LOGGER.info("MongoDB successfully initialized");
-
     }
 
     @Override
     public GuildSettings getSettings(long guildId) {
         if (!settings.containsKey(guildId))
-            settings.put(guildId, getSettingsCache(guildId));
+            settings.put(guildId, fetchSettings(guildId));
         return settings.get(guildId);
     }
 
     @Override
     public void setPrefix(long guildId, String newPrefix) {
+        invalidateCache(guildId);
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
-        Bson filter = Filters.eq("guild_id", guildId);
+        Bson filter = Filters.eq("_id", guildId);
         collection.updateOne(filter, Updates.set("prefix", newPrefix), new UpdateOptions().upsert(true));
     }
 
     @Override
-    public void addReactionRole(long guildId, long channelId, long messageId, long roleId, String emote) {
+    public void addReactionRole(long guildId, String channelId, String messageId, String roleId, String emote) {
     }
 
     @Override
-    public void removeReactionRole(long guildId, long channelId, long messageId, @Nullable String emote) {
+    public void removeReactionRole(long guildId, String channelId, String messageId, @Nullable String emote) {
     }
 
     @Override
-    public long getReactionRoleId(long guildId, long channelId, long messageId, String emote) {
-        return 0;
+    public String getReactionRoleId(long guildId, String channelId, String messageId, String emote) {
+        return null;
+    }
+
+    @Override
+    public void setFlagTranslation(long guildId, boolean isEnabled) {
+        invalidateCache(guildId);
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
+        Bson filter = Filters.eq("_id", guildId);
+        collection.updateOne(filter, Updates.set("flag_translation", isEnabled), new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void updateTranslationChannels(long guildId, List<String> channels) {
+        invalidateCache(guildId);
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
+        Bson filter = Filters.eq("_id", guildId);
+        collection.updateOne(filter, Updates.set("translation_channels", channels), new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void addTranslation(long guildId, long channelId, long messageId, String unicode) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("translations");
+        Document doc = new Document("_id", new ObjectId());
+        doc.append("guild_id", guildId)
+                .append("channel_id", channelId)
+                .append("message_id", messageId)
+                .append("unicode", unicode);
+        collection.insertOne(doc);
+    }
+
+    @Override
+    public boolean isTranslated(long guildId, long channelId, long messageId, String unicode) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("translations");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("channel_id", guildId),
+                Filters.eq("message_id", guildId),
+                Filters.eq("unicode", unicode)
+        );
+        Document document = collection.find(filter).first();
+        return document != null;
     }
 
     @NotNull
-    private GuildSettings getSettingsCache(long guildId) {
-        Bson filter = Filters.eq("guild_id", guildId);
+    private GuildSettings fetchSettings(long guildId) {
+        Bson filter = Filters.eq("_id", guildId);
         MongoCollection<Document> settingsCollection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
         Document document = settingsCollection.find(filter).first();
-        return (document == null) ? new GuildSettings() : new GuildSettings((String) document.get("prefix"));
+        return (document == null) ? new GuildSettings() : new GuildSettings(document);
+    }
+
+    private void invalidateCache(long guildId) {
+        settings.remove(guildId);
     }
 
 }

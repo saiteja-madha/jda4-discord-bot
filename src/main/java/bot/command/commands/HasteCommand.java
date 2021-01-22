@@ -20,7 +20,7 @@ public class HasteCommand extends ICommand {
         this.name = "haste";
         this.help = "Posts some text to hastebin";
         this.usage = "<text>";
-        this.argsCount = 1;
+        this.minArgsCount = 1;
     }
 
     @Override

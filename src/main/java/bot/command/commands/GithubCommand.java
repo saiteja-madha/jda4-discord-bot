@@ -16,7 +16,7 @@ public class GithubCommand extends ICommand {
         this.name = "github";
         this.help = "Shows github statistics of a user";
         this.usage = "<username>";
-        this.argsCount = 1;
+        this.minArgsCount = 1;
     }
 
     private static boolean websiteProvided(String text) {

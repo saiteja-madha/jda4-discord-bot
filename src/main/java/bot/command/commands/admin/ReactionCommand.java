@@ -15,7 +15,7 @@ public class ReactionCommand extends ICommand {
         this.name = "react";
         this.help = "Reacts with an emoji to the mentioned message";
         this.usage = "<#channel> <messageid> <emote>";
-        this.argsCount = 3;
+        this.minArgsCount = 3;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
     }
 

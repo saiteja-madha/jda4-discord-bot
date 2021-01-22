@@ -17,7 +17,7 @@ public class AnimalCommand extends ICommand {
         this.name = "animal";
         this.help = "Show a random image of selected animal type\nAvailable names : llama, duck, alpaca, seal, camel, fox, lizard, bird, wolf, panda";
         this.usage = "<name>";
-        this.argsCount = 1;
+        this.minArgsCount = 1;
     }
 
     @Override

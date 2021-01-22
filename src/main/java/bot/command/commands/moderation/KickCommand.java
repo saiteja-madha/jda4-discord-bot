@@ -16,7 +16,7 @@ public class KickCommand extends ICommand {
         this.name = "kick";
         this.help = "Kick a member off the server";
         this.usage = "<@member(s)> [reason]";
-        this.argsCount = 2;
+        this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
         this.botPermissions = new Permission[]{Permission.KICK_MEMBERS};
     }
