@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -15,9 +16,11 @@ public class AnimalCommand extends ICommand {
 
     public AnimalCommand() {
         this.name = "animal";
-        this.help = "Show a random image of selected animal type\nAvailable names : llama, duck, alpaca, seal, camel, fox, lizard, bird, wolf, panda";
+        this.help = "Show a random image of selected animal type" +
+                "\nAvailable names : llama, duck, alpaca, seal, camel, fox, lizard, bird, wolf, panda";
         this.usage = "<name>";
         this.minArgsCount = 1;
+        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
 
     @Override
@@ -41,7 +44,9 @@ public class AnimalCommand extends ICommand {
 
             final JsonNode data = json.get("data");
             final String image = data.get("file").asText();
-            final EmbedBuilder embed = EmbedUtils.embedImage(image);
+            final EmbedBuilder embed = EmbedUtils.defaultEmbed()
+                    .setImage(image)
+                    .setFooter("Requested by " + ctx.getAuthor().getAsTag());
 
             ctx.reply(embed.build());
 

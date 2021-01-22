@@ -1,4 +1,4 @@
-package bot.utils.web;
+package bot.utils;
 
 import bot.Constants;
 import bot.utils.MiscUtils;

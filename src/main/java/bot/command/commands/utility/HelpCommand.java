@@ -1,8 +1,7 @@
-package bot.command.commands;
+package bot.command.commands.utility;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
-import bot.handlers.CommandHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -10,14 +9,11 @@ import java.util.List;
 
 public class HelpCommand extends ICommand {
 
-    private final CommandHandler manager;
-
-    public HelpCommand(CommandHandler manager) {
+    public HelpCommand() {
         this.name = "help";
         this.help = "Shows the list with commands in the bot";
         this.usage = "<command>";
         this.aliases = Arrays.asList("commands", "cmds", "commandlist");
-        this.manager = manager;
     }
 
     @Override
@@ -28,7 +24,7 @@ public class HelpCommand extends ICommand {
             StringBuilder builder = new StringBuilder()
                     .append("List of commands\n");
 
-            manager.getCommands().stream().map(ICommand::getName).forEach(
+            ctx.getCmdHandler().getCommands().stream().map(ICommand::getName).forEach(
                     (it) -> builder.append('`')
                             .append(ctx.getPrefix())
                             .append(it)
@@ -40,7 +36,7 @@ public class HelpCommand extends ICommand {
         }
 
         String search = args.get(0);
-        ICommand command = manager.getCommand(search);
+        ICommand command = ctx.getCmdHandler().getCommand(search);
 
         if (command == null) {
             ctx.reply("Nothing found for " + search);

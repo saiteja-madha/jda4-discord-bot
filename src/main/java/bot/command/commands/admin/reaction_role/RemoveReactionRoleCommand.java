@@ -1,4 +1,4 @@
-package bot.command.commands.admin;
+package bot.command.commands.admin.reaction_role;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
@@ -15,7 +15,7 @@ public class RemoveReactionRoleCommand extends ICommand {
     public RemoveReactionRoleCommand() {
         this.name = "removerr";
         this.help = "Remove reaction role to the mentioned message";
-        this.usage = "<#channel> <messageid>";
+        this.usage = "<#channel> <messageid> (emote)";
         this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
     }
@@ -33,21 +33,42 @@ public class RemoveReactionRoleCommand extends ICommand {
 
         TextChannel tc = channels.get(0);
         String messageIdString = args.get(1);
+        String emote = null;
+        if (args.size() > 2)
+            emote = args.get(2);
 
         try {
-            tc.retrieveMessageById(messageIdString).queue((msg) -> msg.clearReactions().queue((__) -> {
-                try {
-                    DataSource.INS.removeReactionRole(ctx.getGuild().getIdLong(), tc.getId(), messageIdString, null);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                ctx.reply("Removed reaction role!");
-            }), (err) -> ctx.reply("Did you provide a valid messageId?"));
-
+            String finalEmote = emote;
+            tc.retrieveMessageById(messageIdString).queue(
+                    (msg) -> removeRR(ctx, tc, msg, finalEmote),
+                    (err) -> ctx.reply("Did you provide a valid messageId?")
+            );
         } catch (Exception e) {
             ctx.reply("Failed to remove reaction role! Did you provide valid arguments?");
         }
 
+    }
+
+    private void removeRR(CommandContext ctx, TextChannel tc, Message msg, String emote) {
+        if (emote != null) {
+            msg.removeReaction(emote, ctx.getSelfMember().getUser()).queue((__) -> {
+                try {
+                    DataSource.INS.removeReactionRole(ctx.getGuild().getIdLong(), tc.getId(), msg.getId(), emote);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                ctx.reply("Removed reaction role!");
+            });
+        } else {
+            msg.clearReactions().queue((__) -> {
+                try {
+                    DataSource.INS.removeReactionRole(ctx.getGuild().getIdLong(), tc.getId(), msg.getId(), null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                ctx.reply("Removed reaction role!");
+            });
+        }
 
     }
 

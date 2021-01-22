@@ -1,4 +1,4 @@
-package bot.command.commands;
+package bot.command.commands.utility;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
@@ -43,7 +43,6 @@ public class HasteCommand extends ICommand {
         WebUtils.ins.prepareRaw(request, (r) -> WebParserUtils.toJSONObject(r, new ObjectMapper())).async(
                 (json) -> {
                     String key = json.get("key").asText();
-
                     callback.accept(HASTE_SERVER + key);
                 },
                 (e) -> callback.accept("Error: " + e.getMessage())

@@ -55,15 +55,52 @@ public class MongoDS implements DataSource {
 
     @Override
     public void addReactionRole(long guildId, String channelId, String messageId, String roleId, String emote) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
+
+        Bson updates = Updates.combine(Updates.set("guild_id", guildId),
+                Updates.set("channel_id", channelId),
+                Updates.set("message_id", messageId),
+                Updates.set("channel_id", channelId)
+        );
+
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("channel_id", channelId),
+                Filters.eq("role_id", roleId),
+                Filters.eq("emote", emote)
+        );
+
+        collection.updateOne(filter, updates, new UpdateOptions().upsert(true));
     }
 
     @Override
     public void removeReactionRole(long guildId, String channelId, String messageId, @Nullable String emote) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("channel_id", channelId),
+                Filters.eq("message_id", messageId)
+        );
+
+        if (emote != null)
+            filter = Filters.and(filter, Filters.eq("emote", emote));
+        collection.deleteMany(filter);
     }
 
+    @Nullable
     @Override
     public String getReactionRoleId(long guildId, String channelId, String messageId, String emote) {
-        return null;
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
+
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("channel_id", channelId),
+                Filters.eq("emote", emote)
+        );
+
+        Document doc = collection.find(filter).first();
+        return (doc == null) ? null : doc.getString("role_id");
+
     }
 
     @Override

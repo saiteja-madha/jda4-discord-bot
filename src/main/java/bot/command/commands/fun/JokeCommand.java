@@ -6,13 +6,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
 
 public class JokeCommand extends ICommand {
 
     public JokeCommand() {
         this.name = "joke";
-        this.help = "Shows a random joke";
+        this.help = "shows a random joke";
+        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
 
     @Override

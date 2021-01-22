@@ -1,4 +1,4 @@
-package bot.command.commands;
+package bot.command.commands.utility;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;

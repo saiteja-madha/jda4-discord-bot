@@ -4,7 +4,7 @@ import bot.Constants;
 import bot.database.DataSource;
 import bot.database.objects.GuildSettings;
 import bot.utils.BotUtils;
-import bot.utils.web.HttpUtils;
+import bot.utils.HttpUtils;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;

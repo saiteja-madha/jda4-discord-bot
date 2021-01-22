@@ -1,5 +1,6 @@
 package bot.command;
 
+import bot.handlers.CommandHandler;
 import bot.utils.BotUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
@@ -10,12 +11,14 @@ import java.util.List;
 public class CommandContext {
 
     private final GuildMessageReceivedEvent event;
+    private final CommandHandler cmdHandler;
     private final String prefix;
     private final String invoke;
     private final List<String> args;
 
-    public CommandContext(GuildMessageReceivedEvent event, List<String> args, String invoke, String prefix) {
+    public CommandContext(GuildMessageReceivedEvent event, List<String> args, String invoke, String prefix, CommandHandler cmdHandler) {
         this.event = event;
+        this.cmdHandler = cmdHandler;
         this.prefix = prefix;
         this.invoke = invoke;
         this.args = args;
@@ -23,6 +26,10 @@ public class CommandContext {
 
     public GuildMessageReceivedEvent getEvent() {
         return this.event;
+    }
+
+    public CommandHandler getCmdHandler() {
+        return this.cmdHandler;
     }
 
     public String getPrefix() {
@@ -74,7 +81,7 @@ public class CommandContext {
     }
 
     public void reply(MessageEmbed embed) {
-        BotUtils.sendEmbed(this.getChannel(), embed);
+        BotUtils.sendMsg(this.getChannel(), embed);
     }
 
 }

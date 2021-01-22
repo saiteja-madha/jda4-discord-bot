@@ -24,14 +24,13 @@ public class Bot {
 
         threadpool = Executors.newScheduledThreadPool((Config.getInt("threadpool_size")));
         waiter = new EventWaiter();
-        cmdHandler = new CommandHandler();
+        cmdHandler = new CommandHandler(waiter);
         reactionHandler = new ReactionHandler();
 
         WebUtils.setUserAgent("Beta Bot");
-        EmbedUtils.setEmbedBuilder(
-                () -> new EmbedBuilder()
-                        .setColor(0x3883d9)
-                        .setFooter("Beta Bot")
+        EmbedUtils.setEmbedBuilder(() -> new EmbedBuilder()
+                .setColor(0x3883d9)
+                .setFooter("Beta Bot")
         );
 
         new JDABuilder().setToken(Config.get("token"))

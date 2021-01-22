@@ -1,4 +1,4 @@
-package bot.command.commands.admin;
+package bot.command.commands.admin.reaction_role;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
@@ -48,6 +48,7 @@ public class AddReactionRoleCommand extends ICommand {
         } catch (NumberFormatException e) {
             ctx.reply("Did you provide a valid messageId?");
         } catch (Exception ex) {
+            System.out.println(ex.getMessage());
             ctx.reply("Failed to react! Did you provide valid arguments?");
         }
 

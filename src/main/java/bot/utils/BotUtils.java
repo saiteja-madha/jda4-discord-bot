@@ -20,11 +20,11 @@ public class BotUtils {
                         , null);
     }
 
-    public static void sendEmbed(TextChannel channel, MessageEmbed embed) {
+    public static void sendMsg(TextChannel channel, MessageEmbed embed) {
         channel.sendMessage(embed).queue(null, (error) -> { /* Ignore */ });
     }
 
-    public static void sendEmbed(TextChannel channel, MessageEmbed embed, int time) {
+    public static void sendMsg(TextChannel channel, MessageEmbed embed, int time) {
         channel.sendMessage(embed)
                 .queue((m) -> m.delete().queueAfter(time, TimeUnit.SECONDS, null, (error) -> { /* Ignore */ })
                         , null);

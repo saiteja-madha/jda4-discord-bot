@@ -19,7 +19,7 @@ public interface DataSource {
     // Reaction Role
     void addReactionRole(long guildId, String channelId, String messageId, String roleId, String emote);
     void removeReactionRole(long guildId, String channelId, String messageId, @Nullable String emote);
-    String getReactionRoleId(long guildId, String channelId, String messageId, String emote);
+    @Nullable String getReactionRoleId(long guildId, String channelId, String messageId, String emote);
 
     // Flag Translations
     void setFlagTranslation(long guildId, boolean isEnabled);

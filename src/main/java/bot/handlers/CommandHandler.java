@@ -2,43 +2,54 @@ package bot.handlers;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
-import bot.command.commands.*;
-import bot.command.commands.admin.AddReactionRoleCommand;
+import bot.command.commands.PingCommand;
 import bot.command.commands.admin.ReactionCommand;
-import bot.command.commands.admin.RemoveReactionRoleCommand;
 import bot.command.commands.admin.SetPrefixCommand;
 import bot.command.commands.admin.flag.FlagtrChannels;
 import bot.command.commands.admin.flag.FlagtrCommand;
+import bot.command.commands.admin.reaction_role.AddReactionRoleCommand;
+import bot.command.commands.admin.reaction_role.RemoveReactionRoleCommand;
 import bot.command.commands.fun.*;
 import bot.command.commands.moderation.*;
+import bot.command.commands.utility.*;
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class CommandHandler {
 
-    private final List<ICommand> commands = new ArrayList<>();
+    private final ArrayList<ICommand> commands = new ArrayList<>();
+    private final HashMap<String, Integer> commandIndex = new HashMap<>();
 
-    public CommandHandler() {
+    public CommandHandler(EventWaiter waiter) {
+
         addCommand(new PingCommand());
-        addCommand(new HelpCommand(this));
+        addCommand(new ReactionCommand());
+
+        // UTILITY COMMANDS
+        addCommand(new GithubCommand());
         addCommand(new HasteCommand());
-        addCommand(new MemeCommand());
+        addCommand(new HelpCommand());
+        addCommand(new TranslateCodes(waiter));
+        addCommand(new TranslateCommand());
+        addCommand(new UrbanCommand());
+
+        // FUN COMMANDS
+        addCommand(new FlipCoinCommand());
+        addCommand(new FlipTextCommand());
         addCommand(new CatCommand());
         addCommand(new DogCommand());
         addCommand(new AnimalCommand());
         addCommand(new JokeCommand());
-        addCommand(new InstagramCommand());
-        addCommand(new GithubCommand());
-        addCommand(new ReactionCommand());
-        addCommand(new AddReactionRoleCommand());
-        addCommand(new RemoveReactionRoleCommand());
+        addCommand(new MemeCommand());
 
-        // Moderation Commands
+        // MODERATION COMMANDS
         addCommand(new KickCommand());
         addCommand(new SoftBanCommand());
         addCommand(new BanCommand());
@@ -48,39 +59,42 @@ public class CommandHandler {
         addCommand(new PurgeLinksCommand());
         addCommand(new PurgeUserCommand());
 
-        //* ADMIN COMMANDS **//
+        // ADMIN COMMANDS
         addCommand(new SetPrefixCommand());
-        // Flag Translations
         addCommand(new FlagtrCommand());
         addCommand(new FlagtrChannels());
+        addCommand(new AddReactionRoleCommand());
+        addCommand(new RemoveReactionRoleCommand());
 
     }
 
     private void addCommand(ICommand cmd) {
-        boolean nameFound = this.commands.stream().anyMatch((it) -> it.getName().equalsIgnoreCase(cmd.getName()));
+        int index = this.commands.size();
 
-        if (nameFound) {
-            throw new IllegalArgumentException("A command with this name is already present");
+        if (this.commandIndex.containsKey(cmd.getName())) {
+            throw new IllegalArgumentException(String.format("Command name \"%s\" is already in use", cmd.getName()));
         }
 
-        commands.add(cmd);
+        for (String alias : cmd.getAliases()) {
+            if (this.commandIndex.containsKey(alias)) {
+                throw new IllegalArgumentException(String.format("Alias: %s in Command: \"%s\" is already used!", alias, cmd.getName()));
+            }
+            this.commandIndex.put(alias, index);
+        }
+
+        this.commandIndex.put(cmd.getName(), index);
+        this.commands.add(index, cmd);
+
     }
 
-    public List<ICommand> getCommands() {
+    public ArrayList<ICommand> getCommands() {
         return commands;
     }
 
     @Nullable
     public ICommand getCommand(String search) {
-        String searchLower = search.toLowerCase();
-
-        for (ICommand cmd : this.commands) {
-            if (cmd.getName().equals(searchLower) || cmd.getAliases().contains(searchLower)) {
-                return cmd;
-            }
-        }
-
-        return null;
+        int i = this.commandIndex.getOrDefault(search.toLowerCase(), -1);
+        return i != -1 ? this.commands.get(i) : null;
     }
 
     public void handle(GuildMessageReceivedEvent event, String prefix) {
@@ -93,7 +107,7 @@ public class CommandHandler {
 
         if (cmd != null) {
             List<String> args = Arrays.asList(split).subList(1, split.length);
-            CommandContext ctx = new CommandContext(event, args, invoke, prefix);
+            CommandContext ctx = new CommandContext(event, args, invoke, prefix, this);
             cmd.run(ctx);
         }
 
