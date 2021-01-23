@@ -2,7 +2,6 @@ package bot.handlers;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
-import bot.command.commands.PingCommand;
 import bot.command.commands.admin.ReactionCommand;
 import bot.command.commands.admin.SetPrefixCommand;
 import bot.command.commands.admin.flag.FlagtrChannels;
@@ -10,6 +9,7 @@ import bot.command.commands.admin.flag.FlagtrCommand;
 import bot.command.commands.admin.reaction_role.AddReactionRoleCommand;
 import bot.command.commands.admin.reaction_role.RemoveReactionRoleCommand;
 import bot.command.commands.fun.*;
+import bot.command.commands.information.*;
 import bot.command.commands.moderation.*;
 import bot.command.commands.utility.*;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
@@ -29,8 +29,18 @@ public class CommandHandler {
 
     public CommandHandler(EventWaiter waiter) {
 
-        addCommand(new PingCommand());
         addCommand(new ReactionCommand());
+
+        // INFORMATION COMMANDS
+        addCommand(new AvatarCommand());
+        addCommand(new BotInfoCommand());
+        addCommand(new ChannelInfoCommand());
+        addCommand(new GuildInfoCommand());
+        addCommand(new InviteCommand());
+        addCommand(new PingCommand());
+        addCommand(new RoleInfoCommand());
+        addCommand(new UptimeCommand());
+        addCommand(new UserInfoCommand());
 
         // UTILITY COMMANDS
         addCommand(new GithubCommand());

@@ -9,6 +9,13 @@ public class Constants {
     public final static Map<String, String> langCodes;
     public final static Map<String, String> flagCodes;
 
+    public final static String CUBE_BULLET = "\u2752";
+    public final static String CIRCLE_BULLET = "\u2022";
+    public final static String ARROW_BULLET = "\u00BB";
+    public final static String ARROW = "\u276F";
+    public final static String TICK = "\u2713";
+    public final static String X_MARK = "\u2715";
+
     static {
 
         langCodes = new LinkedHashMap<>(55);
