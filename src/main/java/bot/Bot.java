@@ -7,6 +7,7 @@ import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 
 import javax.security.auth.login.LoginException;
@@ -33,9 +34,10 @@ public class Bot {
                 .setFooter("Beta Bot")
         );
 
-        new JDABuilder().setToken(Config.get("token"))
+        JDABuilder.createDefault(Config.get("TOKEN"))
                 .addEventListeners(waiter, new Listener(this))
-                .setActivity(Activity.watching("this discord"))
+                .setStatus(OnlineStatus.ONLINE)
+                .setActivity(Activity.playing("Booting..."))
                 .build();
 
     }

@@ -14,21 +14,12 @@ public class GuildUtils {
 
     // [totalCount, botCount, memberCount]
     public static void getMemberStats(@NotNull Guild guild, Consumer<long[]> callback) {
-        if (guild.isLoaded()) {
-            List<Member> list = guild.getMembers();
+        getMembersList(guild, list -> {
             final long totalCount = list.size();
             final long botCount = list.stream().filter((m) -> m.getUser().isBot()).count();
             final long memCount = totalCount - botCount;
-
             callback.accept(new long[]{totalCount, botCount, memCount});
-        } else {
-            guild.loadMembers().onSuccess((list) -> {
-                final long totalCount = list.size();
-                final long botCount = list.stream().filter((m) -> m.getUser().isBot()).count();
-                final long memCount = totalCount - botCount;
-                callback.accept(new long[]{totalCount, botCount, memCount});
-            }).onError((e) -> callback.accept(null));
-        }
+        });
     }
 
     public static void getMembersList(@NotNull Guild guild, Consumer<List<Member>> callback) {

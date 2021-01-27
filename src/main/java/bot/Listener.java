@@ -2,6 +2,7 @@ package bot;
 
 import bot.database.DataSource;
 import me.duncte123.botcommons.BotCommons;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -26,6 +27,7 @@ public class Listener implements EventListener {
     public void onReady(@Nonnull ReadyEvent event) {
         LOGGER.info("{} is ready", event.getJDA().getSelfUser().getAsTag());
         LOGGER.info("Watching {} guilds", event.getJDA().getGuilds().size());
+        event.getJDA().getPresence().setActivity(Activity.watching("this server"));
     }
 
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
