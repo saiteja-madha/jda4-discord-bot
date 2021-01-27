@@ -14,25 +14,26 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 
-public abstract class FilterBaseCommand extends ICommand {
+public abstract class TextGenBaseCommand extends ICommand {
 
-    public FilterBaseCommand() {
+    public TextGenBaseCommand() {
         this.name = getClass().getSimpleName().toLowerCase();
-        this.usage = "<imageurl>/<@mention>/<attachment>";
-        this.help = "generates filter for the provided image";
+        this.usage = "<text>";
+        this.minArgsCount = 1;
+        this.help = "generates a meme for the provided text content";
     }
 
     @Override
     public void handle(@Nonnull @NotNull CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
         final User author = ctx.getAuthor();
-        final String imageUrl = ImageUtils.getImageFromCommand(ctx);
 
-        WebUtils.ins.getByteStream(ImageUtils.getFilter(this.getEndpoint(), imageUrl)).async(bytes -> {
+        WebUtils.ins.getByteStream(ImageUtils.getTextGenerator(this.getEndpoint(), ctx.getArgsJoined())).async(bytes -> {
             EmbedBuilder embed = EmbedUtils.defaultEmbed()
                     .setColor(Constants.TRANSPARENT_EMBED)
                     .setFooter("Requested by: " + author.getAsTag());
 
+            ImageUtils.sendImage(channel, bytes, this.getImageType().getFileName());
             ImageUtils.embedImage(channel, embed, bytes, this.getImageType());
 
         });

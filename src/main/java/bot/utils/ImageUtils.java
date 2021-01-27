@@ -38,10 +38,48 @@ public class ImageUtils {
     }
 
     public static String getFilter(String filterName, String image) {
-        String endpoint = BASE_URL + "/filterss/" + filterName;
+        String endpoint = BASE_URL + "/filters/" + filterName;
         HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(endpoint))
                 .newBuilder()
                 .addQueryParameter("image", image);
+        return urlBuilder.build().toString();
+    }
+
+    public static String getGenerator(String genName, String image) {
+        String endpoint = BASE_URL + "/generators/" + genName;
+        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(endpoint))
+                .newBuilder()
+                .addQueryParameter("image", image);
+        return urlBuilder.build().toString();
+    }
+
+    public static String getGenerator(String genName, String image1, String image2) {
+        String endpoint = BASE_URL + "/generators/" + genName;
+        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(endpoint))
+                .newBuilder()
+                .addQueryParameter("image1", image1)
+                .addQueryParameter("image2", image2);
+        return urlBuilder.build().toString();
+    }
+
+    public static String getPodiumGen(String[] avatarArr, String[] nameArr) {
+        String endpoint = BASE_URL + "/generators/podium";
+        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(endpoint))
+                .newBuilder()
+                .addQueryParameter("avatar1", avatarArr[0])
+                .addQueryParameter("avatar2", avatarArr[1])
+                .addQueryParameter("avatar3", avatarArr[2])
+                .addQueryParameter("name1", nameArr[0])
+                .addQueryParameter("name2", nameArr[1])
+                .addQueryParameter("name3", nameArr[2]);
+        return urlBuilder.build().toString();
+    }
+
+    public static String getTextGenerator(String genName, String text) {
+        String endpoint = BASE_URL + "/generators/" + genName;
+        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(endpoint))
+                .newBuilder()
+                .addQueryParameter("text", text);
         return urlBuilder.build().toString();
     }
 
