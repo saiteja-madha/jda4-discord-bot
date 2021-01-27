@@ -8,6 +8,10 @@ import java.util.concurrent.TimeUnit;
 
 public class MiscUtils {
 
+    public static boolean isURL(String url) {
+        return url.matches("^https?:\\/\\/[-a-zA-Z0-9+&@#\\/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#\\/%=~_|]");
+    }
+
     @Nullable
     public static String getLanguage(String code) {
         Locale[] availableLocale = Locale.getAvailableLocales();

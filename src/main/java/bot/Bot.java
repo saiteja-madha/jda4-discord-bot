@@ -30,7 +30,7 @@ public class Bot {
 
         WebUtils.setUserAgent("Beta Bot");
         EmbedUtils.setEmbedBuilder(() -> new EmbedBuilder()
-                .setColor(0x3883d9)
+                .setColor(Constants.BOT_EMBED)
                 .setFooter("Beta Bot")
         );
 

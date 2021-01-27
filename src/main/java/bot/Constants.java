@@ -6,15 +6,24 @@ import java.util.Map;
 
 public class Constants {
 
+    // Hash Maps
     public final static Map<String, String> langCodes;
     public final static Map<String, String> flagCodes;
 
+    // Emoji's
     public final static String CUBE_BULLET = "\u2752";
     public final static String CIRCLE_BULLET = "\u2022";
     public final static String ARROW_BULLET = "\u00BB";
     public final static String ARROW = "\u276F";
     public final static String TICK = "\u2713";
     public final static String X_MARK = "\u2715";
+
+    // Embed Colors
+    public final static int BOT_EMBED = 0x068ADD;
+    public final static int TRANSPARENT_EMBED = 0x36393F;
+
+    // Error Message
+    public final static String API_ERROR = "Unexpected API Error! Try again later or contact [support server](" + Config.get("DISCORD_INVITE") + ")";
 
     static {
 

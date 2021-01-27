@@ -9,6 +9,7 @@ import bot.command.commands.admin.flag.FlagtrCommand;
 import bot.command.commands.admin.reaction_role.AddReactionRoleCommand;
 import bot.command.commands.admin.reaction_role.RemoveReactionRoleCommand;
 import bot.command.commands.fun.*;
+import bot.command.commands.image.filters.*;
 import bot.command.commands.information.*;
 import bot.command.commands.moderation.*;
 import bot.command.commands.utility.*;
@@ -58,6 +59,14 @@ public class CommandHandler {
         addCommand(new AnimalCommand());
         addCommand(new JokeCommand());
         addCommand(new MemeCommand());
+
+        // IMAGE COMMANDS
+        addCommand(new Blur());
+        addCommand(new Contrast());
+        addCommand(new Gay());
+        addCommand(new GreyScale());
+        addCommand(new Invert());
+        addCommand(new Sepia());
 
         // MODERATION COMMANDS
         addCommand(new KickCommand());
