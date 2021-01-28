@@ -35,7 +35,7 @@ public class ReactionHandler {
         else
             emoji = reactionEmote.getEmoji();
 
-        String roleId = DataSource.INS.getReactionRoleId(guild.getIdLong(), channel.getId(), event.getMessageId(), emoji);
+        String roleId = DataSource.INS.getReactionRoleId(guild.getId(), channel.getId(), event.getMessageId(), emoji);
 
         if (roleId == null)
             return;
@@ -44,7 +44,7 @@ public class ReactionHandler {
 
         // If role is removed, remove data from DB
         if (role == null) {
-            DataSource.INS.removeReactionRole(guild.getIdLong(), channel.getId(), event.getMessageId(), emoji);
+            DataSource.INS.removeReactionRole(guild.getId(), channel.getId(), event.getMessageId(), emoji);
             return;
         }
 
@@ -67,7 +67,7 @@ public class ReactionHandler {
     public void handleFlagReaction(@NotNull GuildMessageReactionAddEvent event) {
         final Guild guild = event.getGuild();
         final TextChannel tc = event.getChannel();
-        final long messageId = event.getMessageIdLong();
+        final String messageId = event.getMessageId();
 
         String unicode = event.getReactionEmote().toString().replace("RE:", "");
 
@@ -76,12 +76,12 @@ public class ReactionHandler {
         }
 
         // Check Guild Configuration
-        GuildSettings config = DataSource.INS.getSettings(event.getGuild().getIdLong());
+        GuildSettings config = DataSource.INS.getSettings(event.getGuild().getId());
         if (!config.flagTranslation || !config.translationChannels.contains(event.getChannel().getId()))
             return;
 
         // Check if already translated
-        if (DataSource.INS.isTranslated(tc.getGuild().getIdLong(), tc.getIdLong(), messageId, unicode))
+        if (DataSource.INS.isTranslated(tc.getGuild().getId(), tc.getId(), messageId, unicode))
             return;
 
         String l1 = Constants.flagCodes.get(unicode.substring(0, 7).toUpperCase());
@@ -120,7 +120,7 @@ public class ReactionHandler {
                             "Reacted By: " + event.getUser().getAsTag());
 
             tc.sendMessage(eb.build()).queue((__) ->
-                    DataSource.INS.addTranslation(guild.getIdLong(), tc.getIdLong(), messageId, unicode)
+                    DataSource.INS.addTranslation(guild.getId(), tc.getId(), messageId, unicode)
             );
 
         }, e -> LOGGER.error("Flag Translation Failed: " + e.getMessage()));

@@ -18,7 +18,7 @@ public class SetPrefixCommand extends ICommand {
     @Override
     public void handle(@NotNull CommandContext ctx) {
         final String newPrefix = String.join("", ctx.getArgs());
-        DataSource.INS.setPrefix(ctx.getGuild().getIdLong(), newPrefix);
+        DataSource.INS.setPrefix(ctx.getGuild().getId(), newPrefix);
 
         ctx.reply(String.format("New prefix has been set to `%s`", newPrefix));
 

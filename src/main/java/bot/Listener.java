@@ -37,7 +37,7 @@ public class Listener implements EventListener {
             return;
         }
 
-        final long guildId = event.getGuild().getIdLong();
+        final String guildId = event.getGuild().getId();
         String prefix = DataSource.INS.getSettings(guildId).prefix;
 
         String raw = event.getMessage().getContentRaw();
@@ -53,6 +53,9 @@ public class Listener implements EventListener {
         if (raw.startsWith(prefix)) {
             bot.getCmdHandler().handle(event, prefix);
         }
+
+        bot.getThreadpool().execute(() -> bot.getXpHandler().handle(event));
+
     }
 
     public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {

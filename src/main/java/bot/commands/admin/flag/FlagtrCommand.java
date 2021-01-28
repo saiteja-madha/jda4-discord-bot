@@ -21,9 +21,9 @@ public class FlagtrCommand extends ICommand {
         String input = ctx.getArgs().get(0);
 
         if (input.equalsIgnoreCase("ON")) {
-            DataSource.INS.setFlagTranslation(ctx.getGuild().getIdLong(), true);
+            DataSource.INS.setFlagTranslation(ctx.getGuild().getId(), true);
         } else if (input.equalsIgnoreCase("OFF")) {
-            DataSource.INS.setFlagTranslation(ctx.getGuild().getIdLong(), false);
+            DataSource.INS.setFlagTranslation(ctx.getGuild().getId(), false);
         } else {
             ctx.reply("Incorrect usage. Please provide valid arguments");
             return;

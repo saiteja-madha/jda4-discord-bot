@@ -2,6 +2,7 @@ package bot.handlers;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import bot.commands.TestCommand;
 import bot.commands.admin.ReactionCommand;
 import bot.commands.admin.SetPrefixCommand;
 import bot.commands.admin.flag.FlagtrChannels;
@@ -13,6 +14,7 @@ import bot.commands.image.filters.*;
 import bot.commands.image.generators.*;
 import bot.commands.information.*;
 import bot.commands.moderation.*;
+import bot.commands.social.ReputationCommand;
 import bot.commands.utility.*;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -33,6 +35,11 @@ public class CommandHandler {
 
         addCommand(new ReactionCommand());
 
+        // SOCIAL COMMANDS
+        addCommand(new ReputationCommand());
+
+        // ECONOMY COMMANDS
+
         // INFORMATION COMMANDS
         addCommand(new AvatarCommand());
         addCommand(new BotInfoCommand());
@@ -45,6 +52,7 @@ public class CommandHandler {
         addCommand(new UserInfoCommand());
 
         // UTILITY COMMANDS
+        addCommand(new CovidCommand());
         addCommand(new GithubCommand());
         addCommand(new HasteCommand());
         addCommand(new HelpCommand());
@@ -114,6 +122,8 @@ public class CommandHandler {
         addCommand(new FlagtrChannels());
         addCommand(new AddReactionRoleCommand());
         addCommand(new RemoveReactionRoleCommand());
+
+        addCommand(new TestCommand());
 
     }
 

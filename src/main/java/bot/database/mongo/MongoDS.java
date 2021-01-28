@@ -8,9 +8,8 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.UpdateOptions;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.model.*;
+import net.dv8tion.jda.api.entities.Member;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -26,7 +25,7 @@ public class MongoDS implements DataSource {
     private final MongoClient mongoClient;
 
     // Caching
-    private final Map<Long, GuildSettings> settings = new HashMap<>();
+    private final Map<String, GuildSettings> settings = new HashMap<>();
 
     public MongoDS() {
         ConnectionString connString = new ConnectionString(Config.get("MONGO_CONNECTION_STRING"));
@@ -39,22 +38,22 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public GuildSettings getSettings(long guildId) {
+    public GuildSettings getSettings(String guildId) {
         if (!settings.containsKey(guildId))
             settings.put(guildId, fetchSettings(guildId));
         return settings.get(guildId);
     }
 
     @Override
-    public void setPrefix(long guildId, String newPrefix) {
+    public void setPrefix(String guildId, String newPrefix) {
         invalidateCache(guildId);
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
         Bson filter = Filters.eq("_id", guildId);
         collection.updateOne(filter, Updates.set("prefix", newPrefix), new UpdateOptions().upsert(true));
     }
 
     @Override
-    public void addReactionRole(long guildId, String channelId, String messageId, String roleId, String emote) {
+    public void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
 
         Bson updates = Updates.combine(Updates.set("guild_id", guildId),
@@ -74,7 +73,7 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public void removeReactionRole(long guildId, String channelId, String messageId, @Nullable String emote) {
+    public void removeReactionRole(String guildId, String channelId, String messageId, @Nullable String emote) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
@@ -87,9 +86,8 @@ public class MongoDS implements DataSource {
         collection.deleteMany(filter);
     }
 
-    @Nullable
     @Override
-    public String getReactionRoleId(long guildId, String channelId, String messageId, String emote) {
+    public @Nullable String getReactionRoleId(String guildId, String channelId, String messageId, String emote) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
 
         Bson filter = Filters.and(
@@ -104,23 +102,23 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public void setFlagTranslation(long guildId, boolean isEnabled) {
+    public void setFlagTranslation(String guildId, boolean isEnabled) {
         invalidateCache(guildId);
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
         Bson filter = Filters.eq("_id", guildId);
         collection.updateOne(filter, Updates.set("flag_translation", isEnabled), new UpdateOptions().upsert(true));
     }
 
     @Override
-    public void updateTranslationChannels(long guildId, List<String> channels) {
+    public void updateTranslationChannels(String guildId, List<String> channels) {
         invalidateCache(guildId);
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
         Bson filter = Filters.eq("_id", guildId);
         collection.updateOne(filter, Updates.set("translation_channels", channels), new UpdateOptions().upsert(true));
     }
 
     @Override
-    public void addTranslation(long guildId, long channelId, long messageId, String unicode) {
+    public void addTranslation(String guildId, String channelId, String messageId, String unicode) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("translations");
         Document doc = new Document("_id", new ObjectId());
         doc.append("guild_id", guildId)
@@ -131,7 +129,7 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public boolean isTranslated(long guildId, long channelId, long messageId, String unicode) {
+    public boolean isTranslated(String guildId, String channelId, String messageId, String unicode) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("translations");
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
@@ -143,15 +141,79 @@ public class MongoDS implements DataSource {
         return document != null;
     }
 
+    @Override
+    public int[] updateXp(Member member, int xp, boolean updateMessages) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("levels");
+
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", member.getGuild().getId()),
+                Filters.eq("member_id", member.getId())
+        );
+
+        Document updateValue = new Document()
+                .append("xp", xp);
+        if (updateMessages)
+            updateValue.append("messages", 1);
+
+        Document updateQuery = new Document()
+                .append("$inc", updateValue);
+
+        Document updatedDoc = collection.findOneAndUpdate(filter, updateQuery, new FindOneAndUpdateOptions()
+                .upsert(true)
+                .returnDocument(ReturnDocument.BEFORE));
+
+        if (updatedDoc == null)
+            return new int[]{0, 0, 0};
+        else
+            return new int[]{updatedDoc.containsKey("level") ? updatedDoc.getInteger("level") : 0,
+                    updatedDoc.getInteger("xp"),
+                    updatedDoc.getInteger("messages")
+            };
+    }
+
+    @Override
+    public void setReputation(Member member, int rep) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("levels");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", member.getGuild().getId()),
+                Filters.eq("member_id", member.getId())
+        );
+
+        collection.updateOne(filter,
+                new Document().append("$inc", new Document().append("reputation", rep)),
+                new UpdateOptions().upsert(true)
+        );
+    }
+
+    @Override
+    public void setLevel(Member member, int level) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("levels");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", member.getGuild().getId()),
+                Filters.eq("member_id", member.getId())
+        );
+        collection.updateOne(filter, Updates.set("level", level), new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public int[] addCoins(Member member, int coins) {
+        return new int[0];
+    }
+
+    @Override
+    public int[] removeCoins(Member member, int coins) {
+        return new int[0];
+    }
+
     @NotNull
-    private GuildSettings fetchSettings(long guildId) {
+    private GuildSettings fetchSettings(String guildId) {
         Bson filter = Filters.eq("_id", guildId);
-        MongoCollection<Document> settingsCollection = mongoClient.getDatabase("discord").getCollection("guild_Settings");
+        MongoCollection<Document> settingsCollection = mongoClient.getDatabase("discord").getCollection("guild_settings");
         Document document = settingsCollection.find(filter).first();
         return (document == null) ? new GuildSettings() : new GuildSettings(document);
     }
 
-    private void invalidateCache(long guildId) {
+    private void invalidateCache(String guildId) {
         settings.remove(guildId);
     }
 

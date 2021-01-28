@@ -3,7 +3,11 @@ package bot.utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class MiscUtils {
@@ -41,6 +45,29 @@ public class MiscUtils {
         String secStr = minute > 1 ? " Seconds " : " Second ";
 
         return day + dayStr + hours + hourStr + minute + minStr + second + secStr;
+    }
+
+    public static String getRemainingTime(Instant instant) {
+        Instant plus = instant.plus(1, ChronoUnit.DAYS);
+        Duration duration = Duration.between(Instant.now(), plus);
+
+        long seconds = duration.getSeconds();
+        long hours = seconds / 3600;
+        long minutes = (seconds % 3600) / 60;
+        seconds = seconds % 60;
+
+        return String.format("%s hours, %s minutes, %s seconds", hours, minutes, seconds);
+
+    }
+
+    public static int getRandInt(int from, int to) {
+        final Random rand = new Random();
+        if (from > to) {
+            from ^= to;
+            to ^= from;
+            from ^= to;
+        }
+        return rand.nextInt(to - from) + from;
     }
 
 }

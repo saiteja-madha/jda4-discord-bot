@@ -2,6 +2,7 @@ package bot;
 
 import bot.handlers.CommandHandler;
 import bot.handlers.ReactionHandler;
+import bot.handlers.XPHandler;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.web.WebUtils;
@@ -20,6 +21,7 @@ public class Bot {
     private final EventWaiter waiter;
     private final CommandHandler cmdHandler;
     private final ReactionHandler reactionHandler;
+    private final XPHandler xpHandler;
 
     private Bot() throws LoginException {
 
@@ -27,6 +29,7 @@ public class Bot {
         waiter = new EventWaiter();
         cmdHandler = new CommandHandler(waiter);
         reactionHandler = new ReactionHandler();
+        xpHandler = new XPHandler();
 
         WebUtils.setUserAgent("Beta Bot");
         EmbedUtils.setEmbedBuilder(() -> new EmbedBuilder()
@@ -60,6 +63,10 @@ public class Bot {
 
     public ReactionHandler getReactionHandler() {
         return reactionHandler;
+    }
+
+    public XPHandler getXpHandler() {
+        return xpHandler;
     }
 
 }

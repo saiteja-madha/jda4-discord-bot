@@ -53,7 +53,7 @@ public class RemoveReactionRoleCommand extends ICommand {
         if (emote != null) {
             msg.removeReaction(emote, ctx.getSelfMember().getUser()).queue((__) -> {
                 try {
-                    DataSource.INS.removeReactionRole(ctx.getGuild().getIdLong(), tc.getId(), msg.getId(), emote);
+                    DataSource.INS.removeReactionRole(ctx.getGuild().getId(), tc.getId(), msg.getId(), emote);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -62,7 +62,7 @@ public class RemoveReactionRoleCommand extends ICommand {
         } else {
             msg.clearReactions().queue((__) -> {
                 try {
-                    DataSource.INS.removeReactionRole(ctx.getGuild().getIdLong(), tc.getId(), msg.getId(), null);
+                    DataSource.INS.removeReactionRole(ctx.getGuild().getId(), tc.getId(), msg.getId(), null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

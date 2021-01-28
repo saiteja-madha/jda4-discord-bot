@@ -42,7 +42,7 @@ public class AddReactionRoleCommand extends ICommand {
             String emote = args.get(2);
 
             tc.addReactionById(messageId, emote).queue();
-            DataSource.INS.addReactionRole(ctx.getGuild().getIdLong(), tc.getId(), Long.toUnsignedString(messageId), role.getId(), emote);
+            DataSource.INS.addReactionRole(ctx.getGuild().getId(), tc.getId(), messageIdString, role.getId(), emote);
             ctx.reply("Successfully added reaction role!");
 
         } catch (NumberFormatException e) {
