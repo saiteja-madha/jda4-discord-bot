@@ -3,6 +3,7 @@ package bot.database;
 import bot.database.mongo.MongoDS;
 import bot.database.objects.Economy;
 import bot.database.objects.GuildSettings;
+import bot.database.objects.WarnLogs;
 import net.dv8tion.jda.api.entities.Member;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -40,5 +41,10 @@ public interface DataSource {
     int[] addCoins(Member member, int coins); // [oldCoins, newCoins]
     int[] removeCoins(Member member, int coins); // [oldCoins, newCoins]
     int[] updateDailyStreak(Member member, int coins, int streak); // [oldCoins, newCoins]
+
+    // Moderation
+    void warnUser(Member mod, Member target, String reason);
+    void deleteWarnings(Member target);
+    List<WarnLogs> getWarnLogs(Member member);
 
 }

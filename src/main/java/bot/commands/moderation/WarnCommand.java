@@ -10,15 +10,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class BanCommand extends ICommand {
+public class WarnCommand extends ICommand {
 
-    public BanCommand() {
-        this.name = "ban";
-        this.help = "ban a member off the server";
+    public WarnCommand() {
+        this.name = "warn";
+        this.help = "gives warning to a user";
         this.usage = "<@member(s)> [reason]";
-        this.minArgsCount = 2;
-        this.userPermissions = new Permission[]{Permission.BAN_MEMBERS};
-        this.botPermissions = new Permission[]{Permission.BAN_MEMBERS};
+        this.minArgsCount = 1;
+        this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
     }
 
     @Override
@@ -27,7 +26,7 @@ public class BanCommand extends ICommand {
         List<Member> targetMembers = message.getMentionedMembers();
 
         if (targetMembers.isEmpty()) {
-            ctx.reply("Please @mention the member(s) you want to ban!");
+            ctx.reply("Please @mention the member(s) you want to warn!");
             return;
         }
 
@@ -38,8 +37,8 @@ public class BanCommand extends ICommand {
         targetMembers
                 .stream()
                 // Filter out members with which bot and command author can interact
-                .filter(target -> ModerationUtils.canInteract(ctx.getMember(), target, "ban", ctx.getChannel()))
-                .forEach(member -> ModerationUtils.ban(message, member, reason));
+                .filter(target -> ModerationUtils.canInteract(ctx.getMember(), target, "warn", ctx.getChannel()))
+                .forEach(member -> ModerationUtils.warn(message, member, reason));
 
     }
 

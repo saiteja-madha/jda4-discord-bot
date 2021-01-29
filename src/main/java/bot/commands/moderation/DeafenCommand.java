@@ -10,15 +10,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class BanCommand extends ICommand {
+public class DeafenCommand extends ICommand {
 
-    public BanCommand() {
-        this.name = "ban";
-        this.help = "ban a member off the server";
-        this.usage = "<@member(s)> [reason]";
-        this.minArgsCount = 2;
-        this.userPermissions = new Permission[]{Permission.BAN_MEMBERS};
-        this.botPermissions = new Permission[]{Permission.BAN_MEMBERS};
+    public DeafenCommand() {
+        this.name = "deafen";
+        this.help = "deafen's the mentioned user on this guild";
+        this.usage = "<@member> [reason]";
+        this.minArgsCount = 1;
+        this.userPermissions = new Permission[]{Permission.VOICE_DEAF_OTHERS};
+        this.botPermissions = new Permission[]{Permission.VOICE_DEAF_OTHERS};
     }
 
     @Override
@@ -27,7 +27,7 @@ public class BanCommand extends ICommand {
         List<Member> targetMembers = message.getMentionedMembers();
 
         if (targetMembers.isEmpty()) {
-            ctx.reply("Please @mention the member(s) you want to ban!");
+            ctx.reply("Please @mention the member(s) you want to deafen!");
             return;
         }
 
@@ -38,8 +38,8 @@ public class BanCommand extends ICommand {
         targetMembers
                 .stream()
                 // Filter out members with which bot and command author can interact
-                .filter(target -> ModerationUtils.canInteract(ctx.getMember(), target, "ban", ctx.getChannel()))
-                .forEach(member -> ModerationUtils.ban(message, member, reason));
+                .filter(target -> ModerationUtils.canInteract(ctx.getMember(), target, "kick", ctx.getChannel()))
+                .forEach(member -> ModerationUtils.deafen(message, member, reason));
 
     }
 

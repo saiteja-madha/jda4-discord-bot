@@ -2,34 +2,66 @@ package bot.utils;
 
 import bot.command.CommandContext;
 import bot.data.PurgeType;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import bot.database.DataSource;
+import bot.database.objects.GuildSettings;
+import bot.database.objects.WarnLogs;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.requests.restaction.order.RoleOrderAction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 public class ModerationUtils {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(ModerationUtils.class);
     private final static Pattern linkCheck = Pattern.compile("^(?:https?|ftp):\\/\\/[^\\s/$.?#].[^\\s]*$");
 
     public static boolean canInteract(Member mod, Member target, String action, TextChannel channel) {
         if (!mod.canInteract(target)) {
-            BotUtils.sendMsg(channel, "Oops! You cannot `" + action + "` this member");
+            BotUtils.sendMsg(channel, "Oops! You cannot `" + action + "` " + target.getEffectiveName());
             return false;
         }
 
         final Member self = mod.getGuild().getSelfMember();
 
         if (!self.canInteract(target)) {
-            BotUtils.sendMsg(channel, "Ugh! I cannot `" + action + "` this member, Are their roles above mine?");
+            BotUtils.sendMsg(channel, "Ugh! I cannot `" + action + "` " + target.getEffectiveName() + ", Are their roles above mine?");
             return false;
         }
         return true;
+    }
+
+    @Nullable
+    public static Role createMutedRole(@NotNull Guild guild) {
+        Role mutedrole;
+        try {
+            mutedrole = guild.createRole().setColor(11).setName("Muted").submit().get();
+            int pos = guild.getSelfMember().getRoles().get(0).getPosition();
+            RoleOrderAction modifyRolePositions = guild.modifyRolePositions();
+            modifyRolePositions.selectPosition(mutedrole).moveTo(pos - 1).queue();
+            for (TextChannel tc : guild.getTextChannels()) {
+                if (guild.getSelfMember().hasPermission(tc, Permission.MANAGE_PERMISSIONS, Permission.VIEW_CHANNEL))
+                    tc.createPermissionOverride(mutedrole).deny(Permission.MESSAGE_WRITE).queue();
+            }
+            for (VoiceChannel vc : guild.getVoiceChannels()) {
+                if (guild.getSelfMember().hasPermission(vc, Permission.MANAGE_PERMISSIONS, Permission.VIEW_CHANNEL))
+                    vc.createPermissionOverride(mutedrole).deny(Permission.VOICE_CONNECT, Permission.VOICE_SPEAK).queue();
+
+            }
+            return mutedrole;
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Role create error | Guild: " + guild.getId() + " Error: " + e.getMessage());
+        }
+
+        return null;
     }
 
     public static int checkPurgeAmount(@NotNull CommandContext ctx, int input) {
@@ -50,6 +82,110 @@ public class ModerationUtils {
             return 0;
         }
         return amount;
+    }
+
+    public static void setNick(Message message, Member target, String newName) {
+        final TextChannel channel = message.getTextChannel();
+        final String oldName = target.getNickname();
+
+        target.modifyNickname(newName).queue((__) -> {
+            if (oldName == null)
+                BotUtils.sendMsg(channel, "Changed nick of `"
+                        + target.getUser().getAsTag() + "` to `" + newName + "`");
+            else
+                BotUtils.sendMsg(channel, "Changed nick of `"
+                        + target.getUser().getAsTag() + "` from `"
+                        + oldName + "` to `" + newName + "`");
+
+        }, e -> LOGGER.error("Nick change error: " + e.getMessage()));
+    }
+
+    public static void deafen(Message message, Member target, String reason) {
+        final TextChannel channel = message.getTextChannel();
+        final GuildVoiceState voiceState = target.getVoiceState();
+
+        if (voiceState != null && !voiceState.inVoiceChannel()) {
+            BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` not connected to any voice channel");
+            return;
+        }
+
+        if (voiceState != null && voiceState.isGuildDeafened()) {
+            BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` is already deafened on this server");
+            return;
+        }
+
+        target.deafen(true).reason(reason).queue(
+                (__) -> BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` is now deafened"),
+                e -> {
+                    LOGGER.error("Deafen error: " + e.getMessage());
+                    BotUtils.sendMsg(channel, "Deafen was not successful");
+                });
+    }
+
+    public static void unDeafen(Message message, Member target, String reason) {
+        final TextChannel channel = message.getTextChannel();
+        final GuildVoiceState voiceState = target.getVoiceState();
+
+        if (voiceState != null && !voiceState.inVoiceChannel()) {
+            BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` not connected to any voice channel");
+            return;
+        }
+
+        if (voiceState != null && !voiceState.isGuildDeafened()) {
+            BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` is not deafened on this server");
+            return;
+        }
+
+        target.deafen(false).reason(reason).queue(
+                (__) -> BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` is now un-deafened"),
+                e -> {
+                    LOGGER.error("Undeafen error: " + e.getMessage());
+                    BotUtils.sendMsg(channel, "Deafen was not successful");
+                });
+    }
+
+    public static void vmute(Message message, Member target, String reason) {
+        final TextChannel channel = message.getTextChannel();
+        final GuildVoiceState voiceState = target.getVoiceState();
+
+        if (voiceState != null && !voiceState.inVoiceChannel()) {
+            BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` not connected to any voice channel");
+            return;
+        }
+
+        if (voiceState != null && voiceState.isGuildMuted()) {
+            BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` is already voice muted on this server");
+            return;
+        }
+
+        target.mute(true).reason(reason).queue(
+                (__) -> BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` is now voice muted"),
+                e -> {
+                    LOGGER.error("VMute error: " + e.getMessage());
+                    BotUtils.sendMsg(channel, "Voice Mute was not successful");
+                });
+    }
+
+    public static void vunmute(Message message, Member target, String reason) {
+        final TextChannel channel = message.getTextChannel();
+        final GuildVoiceState voiceState = target.getVoiceState();
+
+        if (voiceState != null && !voiceState.inVoiceChannel()) {
+            BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` not connected to any voice channel");
+            return;
+        }
+
+        if (voiceState != null && !voiceState.isGuildMuted()) {
+            BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` is not voice muted on this server");
+            return;
+        }
+
+        target.mute(false).reason(reason).queue(
+                (__) -> BotUtils.sendMsg(channel, "`" + target.getEffectiveName() + "` is now voice un-muted"),
+                e -> {
+                    LOGGER.error("VUnMute error: " + e.getMessage());
+                    BotUtils.sendMsg(channel, "Voice UnMute was not successful");
+                });
     }
 
     public static void purge(CommandContext ctx, PurgeType type, int amount, String argument) {
@@ -113,7 +249,7 @@ public class ModerationUtils {
                         BotUtils.sendMsg(channel, "Successfully purged `" + size + "` messages!", 7)
                 , e -> {
                     ctx.reply("Purge Failed!");
-                    System.out.println("Purge Failed: " + e.getMessage());
+                    LOGGER.error("Purge Failed: " + e.getMessage());
                 });
     }
 
@@ -127,11 +263,11 @@ public class ModerationUtils {
                     .queue((__) -> BotUtils.sendMsg(tc, "`" + target.getUser().getAsTag() + "` is kicked from this server!"),
                             (error) -> {
                                 BotUtils.sendMsg(tc, "Could not kick " + target.getAsMention());
-                                System.out.println("Kick Error - " + error.getMessage());
+                                LOGGER.error("Kick Error - " + error.getMessage());
                             }
                     );
         } catch (Exception e) {
-            System.out.println("Kick Error - " + e.getMessage());
+            LOGGER.error("Kick Error - " + e.getMessage());
             BotUtils.sendMsg(tc, "Kick was not successful");
         }
     }
@@ -147,17 +283,16 @@ public class ModerationUtils {
                                     BotUtils.sendMsg(tc, "`" + target.getUser().getAsTag() + "` is softbanned from this server!"),
                             (e) -> {
                                 BotUtils.sendMsg(tc, "Could not softban " + target.getAsMention());
-                                System.out.println("Softban Error - " + e.getMessage());
+                                LOGGER.error("Softban Error - " + e.getMessage());
                             }), (e) -> {
                         BotUtils.sendMsg(tc, "Could not softban " + target.getAsMention());
-                        System.out.println("Softban Error - " + e.getMessage());
+                        LOGGER.error("Softban Error - " + e.getMessage());
                     });
 
         } catch (Exception e) {
-            System.out.println("Softban Error - " + e.getMessage());
+            LOGGER.error("Softban Error - " + e.getMessage());
             BotUtils.sendMsg(tc, "SoftBan was not successful");
         }
-
     }
 
     public static void ban(Message msg, Member target, String reason) {
@@ -170,7 +305,7 @@ public class ModerationUtils {
                     .queue((__) -> BotUtils.sendMsg(tc, "`" + target.getUser().getAsTag() + "` is banned from this server!"),
                             (error) -> {
                                 BotUtils.sendMsg(tc, "Could not ban " + target.getAsMention());
-                                System.out.println("Ban Error - " + error.getMessage());
+                                LOGGER.error("Ban Error - " + error.getMessage());
                             }
                     );
             guild.kick(target, reason).reason(reason)
@@ -178,8 +313,85 @@ public class ModerationUtils {
                             (error) -> BotUtils.sendMsg(tc, "Could not kick " + target.getAsMention())
                     );
         } catch (Exception e) {
-            System.out.println("Ban Error - " + e.getMessage());
+            LOGGER.error("Ban Error - " + e.getMessage());
             BotUtils.sendMsg(tc, "Ban was not successful");
+        }
+    }
+
+    public static void warn(Message msg, Member target, String reason) {
+        final TextChannel channel = msg.getTextChannel();
+        final String guildId = msg.getGuild().getId();
+        final GuildSettings settings = DataSource.INS.getSettings(guildId);
+
+        int maxWarnings = settings.maxWarnings;
+
+        List<WarnLogs> warnLogs = DataSource.INS.getWarnLogs(target);
+        int received = warnLogs.size();
+
+        if ((received + 1) >= maxWarnings) {
+            if (msg.getGuild().getSelfMember().hasPermission(Permission.KICK_MEMBERS))
+                kick(msg, target, "Max warnings reached");
+            else
+                BotUtils.sendMsg(channel, "Max warnings reached for `" + target.getEffectiveName()
+                        + "` but unable to kick him due to missing `Kick Permission`");
+            return;
+        }
+
+        DataSource.INS.warnUser(msg.getMember(), target, reason);
+        BotUtils.sendMsg(channel, "`" + target.getUser().getAsTag() + "` has received a warning! `" + (received + 1) + "/" + maxWarnings + "`");
+
+    }
+
+    public static void mute(Message msg, Member target, String reason, Role mutedrole) {
+        final TextChannel channel = msg.getTextChannel();
+        final Guild guild = msg.getGuild();
+
+        if (target.getRoles().contains(mutedrole)) {
+            BotUtils.sendMsg(channel, "`" + target.getUser().getAsTag() + "` is already muted!");
+            return;
+        }
+
+        try {
+            guild.addRoleToMember(target, mutedrole).queue(
+                    (__) -> BotUtils.sendMsg(channel, "`" + target.getUser().getAsTag() + "` is now muted on this server!"),
+                    (e) -> {
+                        LOGGER.error("Mute Error - " + e.getMessage());
+                        BotUtils.sendMsg(channel, "Mute was not successful");
+                    });
+        } catch (Exception e) {
+            LOGGER.error("Mute Error - " + e.getMessage());
+            BotUtils.sendMsg(channel, "Mute was not successful");
+        }
+
+    }
+
+    public static void unmute(Message msg, Member target, String reason) {
+        Role mutedrole = null;
+        final TextChannel channel = msg.getTextChannel();
+        final Guild guild = msg.getGuild();
+
+        for (Role role : target.getRoles())
+            if (role.getName().equalsIgnoreCase("muted")) {
+                mutedrole = role;
+                break;
+            }
+
+        if (mutedrole == null) {
+            BotUtils.sendMsg(channel, "`" + target.getUser().getAsTag() + "`" + " is not muted!");
+            return;
+        }
+
+        try {
+            guild.removeRoleFromMember(target, mutedrole).queue((__) -> {
+                        BotUtils.sendMsg(channel, "`" + target.getUser().getAsTag() + "` is now unmuted on this server!");
+                    },
+                    (e) -> {
+                        LOGGER.error("UnMute Error - " + e.getMessage());
+                        BotUtils.sendMsg(channel, "UnMute was not successful");
+                    });
+        } catch (Exception e) {
+            LOGGER.error("UnMute Error - " + e.getMessage());
+            BotUtils.sendMsg(channel, "UnMute was not successful");
         }
 
     }

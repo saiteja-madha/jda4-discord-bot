@@ -19,6 +19,7 @@ public class GuildSettings {
     public final String levelUpMessage;
     @Nullable
     public final String levelUpChannel;
+    public final int maxWarnings;
 
     public GuildSettings() {
         this.prefix = Config.get("PREFIX");
@@ -27,18 +28,19 @@ public class GuildSettings {
         this.isRankingEnabled = true;
         this.levelUpMessage = Config.get("DEFAULT_LEVELUP_MESSAGE");
         this.levelUpChannel = null;
+        this.maxWarnings = 3;
     }
 
-    public GuildSettings(Document document) {
-        this.prefix = document.getString("prefix");
-        this.flagTranslation = document.containsKey("flag_translation") && document.getBoolean("flag_translation");
-        this.translationChannels = document.containsKey("translation_channels")
-                ? document.getList("translation_channels", String.class)
+    public GuildSettings(Document doc) {
+        this.prefix = doc.getString("prefix");
+        this.flagTranslation = doc.containsKey("flag_translation") && doc.getBoolean("flag_translation");
+        this.translationChannels = doc.containsKey("translation_channels")
+                ? doc.getList("translation_channels", String.class)
                 : new ArrayList<>();
-        this.isRankingEnabled = document.containsKey("ranking_enabled") && document.getBoolean("ranking_enabled");
-        this.levelUpMessage = document.containsKey("levelup_message") ? document.getString("levelup_message") :
-                Config.get("DEFAULT_LEVELUP_MESSAGE");
-        this.levelUpChannel = document.containsKey("levelup_channel") ? document.getString("levelup_channel") : null;
+        this.isRankingEnabled = doc.containsKey("ranking_enabled") && doc.getBoolean("ranking_enabled");
+        this.levelUpMessage = doc.containsKey("levelup_message") ? doc.getString("levelup_message") : Config.get("DEFAULT_LEVELUP_MESSAGE");
+        this.levelUpChannel = doc.containsKey("levelup_channel") ? doc.getString("levelup_channel") : null;
+        this.maxWarnings = doc.containsKey("max_warnings") ? doc.getInteger("max_warnings") : 3;
     }
 
     public GuildSettings(ResultSet rs) throws SQLException {
@@ -48,6 +50,7 @@ public class GuildSettings {
         this.isRankingEnabled = rs.getInt("ranking_enabled") == 1;
         this.levelUpMessage = rs.getString("levelup_message");
         this.levelUpChannel = rs.getString("levelup_channel");
+        this.maxWarnings = rs.getInt("max_warnings");
     }
 
 }

@@ -114,14 +114,23 @@ public class CommandHandler {
         addCommand(new Podium());
 
         // MODERATION COMMANDS
-        addCommand(new KickCommand());
-        addCommand(new SoftBanCommand());
         addCommand(new BanCommand());
+        addCommand(new ClearWarnCommand());
+        addCommand(new DeafenCommand());
+        addCommand(new KickCommand());
+        addCommand(new MuteCommand());
         addCommand(new PurgeAttachmentCommand());
         addCommand(new PurgeBotsCommand());
         addCommand(new PurgeCommand());
         addCommand(new PurgeLinksCommand());
         addCommand(new PurgeUserCommand());
+        addCommand(new SetNickCommand());
+        addCommand(new SoftBanCommand());
+        addCommand(new UnmuteCommand());
+        addCommand(new VMuteCommand());
+        addCommand(new VUnMuteCommand());
+        addCommand(new WarnCommand());
+        addCommand(new WarningsCommand(waiter));
 
         // ADMIN COMMANDS
         addCommand(new SetPrefixCommand());

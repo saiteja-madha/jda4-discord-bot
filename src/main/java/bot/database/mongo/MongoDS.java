@@ -4,8 +4,10 @@ import bot.Config;
 import bot.database.DataSource;
 import bot.database.objects.Economy;
 import bot.database.objects.GuildSettings;
+import bot.database.objects.WarnLogs;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -255,6 +258,45 @@ public class MongoDS implements DataSource {
             int oldCoins = oldDoc.containsKey("coins") ? oldDoc.getInteger("coins") : 0;
             return new int[]{oldCoins, (oldCoins + coins)};
         }
+    }
+
+    @Override
+    public void warnUser(Member mod, Member target, String reason) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("warn_logs");
+        Document doc = new Document()
+                .append("guild_id", mod.getGuild().getId())
+                .append("moderator_id", mod.getId())
+                .append("moderator_name", mod.getUser().getAsTag())
+                .append("member_id", target.getId())
+                .append("reason", reason)
+                .append("time_stamp", Instant.now());
+
+        collection.insertOne(doc);
+    }
+
+    @Override
+    public void deleteWarnings(Member member) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("warn_logs");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", member.getGuild().getId()),
+                Filters.eq("member_id", member.getId())
+        );
+        collection.deleteMany(filter);
+    }
+
+    @Override
+    public List<WarnLogs> getWarnLogs(Member member) {
+        List<WarnLogs> list = new ArrayList<>();
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("warn_logs");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", member.getGuild().getId()),
+                Filters.eq("member_id", member.getId())
+        );
+        FindIterable<Document> documents = collection.find(filter);
+        for (Document doc : documents) {
+            list.add(new WarnLogs(doc));
+        }
+        return list;
     }
 
     @NotNull

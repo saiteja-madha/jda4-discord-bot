@@ -33,7 +33,7 @@ public class KickCommand extends ICommand {
 
         // Split content at last member mention
         String[] split = message.getContentRaw().split(targetMembers.get(targetMembers.size() - 1).getId() + "> ");
-        final String reason = split[1];
+        final String reason = split.length > 1 ? split[1] : "No reason provided";
 
         targetMembers
                 .stream()
