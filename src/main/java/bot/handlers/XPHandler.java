@@ -8,7 +8,19 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class XPHandler {
+
+    private final Map<String, OffsetDateTime> xpCooldown;
+
+    public XPHandler() {
+        this.xpCooldown = new HashMap<>();
+    }
 
     public void handle(GuildMessageReceivedEvent event) {
         final Member member = event.getMember();
@@ -16,6 +28,12 @@ public class XPHandler {
         GuildSettings settings = DataSource.INS.getSettings(event.getGuild().getId());
         if (!settings.isRankingEnabled || member == null)
             return;
+
+        // Cooldown of 2 minutes to prevent spamming
+        String key = member.getGuild().getId() + "|" + member.getId();
+        int remaining = this.getRemainingCooldown(key);
+        if (remaining > 0) return;
+        else this.applyCooldown(key);
 
         int xpToAdd = getRandomXP();
         int[] data = DataSource.INS.updateXp(member, xpToAdd, true);
@@ -48,6 +66,28 @@ public class XPHandler {
 
     public int getXPNeeded(int level) {
         return level * level * 100;
+    }
+
+    public int getRemainingCooldown(String name) {
+        if (xpCooldown.containsKey(name)) {
+            int time = (int) Math.ceil(OffsetDateTime.now().until(xpCooldown.get(name), ChronoUnit.MILLIS) / 1000D);
+            if (time <= 0) {
+                xpCooldown.remove(name);
+                return 0;
+            }
+            return time;
+        }
+        return 0;
+    }
+
+    public void applyCooldown(String name) {
+        xpCooldown.put(name, OffsetDateTime.now().plusMinutes(2));
+    }
+
+    public void cleanCooldowns() {
+        OffsetDateTime now = OffsetDateTime.now();
+        xpCooldown.keySet().stream().filter((str) -> (xpCooldown.get(str).isBefore(now))).collect(Collectors.toList())
+                .forEach(xpCooldown::remove);
     }
 
 }

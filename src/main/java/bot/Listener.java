@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.TimeUnit;
 
 public class Listener implements EventListener {
 
@@ -28,6 +29,10 @@ public class Listener implements EventListener {
         LOGGER.info("{} is ready", event.getJDA().getSelfUser().getAsTag());
         LOGGER.info("Watching {} guilds", event.getJDA().getGuilds().size());
         event.getJDA().getPresence().setActivity(Activity.watching("this server"));
+
+        // purge XP-cooldown cache
+        bot.getThreadpool().schedule(() -> bot.getXpHandler().cleanCooldowns(), 1, TimeUnit.DAYS);
+
     }
 
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
