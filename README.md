@@ -2,7 +2,7 @@
 A cool multipurpose bot built using Java Discord API https://github.com/DV8FromTheWorld/JDA
 
 ## Available Commands
-**UTILITY COMMANDS:**
+### Utility Commands:
 Command | Description
 ------------ | -------------
 `!covid <country>` | Get covid statistics in the specified country
@@ -13,7 +13,7 @@ Command | Description
 `!trcodes` | Displays a list of available translate codes
 `!urban <search-term>` | Searches the urban dictionary
 
-**FUN COMMANDS:**
+### Fun Commands:
 Command | Description
 ------------ | -------------
 `!animal <name>` | Show a random image of selected animal types
@@ -24,7 +24,7 @@ Command | Description
 `!fliptext` | Reverses the given message
 `!meme` | Shows a random meme
 
-**INFORMATION COMMANDS:**
+### Information Commands
 Command | Description
 ------------ | -------------
 `!avatar` | Displays avatar information about the user
@@ -37,8 +37,8 @@ Command | Description
 `!uptime` | Shows bot's uptime
 `!userinfo` | Shows information about the user
 
-**IMAGE COMMANDS:**
-> Image Filters
+### Image Commands
+#### Image Filters
 <table>
    <tr>
       <td>blur</td>
@@ -50,7 +50,7 @@ Command | Description
    </tr>
 </table>
 
-> Image Generators
+#### Image Generators
 <table>
    <tr>
       <td>ad</td>
@@ -93,7 +93,7 @@ Command | Description
    </tr>
 </table>
 
-> Text Generators
+#### Text Generators
 <table>
    <tr>
       <td>achievement</td>
@@ -102,7 +102,7 @@ Command | Description
    </tr>
 </table>
 
-**MODERATION COMMANDS:**
+### Moderation Commands
 
 Command | Description
 ------------ | -------------
