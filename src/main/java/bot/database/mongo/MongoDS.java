@@ -2,6 +2,7 @@ package bot.database.mongo;
 
 import bot.Config;
 import bot.database.DataSource;
+import bot.database.objects.Economy;
 import bot.database.objects.GuildSettings;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -16,6 +17,7 @@ import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,24 +152,20 @@ public class MongoDS implements DataSource {
                 Filters.eq("member_id", member.getId())
         );
 
-        Document updateValue = new Document()
-                .append("xp", xp);
-        if (updateMessages)
-            updateValue.append("messages", 1);
+        Bson update = (updateMessages)
+                ? Updates.combine(Updates.inc("xp", xp), Updates.inc("messages", 1))
+                : Updates.inc("xp", xp);
 
-        Document updateQuery = new Document()
-                .append("$inc", updateValue);
-
-        Document updatedDoc = collection.findOneAndUpdate(filter, updateQuery, new FindOneAndUpdateOptions()
+        Document prevDoc = collection.findOneAndUpdate(filter, update, new FindOneAndUpdateOptions()
                 .upsert(true)
                 .returnDocument(ReturnDocument.BEFORE));
 
-        if (updatedDoc == null)
+        if (prevDoc == null)
             return new int[]{0, 0, 0};
         else
-            return new int[]{updatedDoc.containsKey("level") ? updatedDoc.getInteger("level") : 0,
-                    updatedDoc.getInteger("xp"),
-                    updatedDoc.getInteger("messages")
+            return new int[]{prevDoc.containsKey("level") ? prevDoc.getInteger("level") : 0,
+                    prevDoc.getInteger("xp"),
+                    prevDoc.getInteger("messages")
             };
     }
 
@@ -178,11 +176,7 @@ public class MongoDS implements DataSource {
                 Filters.eq("guild_id", member.getGuild().getId()),
                 Filters.eq("member_id", member.getId())
         );
-
-        collection.updateOne(filter,
-                new Document().append("$inc", new Document().append("reputation", rep)),
-                new UpdateOptions().upsert(true)
-        );
+        collection.updateOne(filter, Updates.inc("reputation", rep), new UpdateOptions().upsert(true));
     }
 
     @Override
@@ -196,19 +190,77 @@ public class MongoDS implements DataSource {
     }
 
     @Override
+    public Economy getEconomy(Member member) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("economy");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", member.getGuild().getId()),
+                Filters.eq("member_id", member.getId())
+        );
+        Document document = collection.find(filter).first();
+        return (document == null) ? new Economy() : new Economy(document);
+    }
+
+    @Override
     public int[] addCoins(Member member, int coins) {
-        return new int[0];
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("economy");
+
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", member.getGuild().getId()),
+                Filters.eq("member_id", member.getId())
+        );
+
+        Document updateQuery = new Document()
+                .append("$inc", new Document().append("coins", coins));
+
+        Document oldDoc = collection.findOneAndUpdate(filter, updateQuery, new FindOneAndUpdateOptions()
+                .upsert(true)
+                .returnDocument(ReturnDocument.BEFORE));
+
+        if (oldDoc == null)
+            return new int[]{0, coins};
+        else {
+            int oldCoins = oldDoc.containsKey("coins") ? oldDoc.getInteger("coins") : 0;
+            return new int[]{oldCoins, (oldCoins + coins)};
+        }
+
     }
 
     @Override
     public int[] removeCoins(Member member, int coins) {
-        return new int[0];
+        return this.addCoins(member, -1 * coins);
+    }
+
+    @Override
+    public int[] updateDailyStreak(Member member, int coins, int streak) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("economy");
+
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", member.getGuild().getId()),
+                Filters.eq("member_id", member.getId())
+        );
+
+        Bson update = Updates.combine(
+                Updates.set("daily_timestamp", Instant.now()),
+                Updates.set("daily_streak", streak),
+                Updates.inc("coins", coins)
+        );
+
+        Document oldDoc = collection.findOneAndUpdate(filter, update, new FindOneAndUpdateOptions()
+                .upsert(true)
+                .returnDocument(ReturnDocument.BEFORE));
+
+        if (oldDoc == null)
+            return new int[]{0, coins};
+        else {
+            int oldCoins = oldDoc.containsKey("coins") ? oldDoc.getInteger("coins") : 0;
+            return new int[]{oldCoins, (oldCoins + coins)};
+        }
     }
 
     @NotNull
     private GuildSettings fetchSettings(String guildId) {
-        Bson filter = Filters.eq("_id", guildId);
         MongoCollection<Document> settingsCollection = mongoClient.getDatabase("discord").getCollection("guild_settings");
+        Bson filter = Filters.eq("_id", guildId);
         Document document = settingsCollection.find(filter).first();
         return (document == null) ? new GuildSettings() : new GuildSettings(document);
     }

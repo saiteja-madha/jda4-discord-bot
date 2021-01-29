@@ -11,7 +11,7 @@ public class PingCommand extends ICommand {
 
     public PingCommand() {
         this.name = "ping";
-        this.help = "Shows the current ping from the bot to the discord servers";
+        this.help = "shows the current ping from the bot to the discord servers";
     }
 
     @Override

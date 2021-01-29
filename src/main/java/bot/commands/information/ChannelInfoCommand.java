@@ -20,7 +20,7 @@ public class ChannelInfoCommand extends ICommand {
         this.name = "channelinfo";
         this.help = "shows mentioned channel information";
         this.aliases = Collections.singletonList("cinfo");
-        this.usage = "<#channel>";
+        this.usage = "[#channel]";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
 

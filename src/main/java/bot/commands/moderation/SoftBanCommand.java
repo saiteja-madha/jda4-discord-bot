@@ -14,7 +14,7 @@ public class SoftBanCommand extends ICommand {
 
     public SoftBanCommand() {
         this.name = "softban";
-        this.help = "kicks a user from the server and delete that users messages";
+        this.help = "kicks a member from the server and delete that users messages";
         this.usage = "<@member(s)> [reason]";
         this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};

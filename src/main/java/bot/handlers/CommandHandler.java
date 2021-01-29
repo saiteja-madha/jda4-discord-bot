@@ -2,13 +2,16 @@ package bot.handlers;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
-import bot.commands.TestCommand;
 import bot.commands.admin.ReactionCommand;
 import bot.commands.admin.SetPrefixCommand;
 import bot.commands.admin.flag.FlagtrChannels;
 import bot.commands.admin.flag.FlagtrCommand;
 import bot.commands.admin.reaction_role.AddReactionRoleCommand;
 import bot.commands.admin.reaction_role.RemoveReactionRoleCommand;
+import bot.commands.economy.BalanceCommand;
+import bot.commands.economy.DailyCommand;
+import bot.commands.economy.GambleCommand;
+import bot.commands.economy.TransferCommand;
 import bot.commands.fun.*;
 import bot.commands.image.filters.*;
 import bot.commands.image.generators.*;
@@ -39,6 +42,10 @@ public class CommandHandler {
         addCommand(new ReputationCommand());
 
         // ECONOMY COMMANDS
+        addCommand(new BalanceCommand());
+        addCommand(new DailyCommand());
+        addCommand(new GambleCommand());
+        addCommand(new TransferCommand());
 
         // INFORMATION COMMANDS
         addCommand(new AvatarCommand());
@@ -122,8 +129,6 @@ public class CommandHandler {
         addCommand(new FlagtrChannels());
         addCommand(new AddReactionRoleCommand());
         addCommand(new RemoveReactionRoleCommand());
-
-        addCommand(new TestCommand());
 
     }
 

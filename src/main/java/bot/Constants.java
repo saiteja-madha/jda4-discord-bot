@@ -17,6 +17,7 @@ public class Constants {
     public final static String ARROW = "\u276F";
     public final static String TICK = "\u2713";
     public final static String X_MARK = "\u2715";
+    public final static String CURRENCY = "\u20AA";
 
     // Embed Colors
     public final static int BOT_EMBED = 0x068ADD;

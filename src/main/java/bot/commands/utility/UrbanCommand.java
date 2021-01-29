@@ -13,7 +13,7 @@ public class UrbanCommand extends ICommand {
 
     public UrbanCommand() {
         this.name = "urban";
-        this.help = "Searches the urban dictionary";
+        this.help = "searches the urban dictionary";
         this.usage = "<search-term>";
         this.minArgsCount = 1;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
