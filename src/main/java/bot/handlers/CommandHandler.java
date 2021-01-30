@@ -126,6 +126,8 @@ public class CommandHandler {
         addCommand(new PurgeUserCommand());
         addCommand(new SetNickCommand());
         addCommand(new SoftBanCommand());
+        addCommand(new TempBanCommand());
+        addCommand(new TempMuteCommand());
         addCommand(new UnDeafenCommand());
         addCommand(new UnmuteCommand());
         addCommand(new VMuteCommand());

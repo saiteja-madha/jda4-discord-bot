@@ -2,6 +2,7 @@ package bot.commands.moderation;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import bot.utils.GuildUtils;
 import bot.utils.ModerationUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -36,16 +37,12 @@ public class MuteCommand extends ICommand {
         }
 
         if (targetMembers.isEmpty()) {
-            ctx.reply("Please @mention the member(s) you want to warn!");
+            ctx.reply("Please @mention the member(s) you want to mute!");
             return;
         }
 
-        Role mutedrole = null;
-        for (Role role : ctx.getGuild().getRoles())
-            if (role.getName().equalsIgnoreCase("muted")) {
-                mutedrole = role;
-                break;
-            }
+        Role mutedrole = GuildUtils.getMutedRole(ctx.getGuild());
+
         if (mutedrole == null) {
             ctx.reply("No \"Muted\" role exists! Please add and setup up a \"Muted\" role, or use `"
                     + ctx.getPrefix() + "mute setup` to have one made automatically.");
@@ -58,15 +55,16 @@ public class MuteCommand extends ICommand {
         }
 
         // Split content at last member mention
-        String[] split = message.getContentRaw().split(targetMembers.get(targetMembers.size() - 1).getId() + "> ");
-        final String reason = split.length > 1 ? split[1] : "No reason provided";
+        String[] split = message.getContentRaw().split(targetMembers.get(targetMembers.size() - 1).getId() + ">");
+        final String reason = (split.length > 1)
+                ? String.join(" ", split[1].split("\\s+")).trim()
+                : "No reason provided";
 
-        Role finalMutedrole = mutedrole;
         targetMembers
                 .stream()
                 // Filter out members with which bot and command author can interact
                 .filter(target -> ModerationUtils.canInteract(ctx.getMember(), target, "mute", ctx.getChannel()))
-                .forEach(member -> ModerationUtils.mute(message, member, reason, finalMutedrole));
+                .forEach(member -> ModerationUtils.mute(message, member, reason, mutedrole));
 
     }
 

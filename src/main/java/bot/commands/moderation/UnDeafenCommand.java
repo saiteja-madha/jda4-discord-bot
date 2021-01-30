@@ -13,9 +13,9 @@ import java.util.List;
 public class UnDeafenCommand extends ICommand {
 
     public UnDeafenCommand() {
-        this.name = "deafen";
-        this.help = "deafen's the mentioned user on this guild";
-        this.usage = "<@member> [reason]";
+        this.name = "undeafen";
+        this.help = "undeafen's the mentioned user on this guild";
+        this.usage = "<@member(s)> [reason]";
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.VOICE_DEAF_OTHERS};
         this.botPermissions = new Permission[]{Permission.VOICE_DEAF_OTHERS};
@@ -32,8 +32,10 @@ public class UnDeafenCommand extends ICommand {
         }
 
         // Split content at last member mention
-        String[] split = message.getContentRaw().split(targetMembers.get(targetMembers.size() - 1).getId() + "> ");
-        final String reason = split.length > 1 ? split[1] : "No reason provided";
+        String[] split = message.getContentRaw().split(targetMembers.get(targetMembers.size() - 1).getId() + ">");
+        final String reason = (split.length > 1)
+                ? String.join(" ", split[1].split("\\s+")).trim()
+                : "No reason provided";
 
         targetMembers
                 .stream()

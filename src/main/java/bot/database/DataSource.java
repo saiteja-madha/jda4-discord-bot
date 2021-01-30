@@ -52,6 +52,8 @@ public interface DataSource {
     void warnUser(Member mod, Member target, String reason);
     void deleteWarnings(Member target);
     List<WarnLogs> getWarnLogs(Member member);
+    void tempMute(String guildId, String memberId, long unmuteTime);
+    void tempBan(String guildId, String memberId, long unbanTime);
 
     // Counter Channels
     List<String> getCounterGuilds();

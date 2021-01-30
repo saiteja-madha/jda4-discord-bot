@@ -67,10 +67,11 @@ public class GuildUtils {
     }
 
     @Nullable
-    public static TextChannel getTextChannelById(Guild guild, String id) {
-        if (id == null || id.equals(""))
-            return null;
-        return guild.getTextChannelById(id);
+    public static Role getMutedRole(@NotNull Guild guild) {
+        return guild.getRoles().stream()
+                .filter(r -> r.getName().equalsIgnoreCase("Muted"))
+                .findFirst()
+                .orElse(null);
     }
 
     @Nullable

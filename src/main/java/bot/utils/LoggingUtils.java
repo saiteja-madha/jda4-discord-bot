@@ -38,6 +38,10 @@ public class LoggingUtils {
                 ModAction.WARN);
     }
 
+    public static void onTempMute(Message msg, Member target, String reason, String unmuteTime) {
+        logModeration(msg, msg.getMember(), target, reason, new String[]{unmuteTime}, ModAction.TEMPMUTE);
+    }
+
     public static void onMute(Message msg, Member target, String reason) {
         logModeration(msg, msg.getMember(), target, reason, null, ModAction.MUTE);
     }
@@ -52,6 +56,10 @@ public class LoggingUtils {
 
     public static void onSoftBan(Message msg, Member target, String reason) {
         logModeration(msg, msg.getMember(), target, reason, null, ModAction.SOFTBAN);
+    }
+
+    public static void onTempBan(Message msg, Member target, String reason, String unbanTime) {
+        logModeration(msg, msg.getMember(), target, reason, new String[]{unbanTime}, ModAction.TEMPMUTE);
     }
 
     public static void onBan(Message msg, Member target, String reason) {

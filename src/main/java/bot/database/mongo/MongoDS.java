@@ -333,6 +333,16 @@ public class MongoDS implements DataSource {
     }
 
     @Override
+    public void tempMute(String guildId, String memberId, long unmuteTime) {
+
+    }
+
+    @Override
+    public void tempBan(String guildId, String memberId, long unbanTime) {
+
+    }
+
+    @Override
     public List<String> getCounterGuilds() {
         List<String> list = new ArrayList<>();
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("counter_config");

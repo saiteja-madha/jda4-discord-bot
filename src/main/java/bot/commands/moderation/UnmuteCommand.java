@@ -14,8 +14,8 @@ public class UnmuteCommand extends ICommand {
 
     public UnmuteCommand() {
         this.name = "unmute";
-        this.help = "unmutes the specified user";
-        this.usage = "<@user>";
+        this.help = "unmutes the specified member(s)";
+        this.usage = "<@member(s)> [reason]";
         this.minArgsCount = 1;
         this.botPermissions = new Permission[]{Permission.MANAGE_ROLES};
         this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
@@ -23,23 +23,25 @@ public class UnmuteCommand extends ICommand {
 
     @Override
     public void handle(@NotNull CommandContext ctx) {
-        final List<String> args = ctx.getArgs();
         final Message message = ctx.getMessage();
+        List<Member> targetMembers = message.getMentionedMembers();
 
         if (message.getMentionedMembers().isEmpty()) {
-            ctx.reply("Please @mention the user you want to unmute!");
+            ctx.reply("Please @mention the member(s) you want to unmute!");
             return;
         }
 
-        String reason = String.join(" ", args.subList(1, args.size()));
+        // Split content at last member mention
+        String[] split = message.getContentRaw().split(targetMembers.get(targetMembers.size() - 1).getId() + ">");
+        final String reason = (split.length > 1)
+                ? String.join(" ", split[1].split("\\s+")).trim()
+                : "No reason provided";
 
-        final Member target = message.getMentionedMembers().get(0);
-
-        if (!ModerationUtils.canInteract(ctx.getMember(), target, "unmute", ctx.getChannel())) {
-            return;
-        }
-
-        ModerationUtils.unmute(message, target, reason);
+        targetMembers
+                .stream()
+                // Filter out members with which bot and command author can interact
+                .filter(target -> ModerationUtils.canInteract(ctx.getMember(), target, "unmute", ctx.getChannel()))
+                .forEach(member -> ModerationUtils.unmute(message, member, reason));
 
     }
 

@@ -16,7 +16,7 @@ public class SetNickCommand extends ICommand {
         this.name = "setnick";
         this.help = "change the mentioned user's nickname on this guild";
         this.usage = "<@member> <new-name>";
-        this.minArgsCount = 1;
+        this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.NICKNAME_MANAGE};
         this.botPermissions = new Permission[]{Permission.NICKNAME_MANAGE};
     }

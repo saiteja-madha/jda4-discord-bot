@@ -13,7 +13,11 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -304,6 +308,35 @@ public class ModerationUtils {
 
     }
 
+    public static void tempMute(Message msg, Member target, String reason, Role mutedRole, int seconds) {
+        final TextChannel tc = msg.getTextChannel();
+        final Guild guild = msg.getGuild();
+
+        if (target.getRoles().contains(mutedRole)) {
+            BotUtils.sendMsg(tc, "`" + target.getUser().getAsTag() + "` is already muted!");
+            return;
+        }
+
+        try {
+            guild.addRoleToMember(target, mutedRole).queue((__) -> {
+                long unmuteTime = Instant.now().plus(seconds, ChronoUnit.SECONDS).getEpochSecond();
+
+                DataSource.INS.tempMute(guild.getId(), target.getId(), unmuteTime);
+                String unmute = LocalDateTime.ofInstant(Instant.now().plusSeconds(seconds), ZoneOffset.UTC).toString();
+                BotUtils.sendSuccessWithMessage(msg, "`" + target.getUser().getAsTag() + "` is muted until `" + unmute + "`");
+                LoggingUtils.onTempMute(msg, target, reason, unmute);
+
+            }, (e) -> {
+                LOGGER.error("TempMute Error - " + e.getMessage());
+                BotUtils.sendMsg(tc, "Temp Mute was not successful");
+            });
+        } catch (Exception e) {
+            LOGGER.error("TempMute Error - " + e.getMessage());
+            BotUtils.sendMsg(tc, "Temp Mute was not successful");
+        }
+
+    }
+
     public static void mute(Message msg, Member target, String reason, Role mutedrole) {
         final TextChannel channel = msg.getTextChannel();
         final Guild guild = msg.getGuild();
@@ -405,6 +438,33 @@ public class ModerationUtils {
             LOGGER.error("Softban Error - " + e.getMessage());
             BotUtils.sendMsg(tc, "SoftBan was not successful");
         }
+    }
+
+    public static void tempBan(Message msg, Member target, String reason, int seconds) {
+        final TextChannel tc = msg.getTextChannel();
+        final Guild guild = msg.getGuild();
+
+        try {
+            guild.ban(target, 0, reason)
+                    .reason(reason)
+                    .queue((__) -> {
+                                long unmuteTime = Instant.now().plus(seconds, ChronoUnit.SECONDS).getEpochSecond();
+                                DataSource.INS.tempBan(guild.getId(), target.getId(), unmuteTime);
+                                String unban = LocalDateTime.ofInstant(Instant.now().plusSeconds(seconds), ZoneOffset.UTC).toString();
+                                BotUtils.sendSuccessWithMessage(msg, "`" + target.getUser().getAsTag() + "` is banned from this server until `" + unban + "`");
+                                LoggingUtils.onTempBan(msg, target, reason, unban);
+
+                            },
+                            (e) -> {
+                                BotUtils.sendMsg(msg.getTextChannel(), "Could not tempban " + target.getAsMention());
+                                LOGGER.error("SoftBan Error - " + e.getMessage());
+                            }
+                    );
+        } catch (Exception e) {
+            LOGGER.error("Ban Error - " + e.getMessage());
+            BotUtils.sendMsg(tc, "TempBan was not successful");
+        }
+
     }
 
     public static void ban(Message msg, Member target, String reason) {

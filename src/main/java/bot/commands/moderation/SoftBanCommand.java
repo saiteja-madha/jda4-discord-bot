@@ -16,7 +16,7 @@ public class SoftBanCommand extends ICommand {
         this.name = "softban";
         this.help = "kicks a member from the server and delete that users messages";
         this.usage = "<@member(s)> [reason]";
-        this.minArgsCount = 2;
+        this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
         this.botPermissions = new Permission[]{Permission.BAN_MEMBERS};
     }
@@ -32,8 +32,10 @@ public class SoftBanCommand extends ICommand {
         }
 
         // Split content at last member mention
-        String[] split = message.getContentRaw().split(targetMembers.get(targetMembers.size() - 1).getId() + "> ");
-        final String reason = split.length > 1 ? split[1] : "No reason provided";
+        String[] split = message.getContentRaw().split(targetMembers.get(targetMembers.size() - 1).getId() + ">");
+        final String reason = (split.length > 1)
+                ? String.join(" ", split[1].split("\\s+")).trim()
+                : "No reason provided";
 
         targetMembers
                 .stream()

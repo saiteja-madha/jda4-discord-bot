@@ -43,6 +43,29 @@ public class MiscUtils {
                 .replace("discord.gg/", "dis\u0441ord.gg/");
     }
 
+    public static int parseTime(String timeString) {
+        timeString = timeString.replaceAll("(?i)(\\s|,|and)", "")
+                .replaceAll("(?is)(-?\\d+|[a-z]+)", "$1 ")
+                .trim();
+        String[] vals = timeString.split("\\s+");
+        int timeinseconds = 0;
+        try {
+            for (int j = 0; j < vals.length; j += 2) {
+                int num = Integer.parseInt(vals[j]);
+                if (vals[j + 1].toLowerCase().startsWith("m"))
+                    num *= 60;
+                else if (vals[j + 1].toLowerCase().startsWith("h"))
+                    num *= 60 * 60;
+                else if (vals[j + 1].toLowerCase().startsWith("d"))
+                    num *= 60 * 60 * 24;
+                timeinseconds += num;
+            }
+        } catch (Exception ex) {
+            return 0;
+        }
+        return timeinseconds;
+    }
+
     public static String formatTime(long seconds) {
         int day = (int) TimeUnit.SECONDS.toDays(seconds);
         long hours = TimeUnit.SECONDS.toHours(seconds) - (day * 24L);
