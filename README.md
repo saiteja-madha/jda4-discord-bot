@@ -38,7 +38,7 @@ Command | Description
 `!userinfo` | Shows information about the user
 
 ### Image Commands
-#### Image Filters
+###### Image Filters
 <table>
    <tr>
       <td>blur</td>
@@ -50,7 +50,7 @@ Command | Description
    </tr>
 </table>
 
-#### Image Generators
+###### Image Generators
 <table>
    <tr>
       <td>ad</td>
@@ -93,7 +93,7 @@ Command | Description
    </tr>
 </table>
 
-#### Text Generators
+###### Text Generators
 <table>
    <tr>
       <td>achievement</td>
@@ -102,16 +102,42 @@ Command | Description
    </tr>
 </table>
 
+### Economy Commands
+
+Command | Description
+------------ | -------------
+`!balance [@member]` | Shows your current coin balance
+`!daily` | Receive a daily coin bonus
+`!gamble <amount>` | Try your luck by gambling
+`!transfer <coins> <@member>` | Transfer coins to other user
+
+### Social Commands
+
+Command | Description
+------------ | -------------
+`!rep [@member]` | Give reputation to a user
+
 ### Moderation Commands
 
 Command | Description
 ------------ | -------------
-`!ban <@member(s)> [reason]` | Ban a member off the server
-`!kick <@member(s)> [reason]` | Kick a member off the server
-`!kick <@member(s)> [reason]` | Kick a member off the server
+`!ban <@member(s)> [reason]` | Ban the the mentioned member(s)
+`!clearwarnings <@member>` | Clears previous warnings received by a member
+`!deafen <@member(s)> [reason]` | Deafen's the mentioned member(s)
+`!kick <@member(s)> [reason]` | Kick the mentioned member(s)
+`!mute <@member(s)> [reason]` | Mute the mentioned member(s) on all text/voice channels
 `!purgeattach <amount>` | Deletes the specified amount of messages with attachments
 `!purgebots <amount>` | Deletes the specified amount of messages from bots
 `!purge <amount>` | Deletes the specified amount of messages
 `!purgelinks <amount>` | Deletes the specified amount of messages with links
 `!purgeuser <@user> <amount>` | Deletes the specified amount of messages for the mentioned user
+`!setnick <@member> <new-name>`| change the mentioned user's nickname
 `!softban <@member(s)> [reason]` | Kicks a member from the server and delete that users messages
+`!tempban <@member(s)> <time> [reason]` | Bans the mentioned member(s) for the specified amount of time
+`!tempmute <@member(s)> <time> [reason]` | Mute the mentioned member(s) for the specified amount of time
+`!undeafen <@member(s)> [reason]` | Undeafen's the mentioned member(s)
+`!unmute <@member(s)> [reason]` | Unmutes the specified member(s)
+`!vmute <@member(s)> [reason]` | Mute voice of the mentioned member(s)
+`!vunmute <@member(s)> [reason]` | UnMute voice of the mentioned member(s)
+`!warn <@member(s)> [reason]` | Gives warning to the mentioned member(s)
+`!warnings <@member>` | Displays warnings received by mentioned user
