@@ -2,10 +2,7 @@ package bot.database;
 
 import bot.data.CounterType;
 import bot.database.mongo.MongoDS;
-import bot.database.objects.CounterConfig;
-import bot.database.objects.Economy;
-import bot.database.objects.GuildSettings;
-import bot.database.objects.WarnLogs;
+import bot.database.objects.*;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -58,4 +55,11 @@ public interface DataSource {
     void updateBotCount(String guildId, boolean isIncrement, int count);
     void setCounter(CounterType type, Guild guild, @Nullable VoiceChannel vc, @Nullable String name);
 
+    // Ticket
+    void addTicketConfig(String guildId, String channelId, String messageId, String title, String roleId);
+    @Nullable Ticket getTicketConfig(String guildId);
+    void setTicketLogChannel(String guildId, String channelId);
+    void setTicketLimit(String guildId, int limit);
+    void setTicketClose(String guildId, boolean isAdminOnly);
+    void deleteTicketConfig(String guildId);
 }

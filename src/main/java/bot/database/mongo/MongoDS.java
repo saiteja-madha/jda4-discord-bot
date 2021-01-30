@@ -3,10 +3,7 @@ package bot.database.mongo;
 import bot.Config;
 import bot.data.CounterType;
 import bot.database.DataSource;
-import bot.database.objects.CounterConfig;
-import bot.database.objects.Economy;
-import bot.database.objects.GuildSettings;
-import bot.database.objects.WarnLogs;
+import bot.database.objects.*;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.FindIterable;
@@ -363,6 +360,58 @@ public class MongoDS implements DataSource {
 
         collection.updateOne(filter, update, new UpdateOptions().upsert(true));
 
+    }
+
+    @Override
+    public void addTicketConfig(String guildId, String channelId, String messageId, String title, String roleId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("ticket_config");
+        Document doc = new Document()
+                .append("guild_id", guildId)
+                .append("channel_id", channelId)
+                .append("message_id", messageId)
+                .append("title", title)
+                .append("support_role", roleId);
+
+        collection.insertOne(doc);
+    }
+
+    @Override
+    public Ticket getTicketConfig(String guildId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("ticket_config");
+        Bson filter = Filters.eq("guild_id", guildId);
+        Document document = collection.find(filter).first();
+        return document == null ? null : new Ticket(document);
+    }
+
+    @Override
+    public void setTicketLogChannel(String guildId, String logchannel) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("ticket_config");
+        Bson filter = Filters.eq("guild_id", guildId);
+        Bson update = Updates.set("log_channel", logchannel);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void setTicketLimit(String guildId, int limit) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("ticket_config");
+        Bson filter = Filters.eq("guild_id", guildId);
+        Bson update = Updates.set("limit", limit);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void setTicketClose(String guildId, boolean isAdminOnly) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("ticket_config");
+        Bson filter = Filters.eq("guild_id", guildId);
+        Bson update = Updates.set("limit", isAdminOnly);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void deleteTicketConfig(String guildId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("ticket_config");
+        Bson filter = Filters.eq("guild_id", guildId);
+        collection.deleteOne(filter);
     }
 
     @NotNull

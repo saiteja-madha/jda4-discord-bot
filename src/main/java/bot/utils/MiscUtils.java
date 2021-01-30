@@ -27,6 +27,16 @@ public class MiscUtils {
         return null;
     }
 
+    public static String escapeString(@NotNull String string) {
+        return string.replace("\\", "\\\\").replace("<", "\\<").replace(">", "\\>").replace("`", "\\`")
+                .replace("*", "\\*").replace("{", "\\{").replace("}", "\\}").replace("[", "\\[").replace("]", "\\]")
+                .replace("(", "\\(").replace(")", "\\)").replace("#", "\\#").replace("+", "\\+").replace("-", "\\-")
+                .replace(".", "\\.").replace("!", "\\!").replace("_", "\\_").replace("\"", "\\\"").replace("$", "\\$")
+                .replace("%", "\\%").replace("&", "\\&").replace("'", "\\'").replace(",", "\\,").replace("/", "\\/")
+                .replace(":", "\\:").replace(";", "\\;").replace("=", "\\=").replace("?", "\\?").replace("@", "\\@")
+                .replace("^", "\\^").replace("\n", "\\n").replace("\r", "\\r").replace("|", "\\|");
+    }
+
     public static String escapeMentions(@NotNull String string) {
         return string.replace("@everyone", "@\u0435veryone")
                 .replace("@here", "@h\u0435re")

@@ -1,6 +1,8 @@
 package bot.utils;
 
+import me.duncte123.botcommons.messaging.MessageUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -50,4 +52,21 @@ public class BotUtils {
 
     }
 
+    public static void sendDM(User user, MessageEmbed embed) {
+        if (user == null)
+            return;
+
+        user.openPrivateChannel()
+                .flatMap((channel) -> channel.sendMessage(embed))
+                .queue(null, (error) -> { /* Ignore */ });
+
+    }
+
+    public static void sendSuccessWithMessage(Message message, String content) {
+        MessageUtils.sendSuccessWithMessage(message, content);
+    }
+
+    public static void sendErrorWithMessage(Message message, String content) {
+        MessageUtils.sendErrorWithMessage(message, content);
+    }
 }

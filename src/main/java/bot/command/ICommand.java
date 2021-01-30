@@ -64,7 +64,7 @@ public abstract class ICommand {
         ctx.reply(ctx.getPrefix() + this.name + " " + this.usage);
     }
 
-    private String parsePerms(Permission[] perms) {
+    protected String parsePerms(Permission[] perms) {
         return Arrays.stream(perms).map(Permission::getName).collect(Collectors.joining("`, `"));
     }
 

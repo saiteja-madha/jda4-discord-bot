@@ -3,10 +3,13 @@ package bot.handlers;
 import bot.Constants;
 import bot.database.DataSource;
 import bot.database.objects.GuildSettings;
+import bot.database.objects.Ticket;
 import bot.utils.BotUtils;
 import bot.utils.HttpUtils;
+import bot.utils.TicketUtils;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.Role;
@@ -19,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 public class ReactionHandler {
 
@@ -124,6 +128,71 @@ public class ReactionHandler {
             );
 
         }, e -> LOGGER.error("Flag Translation Failed: " + e.getMessage()));
+    }
+
+    public void handleTicket(@NotNull GuildMessageReactionAddEvent event) {
+        final String emoji = event.getReactionEmote().getEmoji();
+
+        if (emoji.equalsIgnoreCase(Constants.ENVELOPE_WITH_ARROW))
+            this.handleTicketCreation(event);
+
+        else if (emoji.equalsIgnoreCase(Constants.LOCK))
+            this.handleTicketClose(event);
+
+    }
+
+    private void handleTicketCreation(@NotNull GuildMessageReactionAddEvent event) {
+        final Guild guild = event.getGuild();
+        final String messageId = event.getMessageId();
+        final String channelId = event.getChannel().getId();
+        Ticket config = DataSource.INS.getTicketConfig(guild.getId());
+
+        if (config == null)
+            return;
+
+        if (!messageId.equalsIgnoreCase(config.messageId) && !channelId.equalsIgnoreCase(config.channelId))
+            return;
+
+        final int tkts = TicketUtils.getExistingTickets(guild);
+
+        if (tkts > config.ticketLimit) {
+            BotUtils.sendMsg(event.getChannel(), "Ticket limit reached! try again later", 3);
+            event.getReaction().removeReaction(event.getUser()).queue();
+            return;
+        }
+
+        TextChannel existingTicketChannel = TicketUtils.getExistingTicketChannel(guild, event.getUser());
+
+        if (existingTicketChannel != null) {
+            event.getReaction().removeReaction(event.getUser()).queue();
+            return;
+        }
+
+        try {
+            TicketUtils.handleNewTicket(guild, event.getMember(), config.title, config.roleId, tkts);
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Ticket Creation Failed: " + e.getMessage());
+        }
+
+        event.getReaction().removeReaction(event.getUser()).queue();
+
+    }
+
+    private void handleTicketClose(@NotNull GuildMessageReactionAddEvent event) {
+        final Guild guild = event.getGuild();
+        final TextChannel channel = event.getChannel();
+        Ticket config = DataSource.INS.getTicketConfig(guild.getId());
+
+        if (config != null && config.adminOnly) {
+            if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                BotUtils.sendMsg(channel, "Ticket can only be closed by admin!");
+                return;
+            }
+        }
+
+        if (TicketUtils.isTicketChannel(channel))
+            TicketUtils.closeTicket("Reacted with emoji", guild, event.getUser(), channel);
+
     }
 
 }

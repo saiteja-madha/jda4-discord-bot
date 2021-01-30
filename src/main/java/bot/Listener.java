@@ -69,6 +69,9 @@ public class Listener implements EventListener {
 
         bot.getReactionHandler().handleReactionRole(event, true);
 
+        // Handle Tickets in async
+        bot.getThreadpool().execute(() -> bot.getReactionHandler().handleTicket(event));
+
     }
 
     public void onGuildMessageReactionRemove(@Nonnull GuildMessageReactionRemoveEvent event) {

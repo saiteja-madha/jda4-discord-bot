@@ -18,6 +18,9 @@ public class Constants {
     public final static String TICK = "\u2713";
     public final static String X_MARK = "\u2715";
     public final static String CURRENCY = "\u20AA";
+    public final static String LOCK = "\uD83D\uDD12";
+    public final static String ENVELOPE_WITH_ARROW = "\uD83D\uDCE9";
+    public final static String WHITE_SMALL_SQUARE = "\u25AB";
 
     // Embed Colors
     public final static int BOT_EMBED = 0x068ADD;

@@ -48,6 +48,10 @@ public class CommandContext {
         return this.getEvent().getGuild();
     }
 
+    public String getGuildId() {
+        return this.getEvent().getGuild().getId();
+    }
+
     public TextChannel getChannel() {
         return this.getEvent().getChannel();
     }

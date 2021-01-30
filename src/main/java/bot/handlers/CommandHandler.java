@@ -5,6 +5,7 @@ import bot.command.ICommand;
 import bot.commands.admin.CounterSetup;
 import bot.commands.admin.ReactionCommand;
 import bot.commands.admin.SetPrefixCommand;
+import bot.commands.admin.TicketSetup;
 import bot.commands.admin.flag.FlagtrChannels;
 import bot.commands.admin.flag.FlagtrCommand;
 import bot.commands.admin.reaction_role.AddReactionRoleCommand;
@@ -140,6 +141,7 @@ public class CommandHandler {
         addCommand(new AddReactionRoleCommand());
         addCommand(new RemoveReactionRoleCommand());
         addCommand(new CounterSetup());
+        addCommand(new TicketSetup(waiter));
 
     }
 
