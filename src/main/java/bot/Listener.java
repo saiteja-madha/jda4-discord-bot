@@ -3,6 +3,7 @@ package bot;
 import bot.database.DataSource;
 import bot.database.objects.CounterConfig;
 import bot.database.objects.GuildSettings;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -29,15 +30,24 @@ public class Listener implements EventListener {
     }
 
     public void onReady(@Nonnull ReadyEvent event) {
-        LOGGER.info("{} is ready", event.getJDA().getSelfUser().getAsTag());
-        LOGGER.info("Watching {} guilds", event.getJDA().getGuilds().size());
-        event.getJDA().getPresence().setActivity(Activity.watching("this server"));
+        final JDA jda = event.getJDA();
+
+        LOGGER.info("{} is ready", jda.getSelfUser().getAsTag());
+        LOGGER.info("Watching {} guilds", jda.getGuilds().size());
+        jda.getPresence().setActivity(Activity.watching("this server"));
 
         // Update Counter Channels
-        bot.getThreadpool().execute(() -> bot.getMemberHandler().updateCountersOnStartup(event.getJDA()));
+        bot.getThreadpool().execute(() -> bot.getMemberHandler().updateCountersOnStartup(jda));
 
         // Purge XP-cooldown cache
-        bot.getThreadpool().scheduleWithFixedDelay(() -> bot.getXpHandler().cleanCooldowns(), 0, 1, TimeUnit.DAYS);
+        bot.getThreadpool().scheduleWithFixedDelay(() -> bot.getXpHandler().cleanCooldowns(),
+                0, 1, TimeUnit.DAYS);
+
+        // Check Temporary mutes and bans
+        bot.getThreadpool().scheduleWithFixedDelay(() -> DataSource.INS.checkTempMutes(jda),
+                0, 45, TimeUnit.SECONDS);
+        bot.getThreadpool().scheduleWithFixedDelay(() -> DataSource.INS.checkTempBans(jda),
+                0, 2, TimeUnit.MINUTES);
 
     }
 

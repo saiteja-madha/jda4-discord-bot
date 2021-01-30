@@ -319,7 +319,7 @@ public class ModerationUtils {
 
         try {
             guild.addRoleToMember(target, mutedRole).queue((__) -> {
-                long unmuteTime = Instant.now().plus(seconds, ChronoUnit.SECONDS).getEpochSecond();
+                Instant unmuteTime = Instant.now().plus(seconds, ChronoUnit.SECONDS);
 
                 DataSource.INS.tempMute(guild.getId(), target.getId(), unmuteTime);
                 String unmute = LocalDateTime.ofInstant(Instant.now().plusSeconds(seconds), ZoneOffset.UTC).toString();
@@ -448,8 +448,8 @@ public class ModerationUtils {
             guild.ban(target, 0, reason)
                     .reason(reason)
                     .queue((__) -> {
-                                long unmuteTime = Instant.now().plus(seconds, ChronoUnit.SECONDS).getEpochSecond();
-                                DataSource.INS.tempBan(guild.getId(), target.getId(), unmuteTime);
+                                Instant unbanTime = Instant.now().plus(seconds, ChronoUnit.SECONDS);
+                                DataSource.INS.tempBan(guild.getId(), target.getId(), unbanTime);
                                 String unban = LocalDateTime.ofInstant(Instant.now().plusSeconds(seconds), ZoneOffset.UTC).toString();
                                 BotUtils.sendSuccessWithMessage(msg, "`" + target.getUser().getAsTag() + "` is banned from this server until `" + unban + "`");
                                 LoggingUtils.onTempBan(msg, target, reason, unban);

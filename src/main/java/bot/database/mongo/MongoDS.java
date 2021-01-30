@@ -4,6 +4,7 @@ import bot.Config;
 import bot.data.CounterType;
 import bot.database.DataSource;
 import bot.database.objects.*;
+import bot.utils.GuildUtils;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.FindIterable;
@@ -11,8 +12,11 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.*;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -333,13 +337,77 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public void tempMute(String guildId, String memberId, long unmuteTime) {
+    public void tempMute(String guildId, String memberId, Instant unmuteTime) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("tempmute_logs");
+        Document doc = new Document()
+                .append("guild_id", guildId)
+                .append("member_id", memberId)
+                .append("unmute_time", unmuteTime);
 
+        collection.insertOne(doc);
     }
 
     @Override
-    public void tempBan(String guildId, String memberId, long unbanTime) {
+    public void tempBan(String guildId, String memberId, Instant unbanTime) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("tempban_logs");
+        Document doc = new Document()
+                .append("guild_id", guildId)
+                .append("member_id", memberId)
+                .append("unban_time", unbanTime);
 
+        collection.insertOne(doc);
+    }
+
+    @Override
+    public void checkTempMutes(JDA jda) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("tempmute_logs");
+        Bson filter = Filters.gt("unmute_time", Instant.now());
+        FindIterable<Document> documents = collection.find(filter);
+        for (Document doc : documents) {
+            final String guildId = doc.getString("guild_id");
+            final String memberId = doc.getString("member_id");
+            final Guild guild = jda.getGuildById(guildId);
+            if (guild == null || !guild.getSelfMember().hasPermission(Permission.MANAGE_ROLES))
+                continue;
+            guild.retrieveMemberById(memberId).queue((m) -> {
+                Role mutedRole = GuildUtils.getMutedRole(guild);
+                if (mutedRole != null && m.getRoles().contains(mutedRole)) {
+                    guild.removeRoleFromMember(m, mutedRole).reason("TempMute completed").queue(
+                            (__) -> {
+                                Bson delFilter = Filters.and(
+                                        Filters.eq("guild_id", guildId),
+                                        Filters.eq("member_id", memberId)
+                                );
+                                collection.deleteOne(delFilter);
+                            }
+                    );
+                }
+            }, e -> LOGGER.error("Retrieve Member Failed - GuildId: " + guildId + " MemberId: " + memberId
+                    + " Error: " + e.getMessage()));
+        }
+    }
+
+    @Override
+    public void checkTempBans(JDA jda) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("tempban_logs");
+        Bson filter = Filters.gt("unban_time", Instant.now());
+        FindIterable<Document> documents = collection.find(filter);
+        for (Document doc : documents) {
+            final String guildId = doc.getString("guild_id");
+            final String memberId = doc.getString("member_id");
+            final Guild guild = jda.getGuildById(guildId);
+            if (guild == null || !guild.getSelfMember().hasPermission(Permission.MANAGE_ROLES))
+                continue;
+
+            guild.unban(memberId).queue((__) -> {
+                Bson delFilter = Filters.and(
+                        Filters.eq("guild_id", guildId),
+                        Filters.eq("member_id", memberId)
+                );
+                collection.deleteOne(delFilter);
+            });
+
+        }
     }
 
     @Override
