@@ -59,6 +59,22 @@ public class MongoDS implements DataSource {
     }
 
     @Override
+    public void xpSystem(String guildId, boolean isEnabled) {
+        invalidateCache(guildId);
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
+        Bson filter = Filters.eq("_id", guildId);
+        collection.updateOne(filter, Updates.set("ranking_enabled", isEnabled), new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void setMaxWarnings(String guildId, int warnings) {
+        invalidateCache(guildId);
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
+        Bson filter = Filters.eq("_id", guildId);
+        collection.updateOne(filter, Updates.set("max_warnings", warnings), new UpdateOptions().upsert(true));
+    }
+
+    @Override
     public void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
 

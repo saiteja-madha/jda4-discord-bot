@@ -21,6 +21,8 @@ public interface DataSource {
     // Guild Settings
     GuildSettings getSettings(String guildId);
     void setPrefix(String guildId, String newPrefix);
+    void xpSystem(String guildId, boolean isEnabled);
+    void setMaxWarnings(String guildId, int warnings);
 
     // Reaction Role
     void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote);

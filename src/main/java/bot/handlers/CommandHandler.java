@@ -2,12 +2,10 @@ package bot.handlers;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
-import bot.commands.admin.CounterSetup;
-import bot.commands.admin.ReactionCommand;
-import bot.commands.admin.SetPrefixCommand;
-import bot.commands.admin.TicketSetup;
+import bot.commands.admin.*;
 import bot.commands.admin.flag.FlagtrChannels;
 import bot.commands.admin.flag.FlagtrCommand;
+import bot.commands.admin.mod_config.MaxWarningsCommand;
 import bot.commands.admin.reaction_role.AddReactionRoleCommand;
 import bot.commands.admin.reaction_role.RemoveReactionRoleCommand;
 import bot.commands.economy.BalanceCommand;
@@ -136,6 +134,8 @@ public class CommandHandler {
 
         // ADMIN COMMANDS
         addCommand(new SetPrefixCommand());
+        addCommand(new MaxWarningsCommand());
+        addCommand(new XPSystem());
         addCommand(new FlagtrCommand());
         addCommand(new FlagtrChannels());
         addCommand(new AddReactionRoleCommand());

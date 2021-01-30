@@ -62,6 +62,10 @@ public class BotUtils {
 
     }
 
+    public static void sendSuccess(Message message){
+        MessageUtils.sendSuccess(message);
+    }
+
     public static void sendSuccessWithMessage(Message message, String content) {
         MessageUtils.sendSuccessWithMessage(message, content);
     }

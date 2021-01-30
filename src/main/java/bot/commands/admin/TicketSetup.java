@@ -28,8 +28,9 @@ public class TicketSetup extends ICommand {
 
     private final static List<String> CANCEL_WORDS = Arrays.asList("cancel", "-cancel");
     private final static String CANCEL = "\n\n`Ticket creation has been cancelled.`";
-    private final static String CHANNEL = "Please `mention the channel` where you want to send greeting image";
-    private final static String TITLE = "Please enter the `title` of the ticket";
+    private final static String CHANNEL = "Please `mention the channel` in which the reaction message must be sent";
+    private final static String TITLE = "Please enter the `title` of the ticket\n" +
+            "Example: ```Discord Support Ticket```";
     private final static String ROLE = "What roles should have access to view the newly created tickets? \n\n" +
             "`Please type the name of a existing role in this server.`\n\nAlternatively you can type `none`";
     private final HashMap<String, OffsetDateTime> current;
@@ -209,11 +210,12 @@ public class TicketSetup extends ICommand {
 
         current.put(guild.getId(), OffsetDateTime.now());
         waitForChannel(ctx);
+        BotUtils.sendSuccess(ctx.getMessage());
 
     }
 
     private void waitForChannel(CommandContext ctx) {
-        BotUtils.sendMsg(ctx.getChannel(), getEmbed(CHANNEL));
+        BotUtils.sendMsg(ctx.getChannel(), getEmbed("Ticket Channel", CHANNEL));
         wait(ctx, e -> {
             List<TextChannel> mentionedChannels = e.getMessage().getMentionedChannels();
             if (!mentionedChannels.isEmpty()) {
@@ -226,7 +228,7 @@ public class TicketSetup extends ICommand {
                     return;
                 }
 
-                BotUtils.sendSuccessWithMessage(e.getMessage(), "Alright! The ticket message will be setup in " + mentionedChannels.get(0).getAsMention());
+                BotUtils.sendSuccess(e.getMessage());
                 waitForTitle(ctx, mentionedChannels.get(0));
 
             } else {
@@ -238,16 +240,16 @@ public class TicketSetup extends ICommand {
     }
 
     private void waitForTitle(CommandContext ctx, TextChannel channel) {
-        BotUtils.sendMsg(ctx.getChannel(), getEmbed(TITLE));
+        BotUtils.sendMsg(ctx.getChannel(), getEmbed("Ticket Message", TITLE));
         wait(ctx, e -> {
             String title = e.getMessage().getContentRaw();
-            BotUtils.sendSuccessWithMessage(e.getMessage(), "Done! The ticket initiation title will be `" + e.getMessage().getContentRaw() + "`");
+            BotUtils.sendSuccess(e.getMessage());
             waitForRoles(ctx, channel, title);
         });
     }
 
     private void waitForRoles(CommandContext ctx, TextChannel channel, String title) {
-        BotUtils.sendMsg(ctx.getChannel(), getEmbed(ROLE));
+        BotUtils.sendMsg(ctx.getChannel(), getEmbed("Support Role", ROLE));
 
         wait(ctx, e -> {
             String roleId = null;
@@ -276,8 +278,7 @@ public class TicketSetup extends ICommand {
             }
 
             if (saveConfig(ctx.getGuild().getId(), channel, title, roleId))
-                ctx.reply("Configuration saved!\nThe ticket initiation with `" + title
-                        + "` title is starting in " + channel.getAsMention() + "!");
+                BotUtils.sendErrorWithMessage(ctx.getMessage(), "Ticket system is successfully configured in " + channel.getAsMention() + "!");
             else
                 ctx.reply("Uh oh. Something went wrong and I wasn't able to create a ticket message." + CANCEL);
 
@@ -304,9 +305,9 @@ public class TicketSetup extends ICommand {
 
     }
 
-    private MessageEmbed getEmbed(String message) {
+    private MessageEmbed getEmbed(String title, String message) {
         EmbedBuilder embed = EmbedUtils.defaultEmbed();
-        return embed.setAuthor("Ticket Setup")
+        return embed.setAuthor(title)
                 .setDescription(message)
                 .setFooter("Type cancel to cancel setup")
                 .build();
@@ -339,8 +340,11 @@ public class TicketSetup extends ICommand {
             if (ran)
                 return;
             ran = true;
-            ctx.reply("Uh oh! You took longer than 2 minutes to respond, " + ctx.getAuthor().getAsMention() + "!"
-                    + CANCEL);
+            EmbedBuilder embed = EmbedUtils.defaultEmbed()
+                    .setAuthor("Setup Cancelled")
+                    .setDescription(("Uh oh! You took longer than 2 minutes to respond, " + ctx.getAuthor().getAsMention() + "!"
+                            + CANCEL));
+            ctx.reply(embed.build());
             current.remove(ctx.getGuild().getId());
         }
 
