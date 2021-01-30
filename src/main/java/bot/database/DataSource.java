@@ -23,6 +23,8 @@ public interface DataSource {
     void setPrefix(String guildId, String newPrefix);
     void xpSystem(String guildId, boolean isEnabled);
     void setMaxWarnings(String guildId, int warnings);
+    void enableModlogs(String guildId, boolean isEnabled);
+    void setModLogChannel(String guildId, String logChannel);
 
     // Reaction Role
     void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote);

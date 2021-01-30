@@ -20,6 +20,9 @@ public class GuildSettings {
     @Nullable
     public final String levelUpChannel;
     public final int maxWarnings;
+    public final boolean modlogEnabled;
+    @Nullable
+    public final String modlogChannel;
 
     public GuildSettings() {
         this.prefix = Config.get("PREFIX");
@@ -29,6 +32,8 @@ public class GuildSettings {
         this.levelUpMessage = Config.get("DEFAULT_LEVELUP_MESSAGE");
         this.levelUpChannel = null;
         this.maxWarnings = 3;
+        this.modlogEnabled = false;
+        this.modlogChannel = null;
     }
 
     public GuildSettings(Document doc) {
@@ -39,6 +44,8 @@ public class GuildSettings {
         this.levelUpMessage = doc.get("levelup_message", Config.get("DEFAULT_LEVELUP_MESSAGE"));
         this.levelUpChannel = doc.getString("levelup_channel");
         this.maxWarnings = doc.get("max_warnings", 3);
+        this.modlogEnabled = doc.get("modlog_enabled", false);
+        this.modlogChannel = doc.getString("modlog_channel");
     }
 
     public GuildSettings(ResultSet rs) throws SQLException {
@@ -49,6 +56,8 @@ public class GuildSettings {
         this.levelUpMessage = rs.getString("levelup_message");
         this.levelUpChannel = rs.getString("levelup_channel");
         this.maxWarnings = rs.getInt("max_warnings");
+        this.modlogEnabled = rs.getInt("modlog_enabled") == 1;
+        this.modlogChannel = rs.getString("modlog_channel");
     }
 
 }

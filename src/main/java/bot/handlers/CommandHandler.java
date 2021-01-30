@@ -126,6 +126,7 @@ public class CommandHandler {
         addCommand(new PurgeUserCommand());
         addCommand(new SetNickCommand());
         addCommand(new SoftBanCommand());
+        addCommand(new UnDeafenCommand());
         addCommand(new UnmuteCommand());
         addCommand(new VMuteCommand());
         addCommand(new VUnMuteCommand());
@@ -134,6 +135,7 @@ public class CommandHandler {
 
         // ADMIN COMMANDS
         addCommand(new SetPrefixCommand());
+        addCommand(new ModLogChannel());
         addCommand(new MaxWarningsCommand());
         addCommand(new XPSystem());
         addCommand(new FlagtrCommand());

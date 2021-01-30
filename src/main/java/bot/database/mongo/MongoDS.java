@@ -75,6 +75,22 @@ public class MongoDS implements DataSource {
     }
 
     @Override
+    public void enableModlogs(String guildId, boolean isEnabled) {
+        invalidateCache(guildId);
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
+        Bson filter = Filters.eq("_id", guildId);
+        collection.updateOne(filter, Updates.set("modlog_enabled", isEnabled), new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void setModLogChannel(String guildId, String logChannel) {
+        invalidateCache(guildId);
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
+        Bson filter = Filters.eq("_id", guildId);
+        collection.updateOne(filter, Updates.set("modlog_channel", logChannel), new UpdateOptions().upsert(true));
+    }
+
+    @Override
     public void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
 
