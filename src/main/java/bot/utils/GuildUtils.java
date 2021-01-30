@@ -1,16 +1,19 @@
 package bot.utils;
 
-import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class GuildUtils {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(GuildUtils.class);
 
     // [totalCount, botCount, memberCount]
     public static void getMemberStats(@NotNull Guild guild, Consumer<long[]> callback) {
@@ -61,6 +64,29 @@ public class GuildUtils {
         }
 
         return new String[]{names.toString(), Integer.toString(total - animated), Integer.toString(animated)};
+    }
+
+    @Nullable
+    public static TextChannel getTextChannelById(Guild guild, String id) {
+        if (id == null || id.equals(""))
+            return null;
+        return guild.getTextChannelById(id);
+    }
+
+    @Nullable
+    public static VoiceChannel getVoiceChannelById(Guild guild, String id) {
+        if (id == null || id.equals(""))
+            return null;
+        return guild.getVoiceChannelById(id);
+    }
+
+    public static void setVoiceChannelName(VoiceChannel channel, String name) {
+        try {
+            channel.getManager().setName(name).queue((__) -> {
+            }, (e) -> LOGGER.error("Set Voice Channel Failed: " + e.getMessage()));
+        } catch (PermissionException | Error permEx) {
+            LOGGER.error("Set Voice Channel Failed: " + permEx.getMessage());
+        }
     }
 
 }

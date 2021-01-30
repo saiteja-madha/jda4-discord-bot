@@ -1,7 +1,9 @@
 package bot.database.mongo;
 
 import bot.Config;
+import bot.data.CounterType;
 import bot.database.DataSource;
+import bot.database.objects.CounterConfig;
 import bot.database.objects.Economy;
 import bot.database.objects.GuildSettings;
 import bot.database.objects.WarnLogs;
@@ -12,7 +14,9 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.*;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -297,6 +301,68 @@ public class MongoDS implements DataSource {
             list.add(new WarnLogs(doc));
         }
         return list;
+    }
+
+    @Override
+    public List<String> getCounterGuilds() {
+        List<String> list = new ArrayList<>();
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("counter_config");
+        FindIterable<Document> iterDoc = collection.find();
+        for (Document document : iterDoc) {
+            list.add(document.getString("_id"));
+        }
+        return list;
+    }
+
+    @Override
+    public CounterConfig getCounterConfig(String guildId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("counter_config");
+        Bson filter = Filters.eq("_id", guildId);
+        Document document = collection.find(filter).first();
+        return (document == null) ? new CounterConfig() : new CounterConfig(document);
+    }
+
+    @Override
+    public void updateBotCount(String guildId, boolean isIncrement, int count) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("counter_config");
+        Bson filter = Filters.eq("_id", guildId);
+        Bson update = (isIncrement) ? Updates.inc("bot_count", count) : Updates.set("bot_count", count);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void setCounter(CounterType type, Guild guild, @Nullable VoiceChannel vc, String name) {
+        String var1, var2;
+
+        switch (type) {
+            case ALL:
+                var1 = "total_count_channel";
+                var2 = "total_count_name";
+                break;
+
+            case MEMBERS:
+                var1 = "member_count_channel";
+                var2 = "member_count_name";
+                break;
+
+            case BOTS:
+                var1 = "bot_count_channel";
+                var2 = "bot_count_name";
+                break;
+
+            default:
+                throw new IllegalStateException("Unexpected value: " + type);
+        }
+
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("counter_config");
+        Bson filter = Filters.eq("_id", guild.getId());
+        Bson update = Updates.combine(
+                Updates.set(var1, vc == null ? null : vc.getId()),
+                Updates.set(var2, name)
+        );
+
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+
     }
 
     @NotNull

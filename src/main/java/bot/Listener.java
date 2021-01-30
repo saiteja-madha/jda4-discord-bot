@@ -1,11 +1,14 @@
 package bot;
 
 import bot.database.DataSource;
-import me.duncte123.botcommons.BotCommons;
+import bot.database.objects.CounterConfig;
+import bot.database.objects.GuildSettings;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
@@ -30,36 +33,30 @@ public class Listener implements EventListener {
         LOGGER.info("Watching {} guilds", event.getJDA().getGuilds().size());
         event.getJDA().getPresence().setActivity(Activity.watching("this server"));
 
-        // purge XP-cooldown cache
-        bot.getThreadpool().schedule(() -> bot.getXpHandler().cleanCooldowns(), 1, TimeUnit.DAYS);
+        // Update Counter Channels
+        bot.getThreadpool().execute(() -> bot.getMemberHandler().updateCountersOnStartup(event.getJDA()));
+
+        // Purge XP-cooldown cache
+        bot.getThreadpool().scheduleWithFixedDelay(() -> bot.getXpHandler().cleanCooldowns(), 0, 1, TimeUnit.DAYS);
 
     }
 
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
-        User user = event.getAuthor();
-
-        if (user.isBot() || event.isWebhookMessage()) {
+        // Ignore bots and webhook message
+        if (event.getAuthor().isBot() || event.isWebhookMessage()) {
             return;
         }
 
-        final String guildId = event.getGuild().getId();
-        String prefix = DataSource.INS.getSettings(guildId).prefix;
-
+        GuildSettings settings = DataSource.INS.getSettings(event.getGuild().getId());
         String raw = event.getMessage().getContentRaw();
 
-        if (raw.equalsIgnoreCase(prefix + "shutdown")
-                && user.getId().equals(Config.get("owner_id"))) {
-            LOGGER.info("Shutting down");
-            event.getJDA().shutdown();
-            BotCommons.shutdown(event.getJDA());
-            return;
+        if (raw.startsWith(settings.prefix)) {
+            bot.getCmdHandler().handle(event, settings.prefix);
         }
 
-        if (raw.startsWith(prefix)) {
-            bot.getCmdHandler().handle(event, prefix);
+        if (settings.isRankingEnabled) {
+            bot.getThreadpool().execute(() -> bot.getXpHandler().handle(event, settings));
         }
-
-        bot.getThreadpool().execute(() -> bot.getXpHandler().handle(event));
 
     }
 
@@ -82,6 +79,30 @@ public class Listener implements EventListener {
 
     }
 
+    private void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
+        final Guild guild = event.getGuild();
+        final CounterConfig config = DataSource.INS.getCounterConfig(guild.getId());
+
+        if (config != null) {
+            if (event.getUser().isBot())
+                DataSource.INS.updateBotCount(guild.getId(), true, 1);
+            bot.getMemberHandler().handleMemberCounter(guild);
+        }
+
+    }
+
+    private void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
+        final Guild guild = event.getGuild();
+        final CounterConfig config = DataSource.INS.getCounterConfig(guild.getId());
+
+        if (config != null) {
+            if (event.getUser().isBot())
+                DataSource.INS.updateBotCount(guild.getId(), true, -1);
+            bot.getMemberHandler().handleMemberCounter(guild);
+        }
+
+    }
+
     @Override
     public void onEvent(@Nonnull GenericEvent event) {
         if (event instanceof ReadyEvent) {
@@ -89,9 +110,13 @@ public class Listener implements EventListener {
         } else if (event instanceof GuildMessageReceivedEvent) {
             this.onGuildMessageReceived((GuildMessageReceivedEvent) event);
         } else if (event instanceof GuildMessageReactionAddEvent) {
-            bot.getThreadpool().execute(() -> this.onGuildMessageReactionAdd((GuildMessageReactionAddEvent) event));
+            this.onGuildMessageReactionAdd((GuildMessageReactionAddEvent) event);
         } else if (event instanceof GuildMessageReactionRemoveEvent) {
-            bot.getThreadpool().execute(() -> this.onGuildMessageReactionRemove((GuildMessageReactionRemoveEvent) event));
+            this.onGuildMessageReactionRemove((GuildMessageReactionRemoveEvent) event);
+        } else if (event instanceof GuildMemberJoinEvent) {
+            this.onGuildMemberJoin((GuildMemberJoinEvent) event);
+        } else if (event instanceof GuildMemberRemoveEvent) {
+            this.onGuildMemberRemove((GuildMemberRemoveEvent) event);
         }
     }
 

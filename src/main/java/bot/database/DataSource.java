@@ -1,13 +1,18 @@
 package bot.database;
 
+import bot.data.CounterType;
 import bot.database.mongo.MongoDS;
+import bot.database.objects.CounterConfig;
 import bot.database.objects.Economy;
 import bot.database.objects.GuildSettings;
 import bot.database.objects.WarnLogs;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.css.Counter;
 
 import java.util.List;
 
@@ -46,5 +51,11 @@ public interface DataSource {
     void warnUser(Member mod, Member target, String reason);
     void deleteWarnings(Member target);
     List<WarnLogs> getWarnLogs(Member member);
+
+    // Counter Channels
+    List<String> getCounterGuilds();
+    CounterConfig getCounterConfig(String guildId);
+    void updateBotCount(String guildId, boolean isIncrement, int count);
+    void setCounter(CounterType type, Guild guild, @Nullable VoiceChannel vc, @Nullable String name);
 
 }

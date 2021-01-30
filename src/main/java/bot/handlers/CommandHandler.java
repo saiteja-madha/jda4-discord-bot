@@ -2,6 +2,7 @@ package bot.handlers;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import bot.commands.admin.CounterSetup;
 import bot.commands.admin.ReactionCommand;
 import bot.commands.admin.SetPrefixCommand;
 import bot.commands.admin.flag.FlagtrChannels;
@@ -138,6 +139,7 @@ public class CommandHandler {
         addCommand(new FlagtrChannels());
         addCommand(new AddReactionRoleCommand());
         addCommand(new RemoveReactionRoleCommand());
+        addCommand(new CounterSetup());
 
     }
 

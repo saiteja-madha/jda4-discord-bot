@@ -32,15 +32,13 @@ public class GuildSettings {
     }
 
     public GuildSettings(Document doc) {
-        this.prefix = doc.getString("prefix");
-        this.flagTranslation = doc.containsKey("flag_translation") && doc.getBoolean("flag_translation");
-        this.translationChannels = doc.containsKey("translation_channels")
-                ? doc.getList("translation_channels", String.class)
-                : new ArrayList<>();
-        this.isRankingEnabled = doc.containsKey("ranking_enabled") && doc.getBoolean("ranking_enabled");
-        this.levelUpMessage = doc.containsKey("levelup_message") ? doc.getString("levelup_message") : Config.get("DEFAULT_LEVELUP_MESSAGE");
-        this.levelUpChannel = doc.containsKey("levelup_channel") ? doc.getString("levelup_channel") : null;
-        this.maxWarnings = doc.containsKey("max_warnings") ? doc.getInteger("max_warnings") : 3;
+        this.prefix = doc.get("prefix", Config.get("PREFIX"));
+        this.flagTranslation = doc.get("flag_translation", false);
+        this.translationChannels = doc.get("translation_channels", new ArrayList<>());
+        this.isRankingEnabled = doc.get("ranking_enabled", false);
+        this.levelUpMessage = doc.get("levelup_message", Config.get("DEFAULT_LEVELUP_MESSAGE"));
+        this.levelUpChannel = doc.getString("levelup_channel");
+        this.maxWarnings = doc.get("max_warnings", 3);
     }
 
     public GuildSettings(ResultSet rs) throws SQLException {

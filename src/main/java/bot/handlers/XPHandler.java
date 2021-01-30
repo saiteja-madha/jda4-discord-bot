@@ -22,15 +22,14 @@ public class XPHandler {
         this.xpCooldown = new HashMap<>();
     }
 
-    public void handle(GuildMessageReceivedEvent event) {
+    public void handle(GuildMessageReceivedEvent event, GuildSettings settings) {
         final Member member = event.getMember();
 
-        GuildSettings settings = DataSource.INS.getSettings(event.getGuild().getId());
-        if (!settings.isRankingEnabled || member == null)
-            return;
+        // Member is null in case of Webhook
+        assert member != null;
 
         // Cooldown of 2 minutes to prevent spamming
-        String key = member.getGuild().getId() + "|" + member.getId();
+        String key = event.getGuild().getId() + "|" + member.getId();
         int remaining = this.getRemainingCooldown(key);
         if (remaining > 0) return;
         else this.applyCooldown(key);
