@@ -1,6 +1,7 @@
 package bot.database;
 
 import bot.data.CounterType;
+import bot.data.GreetingType;
 import bot.database.mongo.MongoDS;
 import bot.database.objects.*;
 import net.dv8tion.jda.api.JDA;
@@ -10,7 +11,6 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.css.Counter;
 
 import java.time.Instant;
 import java.util.List;
@@ -72,5 +72,22 @@ public interface DataSource {
     void setTicketLimit(String guildId, int limit);
     void setTicketClose(String guildId, boolean isAdminOnly);
     void deleteTicketConfig(String guildId);
+
+    // Welcome & Farewell Data
+    @Nullable Greeting.Welcome getWelcomeConfig(String guildId);
+    @Nullable Greeting.Farewell getFarewellConfig(String guildId);
+    void setGreetingChannel(String guildId, String channelId, GreetingType type);
+    void enableGreeting(String guildId, boolean enabled, GreetingType type);
+
+    // Welcome & Farewell Embed
+    void enableGreetingEmbed(String guildId, boolean enabled, GreetingType type);
+    void setGreetingDesc(String guildId, @Nullable String description, GreetingType type);
+    void setGreetingFooter(String guildId, @Nullable String description, GreetingType type);
+    void setGreetingColor(String guildId, String color, GreetingType type);
+
+    // Welcome & Farewell Image
+    void enableGreetingImage(String guildId, boolean enabled, GreetingType type);
+    void setGreetingImageMsg(String guildId, @Nullable String message, GreetingType type);
+    void setGreetingImageBkg(String guildId, @Nullable String bkg, GreetingType type);
 
 }

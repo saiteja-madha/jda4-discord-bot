@@ -3,17 +3,48 @@ package bot.utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public class MiscUtils {
 
+    private static final String HEX_PATTERN = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$";
+
     public static boolean isURL(String url) {
         return url.matches("^https?:\\/\\/[-a-zA-Z0-9+&@#\\/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#\\/%=~_|]");
+    }
+
+    public static boolean isImageUrl(String url) {
+        Image image;
+        try {
+            image = ImageIO.read(new URL(url));
+            if (image != null)
+                return true;
+        } catch (IOException e) {
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean isHex(String input) {
+        Pattern pattern = Pattern.compile(HEX_PATTERN);
+        return pattern.matcher(input).matches();
+    }
+
+    public static Color hex2Rgb(String colorStr) {
+        return new Color(
+                Integer.valueOf(colorStr.substring(1, 3), 16),
+                Integer.valueOf(colorStr.substring(3, 5), 16),
+                Integer.valueOf(colorStr.substring(5, 7), 16));
     }
 
     @Nullable

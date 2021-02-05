@@ -1,4 +1,4 @@
-package bot.commands.admin;
+package bot.commands.admin.tickets;
 
 import bot.Constants;
 import bot.command.CommandContext;

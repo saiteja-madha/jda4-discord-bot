@@ -2,6 +2,7 @@ package bot.database.mongo;
 
 import bot.Config;
 import bot.data.CounterType;
+import bot.data.GreetingType;
 import bot.database.DataSource;
 import bot.database.objects.*;
 import bot.utils.GuildUtils;
@@ -522,6 +523,88 @@ public class MongoDS implements DataSource {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("ticket_config");
         Bson filter = Filters.eq("guild_id", guildId);
         collection.deleteOne(filter);
+    }
+
+    @Override
+    public Greeting.Welcome getWelcomeConfig(String guildId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("welcome_config");
+        Bson filter = Filters.eq("guild_id", guildId);
+        Document document = collection.find(filter).first();
+        return document == null ? null : new Greeting.Welcome(document);
+    }
+
+    @Override
+    public Greeting.Farewell getFarewellConfig(String guildId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("farewell_config");
+        Bson filter = Filters.eq("guild_id", guildId);
+        Document document = collection.find(filter).first();
+        return document == null ? null : new Greeting.Farewell(document);
+    }
+
+    private void updateGreeting(String guildId, GreetingType type, String key, Object value) {
+        MongoCollection<Document> collection;
+        if (type == GreetingType.WELCOME)
+            collection = mongoClient.getDatabase("discord").getCollection("welcome_config");
+        else
+            collection = mongoClient.getDatabase("discord").getCollection("farewell_config");
+        Bson filter = Filters.eq("guild_id", guildId);
+        Bson update = Updates.set(key, value);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void setGreetingChannel(String guildId, String channelId, GreetingType type) {
+        this.updateGreeting(guildId, type, "channel_id", channelId);
+    }
+
+    @Override
+    public void enableGreeting(String guildId, boolean enabled, GreetingType type) {
+        MongoCollection<Document> collection;
+        if (type == GreetingType.WELCOME)
+            collection = mongoClient.getDatabase("discord").getCollection("welcome_config");
+        else
+            collection = mongoClient.getDatabase("discord").getCollection("farewell_config");
+        Bson filter = Filters.eq("guild_id", guildId);
+        Bson update = Updates.combine(
+                Updates.set("embed_enabled", enabled),
+                Updates.set("image_enabled", enabled)
+        );
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void enableGreetingEmbed(String guildId, boolean enabled, GreetingType type) {
+        this.updateGreeting(guildId, type, "embed_enabled", enabled);
+    }
+
+    @Override
+    public void setGreetingDesc(String guildId, @Nullable String description, GreetingType type) {
+        this.updateGreeting(guildId, type, "description", description);
+    }
+
+    @Override
+    public void setGreetingFooter(String guildId, @Nullable String description, GreetingType type) {
+        this.updateGreeting(guildId, type, "footer", description);
+    }
+
+    @Override
+    public void setGreetingColor(String guildId, String color, GreetingType type) {
+        this.updateGreeting(guildId, type, "embed_color", color);
+    }
+
+    @Override
+    public void enableGreetingImage(String guildId, boolean enabled, GreetingType type) {
+        this.updateGreeting(guildId, type, "image_enabled", enabled);
+    }
+
+    @Override
+    public void setGreetingImageMsg(String guildId, @Nullable String message, GreetingType type) {
+        this.updateGreeting(guildId, type, "image_message", message);
+    }
+
+    @Override
+    public void setGreetingImageBkg(String guildId, @Nullable String bkg, GreetingType type) {
+        this.updateGreeting(guildId, type, "image_background", bkg);
     }
 
     @NotNull

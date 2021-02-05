@@ -3,15 +3,16 @@ package bot.utils;
 import bot.Config;
 import bot.Constants;
 import bot.command.CommandContext;
+import bot.data.GreetingType;
 import bot.data.ImageType;
+import bot.database.DataSource;
+import bot.database.objects.Greeting;
 import com.jagrosh.jdautilities.commons.utils.FinderUtil;
 import me.duncte123.botcommons.messaging.EmbedUtils;
+import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import okhttp3.HttpUrl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -100,6 +101,115 @@ public class ImageUtils {
 
     public static void embedImage(TextChannel channel, byte[] bytes, ImageType type) {
         embedImage(channel, bytes, null, type);
+    }
+
+    public static void sendGreeting(Guild guild, GreetingType type, User user, @Nullable TextChannel previewChannel) {
+        Greeting config;
+        if (type == GreetingType.WELCOME)
+            config = DataSource.INS.getWelcomeConfig(guild.getId());
+        else
+            config = DataSource.INS.getFarewellConfig(guild.getId());
+
+        if (config == null) {
+            if (previewChannel != null)
+                BotUtils.sendMsg(previewChannel, type.getText() + " message is not configured on your server");
+            return;
+        }
+
+        final TextChannel greetChannel = getGreetingChannel(guild, config);
+        final String greetChannelName = type.getText() + " Channel: " + (greetChannel == null ? "Not configured" : greetChannel.getName());
+
+        if (greetChannel == null && previewChannel == null)
+            return;
+
+        final TextChannel channel = (previewChannel != null) ? previewChannel : greetChannel;
+
+        String endpoint = BASE_URL + ((type == GreetingType.WELCOME) ? "/welcome-card" : "/farewell-card");
+        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(endpoint))
+                .newBuilder()
+                .addQueryParameter("avatar", user.getEffectiveAvatarUrl())
+                .addQueryParameter("name", user.getName())
+                .addQueryParameter("discriminator", user.getDiscriminator())
+                .addQueryParameter("count", String.valueOf(guild.getMemberCount()))
+                .addQueryParameter("guild", guild.getName());
+
+        if (config.imageMessage != null)
+            urlBuilder.addQueryParameter("message", config.imageMessage);
+
+        if (config.imageBkg != null)
+            urlBuilder.addQueryParameter("bkg", config.imageBkg);
+
+        final String URI = urlBuilder.build().toString();
+
+        if (config.isEmbedEnabled) {
+            EmbedBuilder embed = EmbedUtils.defaultEmbed();
+            if (config.embedColor != null)
+                embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
+            if (config.description != null)
+                embed.setDescription(resolveGreeting(guild, user, config.description));
+            if (config.footer != null)
+                embed.setFooter(resolveGreeting(guild, user, config.footer));
+
+            // Check if Image is enabled
+            if (config.isImageEnabled) {
+                WebUtils.ins.getByteStream(URI).async((bytes) -> {
+
+                    // Append Image if response is successful
+                    embed.setImage("attachment://" + type.getAttachmentName());
+                    if (previewChannel != null)
+                        channel.sendMessage(embed.build()).append(greetChannelName).addFile(bytes, type.getAttachmentName()).queue();
+                    else
+                        channel.sendMessage(embed.build()).addFile(bytes, type.getAttachmentName()).queue();
+
+                }, (err) -> {
+                    if (previewChannel != null) {
+                        System.out.println(err.getMessage());
+                        BotUtils.sendMsg(channel, "Unexpected API error! Try again later on contact support server");
+                    } else
+                        BotUtils.sendMsg(channel, embed.build());
+                });
+                return;
+            }
+
+            if (previewChannel != null)
+                channel.sendMessage(embed.build()).append(greetChannelName).queue();
+            else
+                BotUtils.sendMsg(channel, embed.build());
+
+            return;
+        }
+
+        if (config.isImageEnabled) {
+            WebUtils.ins.getByteStream(URI).async(
+                    (bytes) -> {
+                        if (previewChannel != null)
+                            sendImageWithMessage(channel, bytes, type.getAttachmentName(), greetChannelName);
+                        else
+                            sendImage(channel, bytes, type.getAttachmentName());
+                    },
+                    err -> System.out.println(err.getMessage())
+            );
+        }
+
+    }
+
+    @Nullable
+    private static TextChannel getGreetingChannel(Guild guild, Greeting config) {
+        TextChannel channel = null;
+        if (config.channel != null) {
+            TextChannel tcById = guild.getTextChannelById(config.channel);
+            if (tcById != null)
+                channel = tcById;
+            else
+                DataSource.INS.setGreetingChannel(guild.getId(), null, config.type);
+        }
+        return channel;
+    }
+
+    private static String resolveGreeting(Guild guild, User user, String message) {
+        return message.replace("{server}", guild.getName())
+                .replace("{count}", String.valueOf(guild.getMemberCount()))
+                .replace("{member}", user.getName());
     }
 
     @NotNull

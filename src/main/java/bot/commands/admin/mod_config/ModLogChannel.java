@@ -1,4 +1,4 @@
-package bot.commands.admin;
+package bot.commands.admin.mod_config;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;

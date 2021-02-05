@@ -2,12 +2,18 @@ package bot.handlers;
 
 import bot.command.CommandContext;
 import bot.command.ICommand;
-import bot.commands.admin.*;
+import bot.commands.admin.ReactionCommand;
+import bot.commands.admin.SetPrefixCommand;
+import bot.commands.admin.XPSystem;
+import bot.commands.admin.counter.CounterSetup;
 import bot.commands.admin.flag.FlagtrChannels;
 import bot.commands.admin.flag.FlagtrCommand;
+import bot.commands.admin.greeting.*;
 import bot.commands.admin.mod_config.MaxWarningsCommand;
+import bot.commands.admin.mod_config.ModLogChannel;
 import bot.commands.admin.reaction_role.AddReactionRoleCommand;
 import bot.commands.admin.reaction_role.RemoveReactionRoleCommand;
+import bot.commands.admin.tickets.TicketSetup;
 import bot.commands.economy.BalanceCommand;
 import bot.commands.economy.DailyCommand;
 import bot.commands.economy.GambleCommand;
@@ -146,6 +152,12 @@ public class CommandHandler {
         addCommand(new RemoveReactionRoleCommand());
         addCommand(new CounterSetup());
         addCommand(new TicketSetup(waiter));
+        addCommand(new Welcome());
+        addCommand(new WelcomeEmbed());
+        addCommand(new WelcomeImage());
+        addCommand(new Farewell());
+        addCommand(new FarewellEmbed());
+        addCommand(new FarewellImage());
 
     }
 
