@@ -1,8 +1,10 @@
 package bot;
 
+import bot.data.GreetingType;
 import bot.database.DataSource;
 import bot.database.objects.CounterConfig;
 import bot.database.objects.GuildSettings;
+import bot.utils.ImageUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
@@ -102,6 +104,8 @@ public class Listener implements EventListener {
             bot.getMemberHandler().handleMemberCounter(guild);
         }
 
+        ImageUtils.sendGreeting(guild, event.getUser(), GreetingType.WELCOME, null);
+
     }
 
     private void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
@@ -113,6 +117,8 @@ public class Listener implements EventListener {
                 DataSource.INS.updateBotCount(guild.getId(), true, -1);
             bot.getMemberHandler().handleMemberCounter(guild);
         }
+
+        ImageUtils.sendGreeting(guild, event.getUser(), GreetingType.FAREWELL, null);
 
     }
 

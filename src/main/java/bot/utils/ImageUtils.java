@@ -103,25 +103,24 @@ public class ImageUtils {
         embedImage(channel, bytes, null, type);
     }
 
-    public static void sendGreeting(Guild guild, GreetingType type, User user, @Nullable TextChannel previewChannel) {
+    public static void sendGreeting(Guild guild, User user, GreetingType type, @Nullable TextChannel previewChannel) {
         Greeting config;
         if (type == GreetingType.WELCOME)
             config = DataSource.INS.getWelcomeConfig(guild.getId());
         else
             config = DataSource.INS.getFarewellConfig(guild.getId());
 
-        if (config == null) {
+        if (config == null || !config.isEmbedEnabled && !config.isImageEnabled) {
             if (previewChannel != null)
                 BotUtils.sendMsg(previewChannel, type.getText() + " message is not configured on your server");
             return;
         }
 
         final TextChannel greetChannel = getGreetingChannel(guild, config);
-        final String greetChannelName = type.getText() + " Channel: " + (greetChannel == null ? "Not configured" : greetChannel.getName());
-
         if (greetChannel == null && previewChannel == null)
             return;
 
+        final String greetChannelName = type.getText() + " Channel: " + (greetChannel == null ? "Not configured" : greetChannel.getName());
         final TextChannel channel = (previewChannel != null) ? previewChannel : greetChannel;
 
         String endpoint = BASE_URL + ((type == GreetingType.WELCOME) ? "/welcome-card" : "/farewell-card");
@@ -179,30 +178,32 @@ public class ImageUtils {
             return;
         }
 
-        if (config.isImageEnabled) {
-            WebUtils.ins.getByteStream(URI).async(
-                    (bytes) -> {
-                        if (previewChannel != null)
-                            sendImageWithMessage(channel, bytes, type.getAttachmentName(), greetChannelName);
-                        else
-                            sendImage(channel, bytes, type.getAttachmentName());
-                    },
-                    err -> System.out.println(err.getMessage())
-            );
-        }
+        WebUtils.ins.getByteStream(URI).async(
+                (bytes) -> {
+                    if (previewChannel != null)
+                        sendImageWithMessage(channel, bytes, type.getAttachmentName(), greetChannelName);
+                    else
+                        sendImage(channel, bytes, type.getAttachmentName());
+                },
+                err -> System.out.println(err.getMessage())
+        );
+
 
     }
 
     @Nullable
     private static TextChannel getGreetingChannel(Guild guild, Greeting config) {
         TextChannel channel = null;
-        if (config.channel != null) {
-            TextChannel tcById = guild.getTextChannelById(config.channel);
-            if (tcById != null)
-                channel = tcById;
-            else
-                DataSource.INS.setGreetingChannel(guild.getId(), null, config.type);
+        if (config != null) {
+            if (config.channel != null) {
+                TextChannel tcById = guild.getTextChannelById(config.channel);
+                if (tcById != null)
+                    channel = tcById;
+                else
+                    DataSource.INS.setGreetingChannel(guild.getId(), null, config.type);
+            }
         }
+
         return channel;
     }
 

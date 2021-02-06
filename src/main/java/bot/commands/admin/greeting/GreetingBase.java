@@ -65,7 +65,7 @@ public abstract class GreetingBase extends ICommand {
     }
 
     private void sendPreview(CommandContext ctx) {
-        ImageUtils.sendGreeting(ctx.getGuild(), type, ctx.getAuthor(), ctx.getChannel());
+        ImageUtils.sendGreeting(ctx.getGuild(), ctx.getAuthor(), type, ctx.getChannel());
     }
 
 }

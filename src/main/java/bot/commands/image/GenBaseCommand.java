@@ -45,7 +45,7 @@ public abstract class GenBaseCommand extends ICommand {
 
                 ImageUtils.embedImage(channel, embed, bytes, this.getImageType());
 
-            });
+            }, err -> System.out.println(err.getMessage()));
         }
 
     }

@@ -74,8 +74,8 @@ public interface DataSource {
     void deleteTicketConfig(String guildId);
 
     // Welcome & Farewell Data
-    @Nullable Greeting.Welcome getWelcomeConfig(String guildId);
-    @Nullable Greeting.Farewell getFarewellConfig(String guildId);
+    @Nullable Greeting getWelcomeConfig(String guildId);
+    @Nullable Greeting getFarewellConfig(String guildId);
     void setGreetingChannel(String guildId, String channelId, GreetingType type);
     void enableGreeting(String guildId, boolean enabled, GreetingType type);
 
