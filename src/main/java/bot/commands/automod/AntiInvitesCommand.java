@@ -37,8 +37,8 @@ public class AntiInvitesCommand extends ICommand {
 
         DataSource.INS.antiInvites(ctx.getGuildId(), antiinvites);
 
-        if (antiinvites)
-            ctx.reply("Messages with not be filtered for discord links now");
+        if (!antiinvites)
+            ctx.reply("Messages will not be filtered for discord links now");
         else
             ctx.reply("Messages with discord invite links will now be automatically deleted");
 

@@ -37,8 +37,8 @@ public class AntiLinksCommand extends ICommand {
 
         DataSource.INS.antiLinks(ctx.getGuildId(), antilink);
 
-        if (antilink)
-            ctx.reply("Messages with not be filtered for links now");
+        if (!antilink)
+            ctx.reply("Messages will not be filtered for links now");
         else
             ctx.reply("Messages with links will now be automatically deleted");
 
