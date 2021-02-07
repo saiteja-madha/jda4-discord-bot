@@ -1,5 +1,6 @@
 package bot.commands.utility;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,8 @@ public class HasteCommand extends ICommand {
         this.help = "Posts some text to hastebin";
         this.usage = "<text>";
         this.minArgsCount = 1;
+        this.category = CommandCategory.UTILS;
+        this.cooldown = 5;
     }
 
     @Override

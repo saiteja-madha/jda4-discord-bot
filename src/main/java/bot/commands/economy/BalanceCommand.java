@@ -1,6 +1,7 @@
 package bot.commands.economy;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -19,6 +20,7 @@ public class BalanceCommand extends ICommand {
         this.help = "shows your current coin balance";
         this.aliases = Collections.singletonList("bal");
         this.usage = "[@user]";
+        this.category = CommandCategory.ECONOMY;
     }
 
     @Override

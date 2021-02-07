@@ -1,5 +1,6 @@
 package bot.commands.information;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.MiscUtils;
@@ -15,6 +16,7 @@ public class UptimeCommand extends ICommand {
     public UptimeCommand() {
         this.name = "uptime";
         this.help = "shows bot's uptime";
+        this.category = CommandCategory.INFORMATION;
     }
 
     @Override

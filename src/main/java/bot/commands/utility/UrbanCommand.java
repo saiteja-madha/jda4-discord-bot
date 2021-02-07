@@ -1,5 +1,6 @@
 package bot.commands.utility;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,6 +18,8 @@ public class UrbanCommand extends ICommand {
         this.usage = "<search-term>";
         this.minArgsCount = 1;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.UTILS;
+        this.cooldown = 5;
     }
 
     @Override

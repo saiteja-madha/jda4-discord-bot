@@ -1,6 +1,7 @@
 package bot.commands.economy;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -20,6 +21,7 @@ public class DailyCommand extends ICommand {
         this.name = "daily";
         this.help = "receive a daily bonus";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.ECONOMY;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package bot.commands.utility;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import me.duncte123.botcommons.messaging.EmbedUtils;
@@ -17,6 +18,8 @@ public class GithubCommand extends ICommand {
         this.help = "Shows github statistics of a user";
         this.usage = "<username>";
         this.minArgsCount = 1;
+        this.category = CommandCategory.UTILS;
+        this.cooldown = 5;
     }
 
     private static boolean websiteProvided(String text) {

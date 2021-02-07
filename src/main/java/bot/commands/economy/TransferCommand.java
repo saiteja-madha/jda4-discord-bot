@@ -1,6 +1,7 @@
 package bot.commands.economy;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -16,6 +17,7 @@ public class TransferCommand extends ICommand {
         this.help = "transfer coins to other user";
         this.usage = "<coins> <@user>";
         this.minArgsCount = 2;
+        this.category = CommandCategory.ECONOMY;
     }
 
     @Override

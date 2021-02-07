@@ -1,6 +1,7 @@
 package bot.commands.image;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.data.ImageType;
@@ -20,6 +21,8 @@ public abstract class FilterBaseCommand extends ICommand {
         this.name = getClass().getSimpleName().toLowerCase();
         this.usage = "<imageurl>/<@mention>/<attachment>";
         this.help = "generates filter for the provided image";
+        this.category = CommandCategory.IMAGE;
+        this.cooldown = 5;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package bot.commands.moderation;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.data.PurgeType;
@@ -16,6 +17,7 @@ public class PurgeCommand extends ICommand {
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.MESSAGE_MANAGE, Permission.MESSAGE_HISTORY};
         this.botPermissions = new Permission[]{Permission.MESSAGE_MANAGE, Permission.MESSAGE_HISTORY};
+        this.category = CommandCategory.MODERATION;
     }
 
     @Override

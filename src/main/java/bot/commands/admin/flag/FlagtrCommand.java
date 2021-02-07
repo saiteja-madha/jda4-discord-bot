@@ -1,5 +1,6 @@
 package bot.commands.admin.flag;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -14,6 +15,7 @@ public class FlagtrCommand extends ICommand {
         this.minArgsCount = 1;
         this.usage = "<ON | OFF>";
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+        this.category = CommandCategory.ADMINISTRATION;
     }
 
     @Override

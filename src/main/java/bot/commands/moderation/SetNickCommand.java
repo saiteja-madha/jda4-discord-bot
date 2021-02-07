@@ -1,5 +1,6 @@
 package bot.commands.moderation;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.ModerationUtils;
@@ -19,6 +20,7 @@ public class SetNickCommand extends ICommand {
         this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.NICKNAME_MANAGE};
         this.botPermissions = new Permission[]{Permission.NICKNAME_MANAGE};
+        this.category = CommandCategory.MODERATION;
     }
 
     @Override

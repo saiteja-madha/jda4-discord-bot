@@ -1,5 +1,6 @@
 package bot.commands.moderation;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.ModerationUtils;
@@ -19,6 +20,7 @@ public class VUnMuteCommand extends ICommand {
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.VOICE_MUTE_OTHERS};
         this.botPermissions = new Permission[]{Permission.VOICE_MUTE_OTHERS};
+        this.category = CommandCategory.MODERATION;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package bot.commands.admin.greeting;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.data.GreetingType;
@@ -18,6 +19,7 @@ public abstract class GreetingEmbedBase extends ICommand {
         this.type = type;
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+        this.category = CommandCategory.ADMINISTRATION;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package bot.commands.admin.counter;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.data.CounterType;
@@ -24,6 +25,7 @@ public class CounterSetup extends ICommand {
                 "`{p}counter status` : check status on currently configured counters\n";
         this.minArgsCount = 1;
         this.botPermissions = new Permission[]{Permission.MANAGE_CHANNEL};
+        this.category = CommandCategory.ADMINISTRATION;
     }
 
     @Override

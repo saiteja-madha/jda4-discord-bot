@@ -1,6 +1,7 @@
 package bot.commands.information;
 
 import bot.Config;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.BotUtils;
@@ -13,6 +14,7 @@ public class InviteCommand extends ICommand {
     public InviteCommand() {
         this.name = "invite";
         this.help = "get the bot's invite";
+        this.category = CommandCategory.INFORMATION;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package bot.commands.moderation;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -33,6 +34,7 @@ public class WarningsCommand extends ICommand {
                 })
                 .setEventWaiter(waiter)
                 .setTimeout(30, TimeUnit.SECONDS);
+        this.category = CommandCategory.MODERATION;
     }
 
     @Override

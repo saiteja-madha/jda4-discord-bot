@@ -1,5 +1,6 @@
 package bot.commands.information;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import me.duncte123.botcommons.messaging.EmbedUtils;
@@ -12,6 +13,7 @@ public class PingCommand extends ICommand {
     public PingCommand() {
         this.name = "ping";
         this.help = "shows the current ping from the bot to the discord servers";
+        this.category = CommandCategory.INFORMATION;
     }
 
     @Override

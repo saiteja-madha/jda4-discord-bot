@@ -1,5 +1,6 @@
 package bot.commands.admin.mod_config;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -20,6 +21,7 @@ public class ModLogChannel extends ICommand {
         this.aliases = Collections.singletonList("modlogchannel");
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+        this.category = CommandCategory.ADMINISTRATION;
     }
 
     @Override

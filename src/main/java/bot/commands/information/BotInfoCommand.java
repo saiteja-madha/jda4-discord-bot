@@ -2,6 +2,7 @@ package bot.commands.information;
 
 import bot.Config;
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.MiscUtils;
@@ -33,6 +34,7 @@ public class BotInfoCommand extends ICommand {
         this.help = "shows bot information";
         this.aliases = Collections.singletonList("binfo");
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.INFORMATION;
     }
 
     @Override

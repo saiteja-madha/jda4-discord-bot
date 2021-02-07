@@ -1,5 +1,6 @@
 package bot.commands.fun;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import me.duncte123.botcommons.messaging.EmbedUtils;
@@ -15,6 +16,7 @@ public class FlipCoinCommand extends ICommand {
         this.name = "flipcoin";
         this.usage = "flips a coin heads or tails";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.FUN;
     }
 
     @Override

@@ -41,8 +41,10 @@ public class Listener implements EventListener {
         // Update Counter Channels
         bot.getThreadpool().execute(() -> bot.getMemberHandler().updateCountersOnStartup(jda));
 
-        // Purge XP-cooldown cache
+        // Purge CMD & XP-cooldown cache
         bot.getThreadpool().scheduleWithFixedDelay(() -> bot.getXpHandler().cleanCooldowns(),
+                0, 1, TimeUnit.DAYS);
+        bot.getThreadpool().scheduleWithFixedDelay(() -> bot.getCmdHandler().cleanCooldowns(),
                 0, 1, TimeUnit.DAYS);
 
         // Check Temporary mutes and bans

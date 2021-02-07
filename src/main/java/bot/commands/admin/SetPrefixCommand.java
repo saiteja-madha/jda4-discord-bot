@@ -1,5 +1,6 @@
 package bot.commands.admin;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -13,6 +14,7 @@ public class SetPrefixCommand extends ICommand {
         this.help = "Sets the prefix for this server";
         this.usage = "<new-prefix>";
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+        this.category = CommandCategory.ADMINISTRATION;
     }
 
     @Override

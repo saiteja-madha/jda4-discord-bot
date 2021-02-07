@@ -1,5 +1,6 @@
 package bot.commands.fun;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,7 @@ public class FlipTextCommand extends ICommand {
         this.help = "reverses the given message";
         this.usage = "<message>";
         this.minArgsCount = 1;
+        this.category = CommandCategory.FUN;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package bot.commands.utility;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import me.duncte123.botcommons.messaging.EmbedUtils;
@@ -21,6 +22,8 @@ public class CovidCommand extends ICommand {
         this.minArgsCount = 1;
         this.usage = "<country>";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.UTILS;
+        this.cooldown = 5;
     }
 
     @Override

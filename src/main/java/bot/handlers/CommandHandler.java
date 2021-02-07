@@ -28,17 +28,25 @@ import bot.commands.utility.*;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class CommandHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandHandler.class);
+
     private final ArrayList<ICommand> commands = new ArrayList<>();
     private final HashMap<String, Integer> commandIndex = new HashMap<>();
+    private final HashMap<String, OffsetDateTime> cooldowns = new HashMap<>();
 
     public CommandHandler(EventWaiter waiter) {
 
@@ -204,6 +212,30 @@ public class CommandHandler {
             cmd.run(ctx);
         }
 
+    }
+
+    public int getRemainingCooldown(String name) {
+        if (cooldowns.containsKey(name)) {
+            int time = (int) Math.ceil(OffsetDateTime.now().until(cooldowns.get(name), ChronoUnit.MILLIS) / 1000D);
+            if (time <= 0) {
+                cooldowns.remove(name);
+                return 0;
+            }
+            return time;
+        }
+        return 0;
+    }
+
+    public void applyCooldown(String name, int seconds) {
+        cooldowns.put(name, OffsetDateTime.now().plusSeconds(seconds));
+    }
+
+    public void cleanCooldowns() {
+        OffsetDateTime now = OffsetDateTime.now();
+        final int size = cooldowns.size();
+        cooldowns.keySet().stream().filter((str) -> (cooldowns.get(str).isBefore(now))).collect(Collectors.toList())
+                .forEach(cooldowns::remove);
+        LOGGER.info("Command cooldown cache cleared - " + size + " keys released");
     }
 
 }

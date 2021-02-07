@@ -1,7 +1,10 @@
 package bot.command;
 
+import bot.utils.BotUtils;
+import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -19,6 +22,8 @@ public abstract class ICommand {
     protected int maxCharCount = 3000;
     protected Permission[] userPermissions = new Permission[0];
     protected Permission[] botPermissions = new Permission[0];
+    protected int cooldown = 0;
+    protected CommandCategory category = CommandCategory.UNLISTED;
 
     public void run(@Nonnull CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
@@ -52,6 +57,15 @@ public abstract class ICommand {
             return;
         }
 
+        if (this.cooldown > 0) {
+            String key = getCooldownKey(ctx);
+            int remaining = ctx.getCmdHandler().getRemainingCooldown(key);
+            if (remaining > 0) {
+                this.sendCoolDown(ctx.getEvent(), remaining);
+                return;
+            } else ctx.getCmdHandler().applyCooldown(key, cooldown);
+        }
+
         ctx.getEvent().getChannel().sendTyping().queue();
         handle(ctx);
 
@@ -74,6 +88,18 @@ public abstract class ICommand {
 
     public List<String> getAliases() {
         return aliases;
+    }
+
+    private void sendCoolDown(GuildMessageReceivedEvent event, int seconds) {
+        BotUtils.sendMsg(
+                event.getChannel(),
+                EmbedUtils.defaultEmbed().setAuthor("Kindly wait " + seconds + " seconds before using this command").build(),
+                5
+        );
+    }
+
+    private String getCooldownKey(CommandContext ctx) {
+        return this.name + "|" + "U:" + ctx.getAuthor().getId();
     }
 
 }

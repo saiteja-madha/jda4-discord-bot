@@ -1,6 +1,7 @@
 package bot.commands.information;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import me.duncte123.botcommons.messaging.EmbedUtils;
@@ -22,6 +23,7 @@ public class ChannelInfoCommand extends ICommand {
         this.aliases = Collections.singletonList("cinfo");
         this.usage = "[#channel]";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.INFORMATION;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package bot.commands.admin.reaction_role;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -19,6 +20,7 @@ public class AddReactionRoleCommand extends ICommand {
         this.usage = "<#channel> <messageid> <emote> <@role>";
         this.minArgsCount = 4;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+        this.category = CommandCategory.ADMINISTRATION;
     }
 
     @Override

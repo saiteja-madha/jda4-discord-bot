@@ -1,6 +1,7 @@
 package bot.commands.information;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.MiscUtils;
@@ -27,6 +28,7 @@ public class RoleInfoCommand extends ICommand {
         this.usage = "<rolename>";
         this.aliases = Collections.singletonList("rinfo");
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.INFORMATION;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package bot.commands.fun;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import me.duncte123.botcommons.messaging.EmbedUtils;
@@ -14,6 +15,8 @@ public class CatCommand extends ICommand {
         this.name = "cat";
         this.help = "Shows a random cat image";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.FUN;
+        this.cooldown = 5;
     }
 
     @Override

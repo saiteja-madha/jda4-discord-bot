@@ -1,5 +1,6 @@
 package bot.commands.moderation;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.GuildUtils;
@@ -23,6 +24,7 @@ public class TempMuteCommand extends ICommand {
         this.botPermissions = new Permission[]{Permission.MANAGE_ROLES};
         this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
         this.minArgsCount = 2;
+        this.category = CommandCategory.MODERATION;
     }
 
     @Override

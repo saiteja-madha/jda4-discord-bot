@@ -1,5 +1,6 @@
 package bot.commands.utility;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,7 @@ public class HelpCommand extends ICommand {
         this.help = "Shows the list with commands in the bot";
         this.usage = "<command>";
         this.aliases = Arrays.asList("commands", "cmds", "commandlist");
+        this.category = CommandCategory.UTILS;
     }
 
     @Override

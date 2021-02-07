@@ -1,5 +1,6 @@
 package bot.commands.moderation;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.MiscUtils;
@@ -20,6 +21,7 @@ public class TempBanCommand extends ICommand {
         this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.BAN_MEMBERS};
         this.botPermissions = new Permission[]{Permission.BAN_MEMBERS};
+        this.category = CommandCategory.MODERATION;
     }
 
     @Override

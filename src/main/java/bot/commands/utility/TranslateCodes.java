@@ -1,6 +1,7 @@
 package bot.commands.utility;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
@@ -25,6 +26,7 @@ public class TranslateCodes extends ICommand {
                 .setFinalAction(m -> {
                 })
                 .setEventWaiter(waiter);
+        this.category = CommandCategory.UTILS;
     }
 
     @Override

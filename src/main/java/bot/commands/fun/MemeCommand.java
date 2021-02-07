@@ -1,5 +1,6 @@
 package bot.commands.fun;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,6 +16,8 @@ public class MemeCommand extends ICommand {
         this.name = "meme";
         this.help = "shows a random meme";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.FUN;
+        this.cooldown = 5;
     }
 
     @Override

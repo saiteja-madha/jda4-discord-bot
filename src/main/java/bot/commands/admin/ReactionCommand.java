@@ -1,5 +1,6 @@
 package bot.commands.admin;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import net.dv8tion.jda.api.Permission;
@@ -17,6 +18,7 @@ public class ReactionCommand extends ICommand {
         this.usage = "<#channel> <messageid> <emote>";
         this.minArgsCount = 3;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+        this.category = CommandCategory.ADMINISTRATION;
     }
 
     @Override

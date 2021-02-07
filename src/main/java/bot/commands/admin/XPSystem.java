@@ -1,5 +1,6 @@
 package bot.commands.admin;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -17,6 +18,7 @@ public class XPSystem extends ICommand {
         this.minArgsCount = 1;
         this.aliases = Arrays.asList("rankingsystem", "ranking");
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+        this.category = CommandCategory.ADMINISTRATION;
     }
 
     @Override

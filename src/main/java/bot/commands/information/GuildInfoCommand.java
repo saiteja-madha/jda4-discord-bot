@@ -1,6 +1,7 @@
 package bot.commands.information;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.GuildUtils;
@@ -25,6 +26,7 @@ public class GuildInfoCommand extends ICommand {
         this.help = "shows information about the discord server";
         this.aliases = Arrays.asList("guildinfo", "sinfo", "ginfo");
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.INFORMATION;
     }
 
     @Override

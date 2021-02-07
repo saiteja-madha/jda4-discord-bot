@@ -1,5 +1,6 @@
 package bot.commands.moderation;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.ModerationUtils;
@@ -18,6 +19,7 @@ public class WarnCommand extends ICommand {
         this.usage = "<@member(s)> [reason]";
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
+        this.category = CommandCategory.MODERATION;
     }
 
     @Override

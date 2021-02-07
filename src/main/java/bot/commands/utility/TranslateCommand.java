@@ -1,6 +1,7 @@
 package bot.commands.utility;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.HttpUtils;
@@ -20,6 +21,8 @@ public class TranslateCommand extends ICommand {
         this.minArgsCount = 2;
         this.aliases = Collections.singletonList("tr");
         this.usage = "<language-code> <text>";
+        this.category = CommandCategory.UTILS;
+        this.cooldown = 5;
     }
 
     @Override

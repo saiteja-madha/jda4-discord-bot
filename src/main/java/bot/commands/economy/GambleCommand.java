@@ -1,6 +1,7 @@
 package bot.commands.economy;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -21,6 +22,7 @@ public class GambleCommand extends ICommand {
         this.aliases = Collections.singletonList("slot");
         this.minArgsCount = 1;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.ECONOMY;
     }
 
     @Override

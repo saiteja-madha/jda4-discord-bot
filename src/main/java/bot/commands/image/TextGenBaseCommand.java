@@ -1,6 +1,7 @@
 package bot.commands.image;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.data.ImageType;
@@ -21,6 +22,8 @@ public abstract class TextGenBaseCommand extends ICommand {
         this.usage = "<text>";
         this.minArgsCount = 1;
         this.help = "generates a meme for the provided text content";
+        this.category = CommandCategory.IMAGE;
+        this.cooldown = 5;
     }
 
     @Override

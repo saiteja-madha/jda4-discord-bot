@@ -1,5 +1,6 @@
 package bot.commands.social;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -17,6 +18,7 @@ public class ReputationCommand extends ICommand {
         this.help = "give reputation to a user";
         this.usage = "<@user>";
         this.minArgsCount = 1;
+        this.category = CommandCategory.SOCIAL;
     }
 
     @Override

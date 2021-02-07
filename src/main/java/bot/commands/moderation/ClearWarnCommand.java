@@ -1,5 +1,6 @@
 package bot.commands.moderation;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -17,6 +18,7 @@ public class ClearWarnCommand extends ICommand {
         this.minArgsCount = 1;
         this.usage = "<@member>";
         this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
+        this.category = CommandCategory.MODERATION;
     }
 
     @Override

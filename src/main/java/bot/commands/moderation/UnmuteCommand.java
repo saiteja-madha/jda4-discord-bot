@@ -1,5 +1,6 @@
 package bot.commands.moderation;
 
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.utils.ModerationUtils;
@@ -19,6 +20,7 @@ public class UnmuteCommand extends ICommand {
         this.minArgsCount = 1;
         this.botPermissions = new Permission[]{Permission.MANAGE_ROLES};
         this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
+        this.category = CommandCategory.MODERATION;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package bot.commands.admin.tickets;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
@@ -50,6 +51,7 @@ public class TicketSetup extends ICommand {
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.current = new HashMap<>();
         this.waiter = waiter;
+        this.category = CommandCategory.ADMINISTRATION;
     }
 
     @Override

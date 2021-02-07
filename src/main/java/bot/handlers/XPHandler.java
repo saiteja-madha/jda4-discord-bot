@@ -30,8 +30,7 @@ public class XPHandler {
 
         // Cooldown of 2 minutes to prevent spamming
         String key = event.getGuild().getId() + "|" + member.getId();
-        int remaining = this.getRemainingCooldown(key);
-        if (remaining > 0) return;
+        if (isOnCooldown(key)) return;
         else this.applyCooldown(key);
 
         int xpToAdd = getRandomXP();
@@ -67,16 +66,16 @@ public class XPHandler {
         return level * level * 100;
     }
 
-    public int getRemainingCooldown(String name) {
+    public boolean isOnCooldown(String name) {
         if (xpCooldown.containsKey(name)) {
             int time = (int) Math.ceil(OffsetDateTime.now().until(xpCooldown.get(name), ChronoUnit.MILLIS) / 1000D);
             if (time <= 0) {
                 xpCooldown.remove(name);
-                return 0;
+                return false;
             }
-            return time;
+            return true;
         }
-        return 0;
+        return false;
     }
 
     public void applyCooldown(String name) {

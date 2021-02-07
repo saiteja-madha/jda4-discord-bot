@@ -1,6 +1,7 @@
 package bot.commands.information;
 
 import bot.Constants;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import me.duncte123.botcommons.messaging.EmbedUtils;
@@ -15,6 +16,7 @@ public class AvatarCommand extends ICommand {
         this.name = "avatar";
         this.help = "displays avatar information about the user";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.category = CommandCategory.INFORMATION;
     }
 
     @Override
