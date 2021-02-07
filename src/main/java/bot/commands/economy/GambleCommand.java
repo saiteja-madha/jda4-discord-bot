@@ -64,7 +64,7 @@ public class GambleCommand extends ICommand {
 
         DataSource.INS.addCoins(ctx.getMember(), (reward - betAmount));
 
-        EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setAuthor(ctx.getAuthor().getName(), null, ctx.getAuthor().getEffectiveAvatarUrl())
                 .setDescription(str)
                 .setFooter(result + "\nUpdated Balance: " + balance + Constants.CURRENCY);

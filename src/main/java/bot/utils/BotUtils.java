@@ -1,5 +1,6 @@
 package bot.utils;
 
+import com.jagrosh.jdautilities.commons.utils.TableBuilder.Borders;
 import me.duncte123.botcommons.messaging.MessageUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -11,6 +12,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class BotUtils {
+
+    public static final Borders bordersToUse = Borders.newHeaderRowNamesFrameBorders("\u2500", "\u2502", "\u253C",
+            "\u251C", "\u2524", "\u252C", "\u2534", "\u250C", "\u2510", "\u2514", "\u2518", "\u2550", "\u256A",
+            "\u255E", "\u2561", "\u256B", "\u256B", "\u2565", "\u2568", "\u256C", "\u2500", "\u2502");
 
     public static void sendMsg(TextChannel channel, String message) {
         channel.sendMessage(message).queue(null, (error) -> { /* Ignore */ });
@@ -62,7 +67,7 @@ public class BotUtils {
 
     }
 
-    public static void sendSuccess(Message message){
+    public static void sendSuccess(Message message) {
         MessageUtils.sendSuccess(message);
     }
 

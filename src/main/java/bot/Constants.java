@@ -25,6 +25,8 @@ public class Constants {
     // Embed Colors
     public final static int BOT_EMBED = 0x068ADD;
     public final static int TRANSPARENT_EMBED = 0x36393F;
+    public final static int SUCCESS_EMBED = 0x00A56A;
+    public final static int ERROR_EMBED = 0xD61A3C;
 
     // Error Message
     public final static String API_ERROR = "Unexpected API Error! Try again later or contact [support server](" + Config.get("DISCORD_INVITE") + ")";

@@ -33,7 +33,7 @@ public class JokeCommand extends ICommand {
             final String url = data.get("url").asText();
             final String body = data.get("body").asText();
 
-            final EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            final EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setTitle(title, url)
                     .setDescription(body);
 

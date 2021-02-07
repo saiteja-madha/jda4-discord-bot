@@ -36,7 +36,7 @@ public class UrbanCommand extends ICommand {
             final JsonNode item = json.get("list").get(0);
             final String permaLink = item.get("permalink").asText();
 
-            final EmbedBuilder eb = EmbedUtils.defaultEmbed()
+            final EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
                     .setAuthor("Author: " + item.get("author").asText())
                     .setDescription("__**DEFINITION:**__\n\n")
                     .appendDescription(item.get("definition").asText())

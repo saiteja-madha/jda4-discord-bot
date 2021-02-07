@@ -117,7 +117,7 @@ public class ReactionHandler {
                 return;
             }
 
-            EmbedBuilder eb = EmbedUtils.defaultEmbed()
+            EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
                     .setDescription("**Translation:** \n" + translate[5] + "\n\n" +
                             "[view original](" + message.getJumpUrl() + ")")
                     .setFooter(translate[2] + " (" + translate[0] + ")" + " ⟶ " + translate[3] + " (" + translate[1] + ")\n" +

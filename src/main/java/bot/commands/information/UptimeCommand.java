@@ -26,7 +26,7 @@ public class UptimeCommand extends ICommand {
         long uptimeInSeconds = uptime / 1000;
         final String uptimeString = MiscUtils.formatTime(uptimeInSeconds);
 
-        EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setTitle("I am online since")
                 .setDescription("```" + uptimeString + "```");
 

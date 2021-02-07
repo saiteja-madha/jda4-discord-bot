@@ -28,6 +28,14 @@ public interface DataSource {
     void enableModlogs(String guildId, boolean isEnabled);
     void setModLogChannel(String guildId, String logChannel);
 
+    // Automod Settings
+    void setAutomodLogChannel(String guildId, @Nullable String channelId);
+    void antiInvites(String guildId, boolean isEnabled);
+    void antiLinks(String guildId, boolean isEnabled);
+    void setMaxLines(String guildId, int count);
+    void setMaxMentions(String guildId, int count);
+    void setMaxRoleMentions(String guildId, int count);
+
     // Reaction Role
     void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote);
     void removeReactionRole(String guildId, String channelId, String messageId, @Nullable String emote);
@@ -89,5 +97,8 @@ public interface DataSource {
     void enableGreetingImage(String guildId, boolean enabled, GreetingType type);
     void setGreetingImageMsg(String guildId, @Nullable String message, GreetingType type);
     void setGreetingImageBkg(String guildId, @Nullable String bkg, GreetingType type);
+
+    // Guild Data
+    void registerGuild(Guild guild, Member owner);
 
 }

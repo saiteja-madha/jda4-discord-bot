@@ -81,6 +81,13 @@ public class GuildUtils {
         return guild.getVoiceChannelById(id);
     }
 
+    @Nullable
+    public static TextChannel getTextChannelById(Guild guild, String id) {
+        if (id == null || id.equals(""))
+            return null;
+        return guild.getTextChannelById(id);
+    }
+
     public static void setVoiceChannelName(VoiceChannel channel, String name) {
         try {
             channel.getManager().setName(name).queue((__) -> {

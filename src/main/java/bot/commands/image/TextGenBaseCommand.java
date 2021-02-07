@@ -32,7 +32,7 @@ public abstract class TextGenBaseCommand extends ICommand {
         final User author = ctx.getAuthor();
 
         WebUtils.ins.getByteStream(ImageUtils.getTextGenerator(this.getEndpoint(), ctx.getArgsJoined())).async(bytes -> {
-            EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setColor(Constants.TRANSPARENT_EMBED)
                     .setFooter("Requested by: " + author.getAsTag());
 

@@ -14,6 +14,7 @@ import bot.commands.admin.mod_config.ModLogChannel;
 import bot.commands.admin.reaction_role.AddReactionRoleCommand;
 import bot.commands.admin.reaction_role.RemoveReactionRoleCommand;
 import bot.commands.admin.tickets.TicketSetup;
+import bot.commands.automod.*;
 import bot.commands.economy.BalanceCommand;
 import bot.commands.economy.DailyCommand;
 import bot.commands.economy.GambleCommand;
@@ -166,6 +167,15 @@ public class CommandHandler {
         addCommand(new Farewell());
         addCommand(new FarewellEmbed());
         addCommand(new FarewellImage());
+
+        // AUTOMOD COMMANDS
+        addCommand(new AntiLinksCommand());
+        addCommand(new AntiInvitesCommand());
+        addCommand(new AutoModLog());
+        addCommand(new AutoModStatus());
+        addCommand(new MaxLinesCommand());
+        addCommand(new MaxMentionsCommand());
+        addCommand(new MaxRoleMentionsCommand());
 
     }
 

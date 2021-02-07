@@ -47,7 +47,7 @@ public class AnimalCommand extends ICommand {
 
             final JsonNode data = json.get("data");
             final String image = data.get("file").asText();
-            final EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            final EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setImage(image)
                     .setFooter("Requested by " + ctx.getAuthor().getAsTag());
 

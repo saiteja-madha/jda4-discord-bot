@@ -93,7 +93,7 @@ public abstract class ICommand {
     private void sendCoolDown(GuildMessageReceivedEvent event, int seconds) {
         BotUtils.sendMsg(
                 event.getChannel(),
-                EmbedUtils.defaultEmbed().setAuthor("Kindly wait " + seconds + " seconds before using this command").build(),
+                EmbedUtils.getDefaultEmbed().setAuthor("Kindly wait " + seconds + " seconds before using this command").build(),
                 5
         );
     }

@@ -33,7 +33,7 @@ public abstract class GenBaseCommand extends ICommand {
 
         if (this.getImageCount() == 1) {
             WebUtils.ins.getByteStream(ImageUtils.getGenerator(this.getGenName(), imageUrl)).async(bytes -> {
-                EmbedBuilder embed = EmbedUtils.defaultEmbed()
+                EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                         .setColor(Constants.TRANSPARENT_EMBED)
                         .setFooter("Requested by: " + author.getAsTag());
 
@@ -42,7 +42,7 @@ public abstract class GenBaseCommand extends ICommand {
             });
         } else if (this.getImageCount() == 2) {
             WebUtils.ins.getByteStream(ImageUtils.getGenerator(this.getGenName(), author.getEffectiveAvatarUrl(), imageUrl)).async(bytes -> {
-                EmbedBuilder embed = EmbedUtils.defaultEmbed()
+                EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                         .setColor(Constants.TRANSPARENT_EMBED)
                         .setFooter("Requested by: " + author.getAsTag());
 

@@ -34,7 +34,7 @@ public class AvatarCommand extends ICommand {
         String x1024 = avatar + "?size=1024";
         String x2048 = avatar + "?size=2048";
 
-        final EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        final EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setAuthor("Avatar of " + user.getAsTag())
                 .setDescription("Links: "
                         + Constants.CIRCLE_BULLET + " [x64](" + x64 + ") "

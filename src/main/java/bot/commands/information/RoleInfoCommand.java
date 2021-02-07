@@ -67,7 +67,7 @@ public class RoleInfoCommand extends ICommand {
             description.append(role.getPermissions().stream().map(p -> "`, `" + p.getName()).reduce("", String::concat)
                     .substring(3)).append("`");
 
-        EmbedBuilder eb = EmbedUtils.defaultEmbed()
+        EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
                 .setColor(color)
                 .setDescription(description.toString())
                 .setTitle(title);

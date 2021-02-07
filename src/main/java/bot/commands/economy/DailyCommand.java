@@ -28,7 +28,7 @@ public class DailyCommand extends ICommand {
     public void handle(@NotNull CommandContext ctx) {
         final Economy economy = DataSource.INS.getEconomy(ctx.getMember());
 
-        EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setAuthor(ctx.getMember().getEffectiveName(), null, ctx.getAuthor().getEffectiveAvatarUrl());
 
         final Instant current = Instant.now();

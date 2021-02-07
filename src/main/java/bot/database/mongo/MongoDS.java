@@ -5,6 +5,7 @@ import bot.data.CounterType;
 import bot.data.GreetingType;
 import bot.database.DataSource;
 import bot.database.objects.*;
+import bot.utils.FixedSizeCache;
 import bot.utils.GuildUtils;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -27,16 +28,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MongoDS implements DataSource {
 
     private final MongoClient mongoClient;
 
     // Caching
-    private final Map<String, GuildSettings> settings = new HashMap<>();
+    private final FixedSizeCache<String, GuildSettings> settingsCache = new FixedSizeCache<>(Config.getInt("CACHE_SIZE"));
+    private final FixedSizeCache<String, CounterConfig> counterCache = new FixedSizeCache<>(Config.getInt("CACHE_SIZE"));
+    private final FixedSizeCache<String, Greeting.Welcome> welcomeCache = new FixedSizeCache<>(Config.getInt("CACHE_SIZE"));
+    private final FixedSizeCache<String, Greeting.Farewell> farewellCache = new FixedSizeCache<>(Config.getInt("CACHE_SIZE"));
 
     public MongoDS() {
         ConnectionString connString = new ConnectionString(Config.get("MONGO_CONNECTION_STRING"));
@@ -48,51 +50,91 @@ public class MongoDS implements DataSource {
         LOGGER.info("MongoDB successfully initialized");
     }
 
+    private @NotNull GuildSettings fetchSettings(String guildId) {
+        MongoCollection<Document> settingsCollection = mongoClient.getDatabase("discord").getCollection("guild_settings");
+        Bson filter = Filters.eq("_id", guildId);
+        Document document = settingsCollection.find(filter).first();
+        return (document == null) ? new GuildSettings() : new GuildSettings(document);
+    }
+
+    private void updateSettings(String guildId, String key, Object value) {
+        settingsCache.remove(guildId);
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
+        Bson filter = Filters.eq("_id", guildId);
+        Bson update = Updates.set(key, value);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
     @Override
     public GuildSettings getSettings(String guildId) {
-        if (!settings.containsKey(guildId))
-            settings.put(guildId, fetchSettings(guildId));
-        return settings.get(guildId);
+        if (!settingsCache.contains(guildId))
+            settingsCache.put(guildId, fetchSettings(guildId));
+        return settingsCache.get(guildId);
     }
 
     @Override
     public void setPrefix(String guildId, String newPrefix) {
-        invalidateCache(guildId);
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
-        Bson filter = Filters.eq("_id", guildId);
-        collection.updateOne(filter, Updates.set("prefix", newPrefix), new UpdateOptions().upsert(true));
+        updateSettings(guildId, "prefix", newPrefix);
     }
 
     @Override
     public void xpSystem(String guildId, boolean isEnabled) {
-        invalidateCache(guildId);
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
-        Bson filter = Filters.eq("_id", guildId);
-        collection.updateOne(filter, Updates.set("ranking_enabled", isEnabled), new UpdateOptions().upsert(true));
+        updateSettings(guildId, "ranking_enabled", isEnabled);
     }
 
     @Override
     public void setMaxWarnings(String guildId, int warnings) {
-        invalidateCache(guildId);
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
-        Bson filter = Filters.eq("_id", guildId);
-        collection.updateOne(filter, Updates.set("max_warnings", warnings), new UpdateOptions().upsert(true));
+        updateSettings(guildId, "max_warnings", warnings);
     }
 
     @Override
     public void enableModlogs(String guildId, boolean isEnabled) {
-        invalidateCache(guildId);
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
-        Bson filter = Filters.eq("_id", guildId);
-        collection.updateOne(filter, Updates.set("modlog_enabled", isEnabled), new UpdateOptions().upsert(true));
+        updateSettings(guildId, "modlog_enabled", isEnabled);
     }
 
     @Override
     public void setModLogChannel(String guildId, String logChannel) {
-        invalidateCache(guildId);
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
-        Bson filter = Filters.eq("_id", guildId);
-        collection.updateOne(filter, Updates.set("modlog_channel", logChannel), new UpdateOptions().upsert(true));
+        updateSettings(guildId, "modlog_channel", logChannel);
+    }
+
+    @Override
+    public void setFlagTranslation(String guildId, boolean isEnabled) {
+        updateSettings(guildId, "flag_translation", isEnabled);
+    }
+
+    @Override
+    public void updateTranslationChannels(String guildId, List<String> channels) {
+        updateSettings(guildId, "translation_channels", channels);
+    }
+
+    @Override
+    public void setAutomodLogChannel(String guildId, @Nullable String channelId) {
+        updateSettings(guildId, "automodlog_channel", channelId);
+    }
+
+    @Override
+    public void antiInvites(String guildId, boolean isEnabled) {
+        updateSettings(guildId, "anti_invites", isEnabled);
+    }
+
+    @Override
+    public void antiLinks(String guildId, boolean isEnabled) {
+        updateSettings(guildId, "anti_links", isEnabled);
+    }
+
+    @Override
+    public void setMaxLines(String guildId, int count) {
+        updateSettings(guildId, "max_lines", count);
+    }
+
+    @Override
+    public void setMaxMentions(String guildId, int count) {
+        updateSettings(guildId, "max_mentions", count);
+    }
+
+    @Override
+    public void setMaxRoleMentions(String guildId, int count) {
+        updateSettings(guildId, "max_role_mentions", count);
     }
 
     @Override
@@ -142,22 +184,6 @@ public class MongoDS implements DataSource {
         Document doc = collection.find(filter).first();
         return (doc == null) ? null : doc.getString("role_id");
 
-    }
-
-    @Override
-    public void setFlagTranslation(String guildId, boolean isEnabled) {
-        invalidateCache(guildId);
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
-        Bson filter = Filters.eq("_id", guildId);
-        collection.updateOne(filter, Updates.set("flag_translation", isEnabled), new UpdateOptions().upsert(true));
-    }
-
-    @Override
-    public void updateTranslationChannels(String guildId, List<String> channels) {
-        invalidateCache(guildId);
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_settings");
-        Bson filter = Filters.eq("_id", guildId);
-        collection.updateOne(filter, Updates.set("translation_channels", channels), new UpdateOptions().upsert(true));
     }
 
     @Override
@@ -422,12 +448,18 @@ public class MongoDS implements DataSource {
         return list;
     }
 
-    @Override
-    public CounterConfig getCounterConfig(String guildId) {
+    private CounterConfig fetchCounterConfig(String guildId) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("counter_config");
         Bson filter = Filters.eq("_id", guildId);
         Document document = collection.find(filter).first();
         return (document == null) ? new CounterConfig() : new CounterConfig(document);
+    }
+
+    @Override
+    public CounterConfig getCounterConfig(String guildId) {
+        if (!counterCache.contains(guildId))
+            counterCache.put(guildId, fetchCounterConfig(guildId));
+        return counterCache.get(guildId);
     }
 
     @Override
@@ -525,20 +557,32 @@ public class MongoDS implements DataSource {
         collection.deleteOne(filter);
     }
 
-    @Override
-    public Greeting.Welcome getWelcomeConfig(String guildId) {
+    private @Nullable Greeting.Welcome fetchWelcomeConfig(String guildId) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("welcome_config");
         Bson filter = Filters.eq("guild_id", guildId);
         Document document = collection.find(filter).first();
         return document == null ? null : new Greeting.Welcome(document);
     }
 
-    @Override
-    public Greeting.Farewell getFarewellConfig(String guildId) {
+    private @Nullable Greeting.Farewell fetchFarewellConfig(String guildId) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("farewell_config");
         Bson filter = Filters.eq("guild_id", guildId);
         Document document = collection.find(filter).first();
         return document == null ? null : new Greeting.Farewell(document);
+    }
+
+    @Override
+    public Greeting.Welcome getWelcomeConfig(String guildId) {
+        if (!welcomeCache.contains(guildId))
+            welcomeCache.put(guildId, fetchWelcomeConfig(guildId));
+        return welcomeCache.get(guildId);
+    }
+
+    @Override
+    public Greeting.Farewell getFarewellConfig(String guildId) {
+        if (!farewellCache.contains(guildId))
+            farewellCache.put(guildId, fetchFarewellConfig(guildId));
+        return farewellCache.get(guildId);
     }
 
     private void updateGreeting(String guildId, GreetingType type, String key, Object value) {
@@ -607,16 +651,17 @@ public class MongoDS implements DataSource {
         this.updateGreeting(guildId, type, "image_background", bkg);
     }
 
-    @NotNull
-    private GuildSettings fetchSettings(String guildId) {
-        MongoCollection<Document> settingsCollection = mongoClient.getDatabase("discord").getCollection("guild_settings");
-        Bson filter = Filters.eq("_id", guildId);
-        Document document = settingsCollection.find(filter).first();
-        return (document == null) ? new GuildSettings() : new GuildSettings(document);
-    }
+    @Override
+    public void registerGuild(Guild guild, Member owner) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("guild_data");
+        Document doc = new Document()
+                .append("guild_id", guild.getId())
+                .append("guild_name", guild.getName())
+                .append("guild_region", guild.getRegion().getName())
+                .append("guild_ownerId", owner.getId())
+                .append("guild_owner", owner.getUser().getAsTag());
 
-    private void invalidateCache(String guildId) {
-        settings.remove(guildId);
+        collection.insertOne(doc);
     }
 
 }

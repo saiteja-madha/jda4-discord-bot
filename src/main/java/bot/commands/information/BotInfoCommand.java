@@ -82,7 +82,7 @@ public class BotInfoCommand extends ICommand {
         str = str + Constants.ARROW_BULLET + " Websocket Ping: " + gatewayPing + "\n";
         str = str + "\n";
 
-        EmbedBuilder eb = EmbedUtils.defaultEmbed()
+        EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
                 .setTitle("About " + jda.getSelfUser().getName())
                 .setThumbnail(jda.getSelfUser().getEffectiveAvatarUrl())
                 .setDescription(str)

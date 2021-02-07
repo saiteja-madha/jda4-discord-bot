@@ -18,10 +18,10 @@ public class Economy {
         this.dailyStreak = 0;
     }
 
-    public Economy(Document document) {
-        this.coins = document.containsKey("coins") ? document.getInteger("coins") : 0;
-        this.dailyTimestamp = document.containsKey("daily_timestamp") ? document.getDate("daily_timestamp").toInstant() : null;
-        this.dailyStreak = document.containsKey("daily_streak") ? document.getInteger("daily_streak") : 0;
+    public Economy(Document doc) {
+        this.coins = doc.get("coins", 0);
+        this.dailyTimestamp = doc.containsKey("daily_timestamp") ? doc.getDate("daily_timestamp").toInstant() : null;
+        this.dailyStreak = doc.get("daily_streak", 0);
     }
 
 }

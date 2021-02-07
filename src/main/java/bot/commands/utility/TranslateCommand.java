@@ -31,7 +31,7 @@ public class TranslateCommand extends ICommand {
         final String outputCode = args.get(0);
 
         if (!Constants.langCodes.containsKey(outputCode)) {
-            EmbedBuilder eb = EmbedUtils.defaultEmbed()
+            EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
                     .setDescription("Invalid Translation code: `" + outputCode
                             + "`\n\n" + "Type `" + ctx.getPrefix() + "trcodes` to get a list of available translate codes");
             ctx.reply(eb.build());
@@ -49,7 +49,7 @@ public class TranslateCommand extends ICommand {
 
         String footer = translate[2] + " (" + translate[0] + ")" + " ⟶ " + translate[3] + " (" + translate[1] + ")";
 
-        EmbedBuilder eb = EmbedUtils.defaultEmbed()
+        EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
                 .setDescription(translate[5])
                 .setAuthor(ctx.getAuthor().getName() + " says", null, ctx.getAuthor().getEffectiveAvatarUrl())
                 .setFooter(footer);

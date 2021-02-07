@@ -24,7 +24,7 @@ public class DogCommand extends ICommand {
         WebUtils.ins.getJSONObject("https://dog.ceo/api/breeds/image/random").async((json) -> {
             String image = json.get("message").asText();
 
-            final EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            final EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setImage(image)
                     .setFooter("Requested by " + ctx.getAuthor().getAsTag());
 

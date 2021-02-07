@@ -43,7 +43,7 @@ public class GuildInfoCommand extends ICommand {
             str = str + Constants.ARROW + " **Region:** " + gs.region + "\n";
             str = str + "\n";
 
-            EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setThumbnail(guild.getIconUrl())
                     .setTitle("GUILD INFORMATION")
                     .setDescription(str)

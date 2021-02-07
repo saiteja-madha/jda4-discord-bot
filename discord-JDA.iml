@@ -26,7 +26,6 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.10.1" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.10.1" level="project" />
     <orderEntry type="library" name="Maven: com.jagrosh:jda-utilities-command:3.0.5" level="project" />
-    <orderEntry type="library" name="Maven: org.json:json:20160810" level="project" />
     <orderEntry type="library" name="Maven: com.jagrosh:jda-utilities-commons:3.0.5" level="project" />
     <orderEntry type="library" name="Maven: com.jagrosh:jda-utilities-doc:3.0.5" level="project" />
     <orderEntry type="library" name="Maven: com.jagrosh:jda-utilities-examples:3.0.5" level="project" />
@@ -43,5 +42,7 @@
     <orderEntry type="library" name="Maven: org.mongodb:bson:4.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.mongodb:mongodb-driver-core:4.2.0" level="project" />
     <orderEntry type="library" name="Maven: io.github.cdimascio:dotenv-java:2.2.0" level="project" />
+    <orderEntry type="library" name="Maven: club.minnced:discord-webhooks:0.5.4-rc" level="project" />
+    <orderEntry type="library" name="Maven: org.json:json:20180813" level="project" />
   </component>
 </module>

@@ -55,7 +55,7 @@ public class GithubCommand extends ICommand {
             final String location = !json.get("location").asText().equals("null") ? json.get("location").asText() : "Not provided";
             final String website = websiteProvided(json.get("blog").asText()) ? "[Click me](" + json.get("blog").asText() + ")" : "Not provided";
 
-            EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setAuthor("GitHub User: " + username, userPageLink, avatarUrl)
                     .addField("User Info",
                             "**Real Name**: *" + realName + "*\n" +

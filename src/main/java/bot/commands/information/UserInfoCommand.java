@@ -63,7 +63,7 @@ public class UserInfoCommand extends ICommand {
 
         }
 
-        EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setThumbnail(AVATAR)
                 .setDescription("**User information for " + member.getUser().getName() + ":**")
                 .addField("Name / Nickname", NAME, true)

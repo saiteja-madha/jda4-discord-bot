@@ -56,7 +56,7 @@ public class TransferCommand extends ICommand {
             final int[] sourceBal = DataSource.INS.removeCoins(ctx.getMember(), coinsToTransfer);
             final int[] targetBal = DataSource.INS.addCoins(target, coinsToTransfer);
 
-            EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setAuthor("Coins Transferred")
                     .setDescription(String.format("**Updated Balance:**" +
                                     "\n %s %s: %s" +

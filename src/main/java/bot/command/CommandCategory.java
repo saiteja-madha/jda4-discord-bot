@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 public enum CommandCategory {
 
     ADMINISTRATION("Admin"),
+    AUTOMOD("Automod"),
     ECONOMY("Economy"),
     FUN("Fun", "https://cdn4.iconfinder.com/data/icons/instagram-highlight/64/just-for-fun-512.png"),
     IMAGE("Image", "https://www.freeiconspng.com/uploads/multimedia-photo-icon-31.png"),

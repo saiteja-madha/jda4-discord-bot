@@ -5,13 +5,17 @@ import bot.database.DataSource;
 import bot.database.objects.CounterConfig;
 import bot.database.objects.GuildSettings;
 import bot.utils.ImageUtils;
+import bot.utils.WebhookUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
@@ -26,9 +30,11 @@ public class Listener implements EventListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Listener.class);
     private final Bot bot;
+    private final WebhookUtil webhookUtil;
 
     public Listener(Bot bot) {
         this.bot = bot;
+        this.webhookUtil = new WebhookUtil(Config.get("JOIN_LEAVE_WEBHOOK"));
     }
 
     public void onReady(@Nonnull ReadyEvent event) {
@@ -71,6 +77,8 @@ public class Listener implements EventListener {
         if (settings.isRankingEnabled) {
             bot.getThreadpool().execute(() -> bot.getXpHandler().handle(event, settings));
         }
+
+        bot.getAutomodHandler().performAutomod(settings.automod, event.getMessage());
 
     }
 
@@ -124,10 +132,35 @@ public class Listener implements EventListener {
 
     }
 
+    private void onGuildMessageDelete(@Nonnull GuildMessageDeleteEvent event) {
+        DataSource.INS.removeReactionRole(event.getGuild().getId(), event.getChannel().getId(), event.getMessageId(), null);
+    }
+
+    private void onGuildJoin(@Nonnull GuildJoinEvent event) {
+        final Guild guild = event.getGuild();
+        guild.retrieveOwner().queue((owner) -> {
+            LOGGER.info("Guild Joined - GuildID: {} | OwnerId: {} | Members: {}", guild.getId(), owner.getId(), guild.getMemberCount());
+            webhookUtil.sendWebhook(owner, guild, WebhookUtil.Action.JOIN);
+            DataSource.INS.registerGuild(guild, owner);
+        });
+    }
+
+    private void onGuildLeave(@Nonnull GuildLeaveEvent event) {
+        final Guild guild = event.getGuild();
+        guild.retrieveOwner().queue((owner) -> {
+            LOGGER.info("Guild Left - GuildID: {} | OwnerId: {} | Members: {}", guild.getId(), owner.getId(), guild.getMemberCount());
+            webhookUtil.sendWebhook(owner, guild, WebhookUtil.Action.LEAVE);
+        });
+    }
+
     @Override
     public void onEvent(@Nonnull GenericEvent event) {
         if (event instanceof ReadyEvent) {
             this.onReady((ReadyEvent) event);
+        } else if (event instanceof GuildJoinEvent) {
+            this.onGuildJoin((GuildJoinEvent) event);
+        } else if (event instanceof GuildLeaveEvent) {
+            this.onGuildLeave((GuildLeaveEvent) event);
         } else if (event instanceof GuildMessageReceivedEvent) {
             this.onGuildMessageReceived((GuildMessageReceivedEvent) event);
         } else if (event instanceof GuildMessageReactionAddEvent) {
@@ -138,6 +171,8 @@ public class Listener implements EventListener {
             this.onGuildMemberJoin((GuildMemberJoinEvent) event);
         } else if (event instanceof GuildMemberRemoveEvent) {
             this.onGuildMemberRemove((GuildMemberRemoveEvent) event);
+        } else if (event instanceof GuildMessageDeleteEvent) {
+            this.onGuildMessageDelete((GuildMessageDeleteEvent) event);
         }
     }
 

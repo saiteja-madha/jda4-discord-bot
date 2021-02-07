@@ -1,12 +1,8 @@
 package bot;
 
-import bot.handlers.CommandHandler;
-import bot.handlers.MemberHandler;
-import bot.handlers.ReactionHandler;
-import bot.handlers.XPHandler;
+import bot.handlers.*;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import me.duncte123.botcommons.messaging.EmbedUtils;
-import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -26,6 +22,7 @@ public class Bot {
     private final ReactionHandler reactionHandler;
     private final MemberHandler memberHandler;
     private final XPHandler xpHandler;
+    private final AutoModHandler automodHandler;
 
     private Bot() throws LoginException {
 
@@ -35,11 +32,11 @@ public class Bot {
         reactionHandler = new ReactionHandler();
         memberHandler = new MemberHandler(this);
         xpHandler = new XPHandler();
+        automodHandler = new AutoModHandler();
 
-        WebUtils.setUserAgent("Beta Bot");
         EmbedUtils.setEmbedBuilder(() -> new EmbedBuilder()
                 .setColor(Constants.BOT_EMBED)
-                .setFooter("Beta Bot")
+                .setFooter("Strange Bot")
         );
 
         JDABuilder.createDefault(Config.get("TOKEN"))
@@ -78,6 +75,10 @@ public class Bot {
 
     public XPHandler getXpHandler() {
         return xpHandler;
+    }
+
+    public AutoModHandler getAutomodHandler() {
+        return automodHandler;
     }
 
 }

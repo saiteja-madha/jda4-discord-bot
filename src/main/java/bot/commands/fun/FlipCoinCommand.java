@@ -26,7 +26,7 @@ public class FlipCoinCommand extends ICommand {
         String HEADS = "https://i.imgur.com/HavOS7J.png";
         String TAILS = "https://i.imgur.com/u1pmQMV.png";
 
-        EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setAuthor(ctx.getAuthor().getAsTag(), null, ctx.getAuthor().getEffectiveAvatarUrl())
                 .setImage(isHeads ? HEADS : TAILS);
 

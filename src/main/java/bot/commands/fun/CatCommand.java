@@ -24,7 +24,7 @@ public class CatCommand extends ICommand {
         WebUtils.ins.getJSONObject("https://aws.random.cat/meow").async((json) -> {
             String image = json.get("file").asText();
 
-            final EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            final EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setImage(image)
                     .setFooter("Requested by " + ctx.getAuthor().getAsTag());
 

@@ -184,7 +184,7 @@ public class LoggingUtils {
             }
         }
 
-        EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setColor(0xfe5442)
                 .setDescription(str.toString());
         if (target != null)

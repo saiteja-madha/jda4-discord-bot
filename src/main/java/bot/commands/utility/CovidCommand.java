@@ -55,7 +55,7 @@ public class CovidCommand extends ICommand {
             final int totalTests = (int) json.get("totalTests");
             final int testsPerOneMillion = (int) json.get("testsPerOneMillion");
 
-            EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setTitle("Covid Stats - " + country)
                     .addField("Cases", String.valueOf(cases), true)
                     .addField("Cases Today", String.valueOf(todayCases), true)

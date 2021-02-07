@@ -43,7 +43,7 @@ public class ReputationCommand extends ICommand {
 
         DataSource.INS.setReputation(target, 1);
 
-        EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setAuthor(ctx.getMember().getEffectiveName(), null, ctx.getAuthor().getEffectiveAvatarUrl())
                 .setDescription(target.getAsMention() + " +1 Rep!");
 

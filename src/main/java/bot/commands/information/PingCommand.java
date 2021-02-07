@@ -21,7 +21,7 @@ public class PingCommand extends ICommand {
         JDA jda = ctx.getJDA();
         jda.getRestPing().queue(
                 (ping) -> {
-                    EmbedBuilder embed = EmbedUtils.defaultEmbed()
+                    EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                             .setDescription(String.format("Reset ping: %sms\n" +
                                     "Websocket ping: %sms", ping, jda.getGatewayPing()));
 

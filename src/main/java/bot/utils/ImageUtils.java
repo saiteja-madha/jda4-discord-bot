@@ -141,7 +141,7 @@ public class ImageUtils {
         final String URI = urlBuilder.build().toString();
 
         if (config.isEmbedEnabled) {
-            EmbedBuilder embed = EmbedUtils.defaultEmbed();
+            EmbedBuilder embed = EmbedUtils.getDefaultEmbed();
             if (config.embedColor != null)
                 embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
             if (config.description != null)
@@ -279,7 +279,7 @@ public class ImageUtils {
     }
 
     private static void embedImage(TextChannel channel, byte[] bytes, EmbedBuilder eb, ImageType type) {
-        EmbedBuilder embed = (eb != null) ? eb : EmbedUtils.defaultEmbed()
+        EmbedBuilder embed = (eb != null) ? eb : EmbedUtils.getDefaultEmbed()
                 .setColor(Constants.TRANSPARENT_EMBED);
 
         if (bytes == null) {

@@ -288,7 +288,7 @@ public class TicketSetup extends ICommand {
     }
 
     private boolean saveConfig(String guildId, TextChannel channel, String title, String roleId) {
-        EmbedBuilder eb = EmbedUtils.defaultEmbed()
+        EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
                 .setAuthor(title)
                 .setDescription("To create a ticket react with  " + ":envelope_with_arrow:")
                 .setFooter("You can only have 1 open ticket at a time!");
@@ -308,7 +308,7 @@ public class TicketSetup extends ICommand {
     }
 
     private MessageEmbed getEmbed(String title, String message) {
-        EmbedBuilder embed = EmbedUtils.defaultEmbed();
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed();
         return embed.setAuthor(title)
                 .setDescription(message)
                 .setFooter("Type cancel to cancel setup")
@@ -342,7 +342,7 @@ public class TicketSetup extends ICommand {
             if (ran)
                 return;
             ran = true;
-            EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setAuthor("Setup Cancelled")
                     .setDescription(("Uh oh! You took longer than 2 minutes to respond, " + ctx.getAuthor().getAsMention() + "!"
                             + CANCEL));

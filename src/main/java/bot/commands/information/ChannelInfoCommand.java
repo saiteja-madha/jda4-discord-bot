@@ -55,7 +55,7 @@ public class ChannelInfoCommand extends ICommand {
                 + LINESTART + "isNews: **" + (targetChannel.isNews() ? Constants.TICK : Constants.X_MARK) + "**\n"
         );
 
-        EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setAuthor("Channel Details")
                 .setDescription(description);
 

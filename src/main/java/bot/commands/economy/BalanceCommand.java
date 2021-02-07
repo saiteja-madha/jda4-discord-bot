@@ -38,7 +38,7 @@ public class BalanceCommand extends ICommand {
 
         final int points = DataSource.INS.getEconomy(target).coins;
 
-        final EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        final EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setAuthor(target.getEffectiveName(), null, target.getUser().getEffectiveAvatarUrl())
                 .setDescription("**Coin Balance:** " + points + Constants.CURRENCY);
 

@@ -32,7 +32,7 @@ public abstract class FilterBaseCommand extends ICommand {
         final String imageUrl = ImageUtils.getImageFromCommand(ctx);
 
         WebUtils.ins.getByteStream(ImageUtils.getFilter(this.getEndpoint(), imageUrl)).async(bytes -> {
-            EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setColor(Constants.TRANSPARENT_EMBED)
                     .setFooter("Requested by: " + author.getAsTag());
 

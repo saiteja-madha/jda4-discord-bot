@@ -48,7 +48,7 @@ public class Podium extends GenBaseCommand {
         };
 
         WebUtils.ins.getByteStream(ImageUtils.getPodiumGen(avatarArr, nameArr)).async(bytes -> {
-            EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setColor(Constants.TRANSPARENT_EMBED)
                     .setFooter("Requested by: " + author.getAsTag());
 

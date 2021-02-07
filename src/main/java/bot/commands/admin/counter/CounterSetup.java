@@ -103,7 +103,7 @@ public class CounterSetup extends ICommand {
                 .append("MemberCount Channel: ").append(mvc == null ? Constants.X_MARK : Constants.TICK).append("\n")
                 .append("BotCount Channel: ").append(bvc == null ? Constants.X_MARK : Constants.TICK).append("\n");
 
-        EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setAuthor("Counter Configuration")
                 .setDescription(str.toString());
 

@@ -25,7 +25,7 @@ public class InviteCommand extends ICommand {
         desc += "Support Server: [Join here](" + Config.get("DISCORD_INVITE") + ")" + "\n";
         desc += "Invite Link: [Add me here](" + inviteUrl + ")" + "\n";
 
-        final EmbedBuilder embed = EmbedUtils.defaultEmbed()
+        final EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setAuthor("Wew! I made it threw the ~waves~")
                 .setDescription(desc);
 

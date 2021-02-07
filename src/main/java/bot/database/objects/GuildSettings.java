@@ -4,10 +4,7 @@ import bot.Config;
 import org.bson.Document;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class GuildSettings {
@@ -23,6 +20,8 @@ public class GuildSettings {
     public final boolean modlogEnabled;
     @Nullable
     public final String modlogChannel;
+    @Nullable
+    public final GuildSettings.Automod automod;
 
     public GuildSettings() {
         this.prefix = Config.get("PREFIX");
@@ -34,6 +33,7 @@ public class GuildSettings {
         this.maxWarnings = 3;
         this.modlogEnabled = false;
         this.modlogChannel = null;
+        this.automod = null;
     }
 
     public GuildSettings(Document doc) {
@@ -46,18 +46,26 @@ public class GuildSettings {
         this.maxWarnings = doc.get("max_warnings", 3);
         this.modlogEnabled = doc.get("modlog_enabled", false);
         this.modlogChannel = doc.getString("modlog_channel");
+        this.automod = new Automod(doc);
     }
 
-    public GuildSettings(ResultSet rs) throws SQLException {
-        this.prefix = rs.getString("prefix");
-        this.flagTranslation = rs.getInt("flag_translation") == 1;
-        this.translationChannels = Arrays.asList(rs.getString("translation_channels").split(","));
-        this.isRankingEnabled = rs.getInt("ranking_enabled") == 1;
-        this.levelUpMessage = rs.getString("levelup_message");
-        this.levelUpChannel = rs.getString("levelup_channel");
-        this.maxWarnings = rs.getInt("max_warnings");
-        this.modlogEnabled = rs.getInt("modlog_enabled") == 1;
-        this.modlogChannel = rs.getString("modlog_channel");
+    public static class Automod {
+
+        public final int maxMentions, maxRoleMentions;
+        public final int maxLines;
+        public final boolean preventLinks, preventInvites;
+        @Nullable
+        public final String logChannel;
+
+        private Automod(Document doc) {
+            this.maxMentions = doc.get("max_mentions", 0);
+            this.maxRoleMentions = doc.get("max_role_mentions", 0);
+            this.maxLines = doc.get("max_lines", 0);
+            this.preventLinks = doc.get("anti_links", false);
+            this.preventInvites = doc.get("anti_invites", false);
+            this.logChannel = doc.getString("automodlog_channel");
+        }
+
     }
 
 }

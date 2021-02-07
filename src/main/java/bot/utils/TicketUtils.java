@@ -123,7 +123,7 @@ public class TicketUtils {
                     + Constants.WHITE_SMALL_SQUARE + "**Reason:** " + (reason != null ? MiscUtils.escapeString(reason) : "No reason provided") + "\n\n"
                     + logsString;
 
-            EmbedBuilder embed = EmbedUtils.defaultEmbed()
+            EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setAuthor("Ticket Closed");
 
             if (logChannel != null) {
@@ -166,7 +166,7 @@ public class TicketUtils {
 
         CompletableFuture<TextChannel> submit = action.submit();
 
-        EmbedBuilder meb = EmbedUtils.defaultEmbed()
+        EmbedBuilder meb = EmbedUtils.getDefaultEmbed()
                 .setAuthor("Ticket #" + ticketNumber)
                 .setDescription(String.format(OPEN_MSG, MiscUtils.escapeString(member.getUser().getAsTag()),
                         (reason != null ? reason : "No reason provided!")))
@@ -178,7 +178,7 @@ public class TicketUtils {
         msg.addReaction(Constants.LOCK).queue();
         tc.sendMessage(member.getAsMention()).queue();
 
-        EmbedBuilder eb = EmbedUtils.defaultEmbed()
+        EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
                 .setAuthor("Ticket Created")
                 .setDescription(""
                         + Constants.WHITE_SMALL_SQUARE + "**Ticket:** #" + ticketNumber + "\n"
