@@ -1,8 +1,8 @@
 package bot.handlers;
 
+import bot.Bot;
 import bot.command.CommandContext;
 import bot.command.ICommand;
-import bot.commands.admin.ReactionCommand;
 import bot.commands.admin.SetPrefixCommand;
 import bot.commands.admin.XPSystem;
 import bot.commands.admin.counter.CounterSetup;
@@ -24,9 +24,11 @@ import bot.commands.image.filters.*;
 import bot.commands.image.generators.*;
 import bot.commands.information.*;
 import bot.commands.moderation.*;
+import bot.commands.owner.EvalCommand;
+import bot.commands.owner.ShutDownCommand;
+import bot.commands.owner.UsageCommand;
 import bot.commands.social.ReputationCommand;
 import bot.commands.utility.*;
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -48,10 +50,9 @@ public class CommandHandler {
     private final ArrayList<ICommand> commands = new ArrayList<>();
     private final HashMap<String, Integer> commandIndex = new HashMap<>();
     private final HashMap<String, OffsetDateTime> cooldowns = new HashMap<>();
+    private final HashMap<String, Integer> uses = new HashMap<>();
 
-    public CommandHandler(EventWaiter waiter) {
-
-        addCommand(new ReactionCommand());
+    public CommandHandler(Bot bot) {
 
         // SOCIAL COMMANDS
         addCommand(new ReputationCommand());
@@ -78,7 +79,7 @@ public class CommandHandler {
         addCommand(new GithubCommand());
         addCommand(new HasteCommand());
         addCommand(new HelpCommand());
-        addCommand(new TranslateCodes(waiter));
+        addCommand(new TranslateCodes(bot.getWaiter()));
         addCommand(new TranslateCommand());
         addCommand(new UrbanCommand());
 
@@ -148,7 +149,7 @@ public class CommandHandler {
         addCommand(new VMuteCommand());
         addCommand(new VUnMuteCommand());
         addCommand(new WarnCommand());
-        addCommand(new WarningsCommand(waiter));
+        addCommand(new WarningsCommand(bot.getWaiter()));
 
         // ADMIN COMMANDS
         addCommand(new SetPrefixCommand());
@@ -160,7 +161,7 @@ public class CommandHandler {
         addCommand(new AddReactionRoleCommand());
         addCommand(new RemoveReactionRoleCommand());
         addCommand(new CounterSetup());
-        addCommand(new TicketSetup(waiter));
+        addCommand(new TicketSetup(bot.getWaiter()));
         addCommand(new Welcome());
         addCommand(new WelcomeEmbed());
         addCommand(new WelcomeImage());
@@ -176,6 +177,11 @@ public class CommandHandler {
         addCommand(new MaxLinesCommand());
         addCommand(new MaxMentionsCommand());
         addCommand(new MaxRoleMentionsCommand());
+
+        // OWNER COMMANDS
+        addCommand(new ShutDownCommand(bot));
+        addCommand(new UsageCommand(bot.getWaiter()));
+        addCommand(new EvalCommand());
 
     }
 
@@ -219,6 +225,7 @@ public class CommandHandler {
         if (cmd != null) {
             List<String> args = Arrays.asList(split).subList(1, split.length);
             CommandContext ctx = new CommandContext(event, args, invoke, prefix, this);
+            uses.put(cmd.getName(), uses.getOrDefault(cmd.getName(), 0) + 1);
             cmd.run(ctx);
         }
 
@@ -246,6 +253,10 @@ public class CommandHandler {
         cooldowns.keySet().stream().filter((str) -> (cooldowns.get(str).isBefore(now))).collect(Collectors.toList())
                 .forEach(cooldowns::remove);
         LOGGER.info("Command cooldown cache cleared - " + size + " keys released");
+    }
+
+    public int getCommandUses(String name) {
+        return uses.getOrDefault(name, 0);
     }
 
 }

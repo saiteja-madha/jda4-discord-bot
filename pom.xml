@@ -77,5 +77,10 @@
             <artifactId>discord-webhooks</artifactId>
             <version>0.5.4-rc</version>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>3.0.6</version>
+        </dependency>
     </dependencies>
 </project>

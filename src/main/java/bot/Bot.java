@@ -28,7 +28,7 @@ public class Bot {
 
         threadpool = Executors.newScheduledThreadPool((Config.getInt("threadpool_size")));
         waiter = new EventWaiter();
-        cmdHandler = new CommandHandler(waiter);
+        cmdHandler = new CommandHandler(this);
         reactionHandler = new ReactionHandler();
         memberHandler = new MemberHandler(this);
         xpHandler = new XPHandler();

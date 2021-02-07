@@ -44,5 +44,6 @@
     <orderEntry type="library" name="Maven: io.github.cdimascio:dotenv-java:2.2.0" level="project" />
     <orderEntry type="library" name="Maven: club.minnced:discord-webhooks:0.5.4-rc" level="project" />
     <orderEntry type="library" name="Maven: org.json:json:20180813" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.groovy:groovy:3.0.6" level="project" />
   </component>
 </module>
