@@ -25,9 +25,15 @@ public class Greeting {
     public Greeting(Document doc, GreetingType type) {
         this.isEmbedEnabled = doc.getBoolean("embed_enabled", true);
         this.channel = doc.getString("channel_id");
-        this.description = doc.getString("description");
+        if (type == GreetingType.WELCOME) {
+            this.description = doc.get("description", "Welcome to our server {member} ");
+            this.embedColor = doc.get("embed_color", "#1abc9c");
+        } else {
+            this.description = doc.get("description", "{member} has left {server}");
+            this.embedColor = doc.get("embed_color", "#eb4d4b");
+        }
         this.footer = doc.getString("footer");
-        this.embedColor = doc.getString("embed_color");
+
         this.isImageEnabled = doc.getBoolean("image_enabled", true);
         this.imageMessage = doc.getString("image_message");
         this.imageBkg = doc.getString("image_background");

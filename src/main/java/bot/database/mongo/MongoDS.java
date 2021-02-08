@@ -582,33 +582,21 @@ public class MongoDS implements DataSource {
 
     private void updateGreeting(String guildId, GreetingType type, String key, Object value) {
         MongoCollection<Document> collection;
-        if (type == GreetingType.WELCOME)
+        if (type == GreetingType.WELCOME) {
             collection = mongoClient.getDatabase("discord").getCollection("welcome_config");
-        else
+            welcomeCache.remove(guildId);
+        } else {
             collection = mongoClient.getDatabase("discord").getCollection("farewell_config");
+            farewellCache.remove(guildId);
+        }
         Bson filter = Filters.eq("guild_id", guildId);
         Bson update = Updates.set(key, value);
         collection.updateOne(filter, update, new UpdateOptions().upsert(true));
     }
 
     @Override
-    public void setGreetingChannel(String guildId, String channelId, GreetingType type) {
+    public void setGreetingChannel(String guildId, @Nullable String channelId, GreetingType type) {
         this.updateGreeting(guildId, type, "channel_id", channelId);
-    }
-
-    @Override
-    public void enableGreeting(String guildId, boolean enabled, GreetingType type) {
-        MongoCollection<Document> collection;
-        if (type == GreetingType.WELCOME)
-            collection = mongoClient.getDatabase("discord").getCollection("welcome_config");
-        else
-            collection = mongoClient.getDatabase("discord").getCollection("farewell_config");
-        Bson filter = Filters.eq("guild_id", guildId);
-        Bson update = Updates.combine(
-                Updates.set("embed_enabled", enabled),
-                Updates.set("image_enabled", enabled)
-        );
-        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
     }
 
     @Override

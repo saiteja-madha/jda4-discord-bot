@@ -7,6 +7,7 @@ import bot.data.GreetingType;
 import bot.database.DataSource;
 import bot.utils.ImageUtils;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -18,8 +19,7 @@ public abstract class GreetingBase extends ICommand {
     public GreetingBase(GreetingType type) {
         this.type = type;
         String text = type.getText().toLowerCase();
-        this.usage = "`{p}{i} <ON | OFF>` : enable or disable " + text + " message\n" +
-                "`{p}{i} channel <#channel>` : configure " + text + " channel\n" +
+        this.usage = "`{p}{i} <#channel | OFF>` : enable or disable " + text + " message\n" +
                 "`{p}{i} preview` : preview the configured " + text + "\n";
         this.help = "setup " + text + " message in your discord server";
         this.multilineHelp = true;
@@ -33,43 +33,29 @@ public abstract class GreetingBase extends ICommand {
         final List<String> args = ctx.getArgs();
         final String input = args.get(0);
 
-        switch (input.toLowerCase()) {
-
-            case "on":
-            case "enable":
-                DataSource.INS.enableGreeting(ctx.getGuildId(), true, type);
-                ctx.replyWithSuccess("Configuration saved! " + type.getText() + " is now enabled");
-                break;
-
-            case "off":
-            case "disable":
-                DataSource.INS.enableGreeting(ctx.getGuildId(), false, type);
-                ctx.replyWithSuccess("Configuration saved! " + type.getText() + " is now disabled");
-                break;
-
-            case "channel":
-                setChannel(ctx);
-                break;
-
-            case "preview":
-                sendPreview(ctx);
-                break;
-
-            default:
-                this.sendUsageEmbed(ctx, "Incorrect Arguments");
-
-        }
-
-    }
-
-    private void setChannel(CommandContext ctx) {
-        if (ctx.getMessage().getMentionedChannels().isEmpty()) {
-            ctx.reply("Please mention the channel where you want to send the " + type.getText().toLowerCase() + " message");
+        if (input.equalsIgnoreCase("preview")) {
+            sendPreview(ctx);
             return;
         }
 
-        DataSource.INS.setGreetingChannel(ctx.getGuildId(), ctx.getMessage().getMentionedChannels().get(0).getId(), type);
-        ctx.replyWithSuccess("Configuration saved!");
+        List<TextChannel> mentionedChannels = ctx.getMessage().getMentionedChannels();
+        TextChannel targetChannel = null;
+
+        if (!input.equalsIgnoreCase("off") && !input.equalsIgnoreCase("disable")) {
+            if (mentionedChannels.isEmpty()) {
+                this.sendUsageEmbed(ctx, "Incorrect Usage");
+                return;
+            }
+            targetChannel = mentionedChannels.get(0);
+        }
+
+        DataSource.INS.setGreetingChannel(ctx.getGuildId(), (targetChannel == null) ? null : targetChannel.getId(), type);
+        if (targetChannel == null)
+            ctx.replyWithSuccess("Configuration saved! " + type.getText() + " message is disabled");
+        else
+            ctx.replyWithSuccess("Configuration saved! " + type.getText() + " message channel is set to " + targetChannel.getAsMention());
+
+
     }
 
     private void sendPreview(CommandContext ctx) {

@@ -83,8 +83,7 @@ public interface DataSource {
     // Welcome & Farewell Data
     @Nullable Greeting getWelcomeConfig(String guildId);
     @Nullable Greeting getFarewellConfig(String guildId);
-    void setGreetingChannel(String guildId, String channelId, GreetingType type);
-    void enableGreeting(String guildId, boolean enabled, GreetingType type);
+    void setGreetingChannel(String guildId, @Nullable String channelId, GreetingType type);
 
     // Welcome & Farewell Embed
     void enableGreetingEmbed(String guildId, boolean enabled, GreetingType type);
