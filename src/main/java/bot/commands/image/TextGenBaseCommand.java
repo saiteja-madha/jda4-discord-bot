@@ -36,9 +36,11 @@ public abstract class TextGenBaseCommand extends ICommand {
                     .setColor(Constants.TRANSPARENT_EMBED)
                     .setFooter("Requested by: " + author.getAsTag());
 
-            ImageUtils.sendImage(channel, bytes, this.getImageType().getFileName());
             ImageUtils.embedImage(channel, embed, bytes, this.getImageType());
 
+        }, err -> {
+            LOGGER.error(err.getMessage());
+            ctx.replyError(Constants.API_ERROR);
         });
 
     }

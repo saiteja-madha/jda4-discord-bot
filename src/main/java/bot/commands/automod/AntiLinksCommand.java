@@ -31,16 +31,16 @@ public class AntiLinksCommand extends ICommand {
         else if (input.equalsIgnoreCase("on"))
             antilink = true;
         else {
-            ctx.reply("Not a valid input");
+            this.sendUsageEmbed(ctx, "Incorrect Argument");
             return;
         }
 
         DataSource.INS.antiLinks(ctx.getGuildId(), antilink);
 
         if (!antilink)
-            ctx.reply("Messages will not be filtered for links now");
+            ctx.replyWithSuccess("Messages will not be filtered for links now");
         else
-            ctx.reply("Messages with links will now be automatically deleted");
+            ctx.replyWithSuccess("Messages with links will now be automatically deleted");
 
     }
 

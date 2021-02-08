@@ -1,6 +1,8 @@
 package bot.utils;
 
+import bot.Constants;
 import com.jagrosh.jdautilities.commons.utils.TableBuilder.Borders;
+import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.messaging.MessageUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -35,6 +37,13 @@ public class BotUtils {
         channel.sendMessage(embed)
                 .queue((m) -> m.delete().queueAfter(time, TimeUnit.SECONDS, null, (error) -> { /* Ignore */ })
                         , null);
+    }
+
+    public static void sendErrorEmbed(TextChannel channel, String message) {
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
+                .setDescription(message)
+                .setColor(Constants.ERROR_EMBED);
+        channel.sendMessage(embed.build()).queue(null, (error) -> { /* Ignore */ });
     }
 
     public static void sendDM(User user, EmbedBuilder embed, Consumer<? super Object> success, Consumer<? super Throwable> error) {

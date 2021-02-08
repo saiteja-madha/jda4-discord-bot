@@ -38,6 +38,9 @@ public abstract class FilterBaseCommand extends ICommand {
 
             ImageUtils.embedImage(channel, embed, bytes, this.getImageType());
 
+        }, err -> {
+            LOGGER.error(err.getMessage());
+            ctx.replyError(Constants.API_ERROR);
         });
 
     }

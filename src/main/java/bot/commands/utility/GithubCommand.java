@@ -1,5 +1,6 @@
 package bot.commands.utility;
 
+import bot.Constants;
 import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
@@ -72,6 +73,9 @@ public class GithubCommand extends ICommand {
 
             ctx.reply(embed.build());
 
+        }, err -> {
+            LOGGER.error(err.getMessage());
+            ctx.replyError(Constants.API_ERROR);
         });
 
     }

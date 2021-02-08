@@ -35,7 +35,7 @@ public class FlagtrChannels extends ICommand {
         List<String> collect = menChannels.stream().map(ISnowflake::getId).collect(Collectors.toList());
         DataSource.INS.updateTranslationChannels(ctx.getGuild().getId(), collect);
 
-        ctx.reply("Successfully updated flag translation channels");
+        ctx.replyWithSuccess("Successfully updated flag translation channels");
 
     }
 

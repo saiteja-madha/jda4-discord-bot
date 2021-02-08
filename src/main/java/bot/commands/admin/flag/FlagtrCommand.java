@@ -31,7 +31,7 @@ public class FlagtrCommand extends ICommand {
             return;
         }
 
-        ctx.reply("Success. Configuration saved!");
+        ctx.replyWithSuccess("Success. Configuration saved!");
 
     }
 

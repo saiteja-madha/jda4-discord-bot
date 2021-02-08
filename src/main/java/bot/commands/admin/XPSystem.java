@@ -36,7 +36,7 @@ public class XPSystem extends ICommand {
         }
 
         DataSource.INS.xpSystem(ctx.getGuild().getId(), ranking);
-        ctx.reply("Configuration saved! XP System is now " + (ranking ? "enabled" : "disabled"));
+        ctx.replyWithSuccess("Configuration saved! XP System is now " + (ranking ? "enabled" : "disabled"));
 
     }
 

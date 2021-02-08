@@ -17,6 +17,17 @@ public abstract class GreetingImageBase extends ICommand {
 
     public GreetingImageBase(GreetingType type) {
         this.type = type;
+        String text = type.getText().toLowerCase();
+        this.usage = "`{p}{i} <ON | OFF>` : enable or disable " + text + " embed\n" +
+                "`{p}{i} msg <text>` : setup " + text + " image message\n" +
+                "`{p}{i} bkg <image-url>` : setup " + text + " image background\n\n" +
+                "**Replacements**\n```" +
+                "{server} - Server Name\n" +
+                "{member} - Member Name\n" +
+                "{count} - Server Member Count\n" +
+                "```";
+        this.multilineHelp = true;
+        this.help = "";
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.category = CommandCategory.ADMINISTRATION;
@@ -31,13 +42,13 @@ public abstract class GreetingImageBase extends ICommand {
             case "on":
             case "enable":
                 DataSource.INS.enableGreetingImage(ctx.getGuildId(), true, type);
-                ctx.reply("Configuration saved!");
+                ctx.replyWithSuccess("Configuration saved! " + type.getText() + " image is now enabled");
                 break;
 
             case "off":
             case "disable":
                 DataSource.INS.enableGreetingImage(ctx.getGuildId(), false, type);
-                ctx.reply("Configuration saved!");
+                ctx.replyWithSuccess("Configuration saved! " + type.getText() + " embed is now disabled");
                 break;
 
             case "msg":
@@ -50,7 +61,7 @@ public abstract class GreetingImageBase extends ICommand {
                 break;
 
             default:
-                ctx.reply("Did you provide a valid argument?");
+                this.sendUsageEmbed(ctx, "Incorrect Arguments");
 
         }
 
@@ -64,7 +75,7 @@ public abstract class GreetingImageBase extends ICommand {
 
         String message = String.join(" ", ctx.getArgs().subList(1, ctx.getArgs().size()));
         DataSource.INS.setGreetingImageMsg(ctx.getGuildId(), message, type);
-        ctx.reply("Configuration saved!");
+        ctx.replyWithSuccess("Configuration saved! Image message is updated");
 
     }
 
@@ -82,7 +93,7 @@ public abstract class GreetingImageBase extends ICommand {
         }
 
         DataSource.INS.setGreetingImageBkg(ctx.getGuildId(), url, type);
-        ctx.reply("Configuration saved!");
+        ctx.replyWithSuccess("Configuration saved! Image background changed");
 
     }
 

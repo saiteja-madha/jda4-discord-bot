@@ -88,4 +88,16 @@ public class CommandContext {
         BotUtils.sendMsg(this.getChannel(), embed);
     }
 
+    public void replyWithSuccess(String message) {
+        BotUtils.sendSuccessWithMessage(this.getMessage(), message);
+    }
+
+    public void replyWithError(String message) {
+        BotUtils.sendErrorWithMessage(this.getMessage(), message);
+    }
+
+    public void replyError(String message) {
+        BotUtils.sendErrorEmbed(this.getChannel(), message);
+    }
+
 }

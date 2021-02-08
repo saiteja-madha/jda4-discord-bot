@@ -37,7 +37,7 @@ public class AutoModLog extends ICommand {
             if (!ModerationUtils.canSendLogs(ctx.getChannel(), targetChannel))
                 return;
             DataSource.INS.setAutomodLogChannel(ctx.getGuildId(), targetChannel.getId());
-            ctx.reply("Configuration saved! Log-channel updated");
+            ctx.replyWithSuccess("Configuration saved! Log-channel updated");
         }
 
     }

@@ -45,9 +45,9 @@ public class MaxLinesCommand extends ICommand {
         DataSource.INS.setMaxLines(ctx.getGuildId(), maxlines);
 
         if (maxlines == 0)
-            ctx.reply("There is now no maximum line limit.");
+            ctx.replyWithSuccess("Maximum line limit is disabled.");
         else
-            ctx.reply("Messages longer than `" + maxlines + "` lines will now be automatically deleted");
+            ctx.replyWithSuccess("Messages longer than `" + maxlines + "` lines will now be automatically deleted");
 
     }
 

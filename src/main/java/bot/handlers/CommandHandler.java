@@ -22,6 +22,9 @@ import bot.commands.economy.TransferCommand;
 import bot.commands.fun.*;
 import bot.commands.image.filters.*;
 import bot.commands.image.generators.*;
+import bot.commands.image.text_generators.Achievement;
+import bot.commands.image.text_generators.BeLikeBill;
+import bot.commands.image.text_generators.Presentation;
 import bot.commands.information.*;
 import bot.commands.moderation.*;
 import bot.commands.owner.EvalCommand;
@@ -128,6 +131,9 @@ public class CommandHandler {
         addCommand(new Trash());
         addCommand(new Wanted());
         addCommand(new Podium());
+        addCommand(new Achievement());
+        addCommand(new BeLikeBill());
+        addCommand(new Presentation());
 
         // MODERATION COMMANDS
         addCommand(new BanCommand());

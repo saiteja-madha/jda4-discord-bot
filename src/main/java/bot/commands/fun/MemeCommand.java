@@ -1,5 +1,6 @@
 package bot.commands.fun;
 
+import bot.Constants;
 import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
@@ -35,6 +36,9 @@ public class MemeCommand extends ICommand {
             final EmbedBuilder embed = EmbedUtils.embedImageWithTitle(title, url, image);
 
             ctx.reply(embed.build());
+        }, err -> {
+            LOGGER.error(err.getMessage());
+            ctx.replyError(Constants.API_ERROR);
         });
     }
 

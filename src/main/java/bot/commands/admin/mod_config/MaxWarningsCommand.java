@@ -34,7 +34,7 @@ public class MaxWarningsCommand extends ICommand {
             }
 
             DataSource.INS.setMaxWarnings(ctx.getGuildId(), input);
-            ctx.reply("Successfully updated max warnings to `" + input + "`");
+            ctx.replyWithSuccess("Successfully updated max warnings to `" + input + "`");
 
         } catch (NumberFormatException e) {
             ctx.reply("Incorrect argument `" + args.get(0) + "`. Please provide a valid number input");

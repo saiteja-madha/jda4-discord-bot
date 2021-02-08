@@ -39,14 +39,15 @@ public class TicketSetup extends ICommand {
 
     public TicketSetup(EventWaiter waiter) {
         this.name = "ticket";
-        this.usage = "`{p}ticket setup` : start interactive ticket setup\n" +
-                "`{p}ticket rem` : remove the existing ticket configuration\n" +
-                "`{p}ticket limit <number>` : set max tickets that can exist at a time\n" +
-                "`{p}ticket log <#channel>` : setup log channel for new tickets\n" +
-                "`{p}ticket adminonly <ON|OFF>` : toggle if admins can only close a ticket\n" +
-                "`{p}ticket close` : close a current ticket\n" +
-                "`{p}ticket closeall` : close all open tickets\n";
+        this.usage = "`{p}{i} setup` : start interactive ticket setup\n" +
+                "`{p}{i} rem` : remove the existing ticket configuration\n" +
+                "`{p}{i} limit <number>` : set max tickets that can exist at a time\n" +
+                "`{p}{i} log <#channel>` : setup log channel for new tickets\n" +
+                "`{p}{i} adminonly <ON|OFF>` : toggle if admins can only close a ticket\n" +
+                "`{p}{i} close` : close a current ticket\n" +
+                "`{p}{i} closeall` : close all open tickets\n";
         this.help = "setup ticketing system in your discord server";
+        this.multilineHelp = true;
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.current = new HashMap<>();
@@ -260,47 +261,45 @@ public class TicketSetup extends ICommand {
                 List<Role> list = FinderUtil.findRoles(query, ctx.getGuild());
 
                 if (list.isEmpty()) {
-                    BotUtils.sendErrorWithMessage(e.getMessage(),
-                            "Uh oh, I couldn't find any roles called '" + query + "'! Try again");
+                    ctx.replyWithError("Uh oh, I couldn't find any roles called '" + query + "'! Try again");
                     waitForRoles(ctx, channel, title);
                     return;
                 }
 
                 if (list.size() > 1) {
-                    BotUtils.sendErrorWithMessage(e.getMessage(),
-                            "Oh... there are multiple roles with that name. Please be more specific!");
+                    ctx.replyWithError("Oh... there are multiple roles with that name. Please be more specific!");
                     waitForRoles(ctx, channel, title);
                     return;
                 }
 
                 Role role = list.get(0);
                 roleId = role.getId();
-                BotUtils.sendSuccessWithMessage(e.getMessage(), "Alright! `" + role.getName() + "` can now view the newly created tickets");
+                ctx.replyWithSuccess("Alright! `" + role.getName() + "` can now view the newly created tickets");
 
             }
-
+            BotUtils.sendSuccess(e.getMessage());
             if (saveConfig(ctx.getGuild().getId(), channel, title, roleId))
-                BotUtils.sendErrorWithMessage(ctx.getMessage(), "Ticket system is successfully configured in " + channel.getAsMention() + "!");
+                ctx.replyWithSuccess("Ticket system is successfully configured in " + channel.getAsMention() + "!");
             else
-                ctx.reply("Uh oh. Something went wrong and I wasn't able to create a ticket message." + CANCEL);
+                ctx.replyError("Uh oh. Something went wrong and I wasn't able to create a ticket message." + CANCEL);
 
         });
     }
 
     private boolean saveConfig(String guildId, TextChannel channel, String title, String roleId) {
-        EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
-                .setAuthor(title)
-                .setDescription("To create a ticket react with  " + ":envelope_with_arrow:")
-                .setFooter("You can only have 1 open ticket at a time!");
-
         try {
+            EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
+                    .setAuthor(title)
+                    .setDescription("To create a ticket react with  " + ":envelope_with_arrow:")
+                    .setFooter("You can only have 1 open ticket at a time!");
+
             Message message = channel.sendMessage(eb.build()).submit().get();
             message.addReaction(Constants.ENVELOPE_WITH_ARROW).queue();
             DataSource.INS.addTicketConfig(guildId, channel.getId(), message.getId(), title, roleId);
             current.remove(guildId);
             return true;
         } catch (InterruptedException | ExecutionException e) {
-            System.out.println(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
         current.remove(guildId);
         return false;

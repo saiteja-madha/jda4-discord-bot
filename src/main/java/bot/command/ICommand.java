@@ -2,9 +2,12 @@ package bot.command;
 
 import bot.utils.BotUtils;
 import me.duncte123.botcommons.messaging.EmbedUtils;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -14,9 +17,12 @@ import java.util.stream.Collectors;
 
 public abstract class ICommand {
 
+    protected static final Logger LOGGER = LoggerFactory.getLogger(ICommand.class);
+
     protected String name = "";
     protected List<String> aliases = Collections.emptyList();
     protected String help = "No help available";
+    protected boolean multilineHelp = false;
     protected String usage = "";
     protected int minArgsCount = 0;
     protected int maxCharCount = 3000;
@@ -47,7 +53,7 @@ public abstract class ICommand {
         }
 
         if (this.minArgsCount > 0 && (ctx.getArgs().isEmpty() || ctx.getArgs().size() < this.minArgsCount)) {
-            ctx.reply("Missing command arguments");
+            this.sendUsageEmbed(ctx, "Insufficient Arguments");
             return;
         }
 
@@ -90,10 +96,46 @@ public abstract class ICommand {
         return aliases;
     }
 
+    public void sendUsageEmbed(@Nonnull CommandContext ctx, String title) {
+        final String prefix = ctx.getPrefix();
+        final StringBuilder str = new StringBuilder();
+
+        // Append Usage
+        if (this.multilineHelp)
+            str.append(this.usage.replace("{p}", prefix)
+                    .replace("{i}", ctx.getInvoke()));
+
+        else
+            str.append("**Usage:**\n")
+                    .append("```css\n")
+                    .append(prefix)
+                    .append(ctx.getInvoke())
+                    .append(" ")
+                    .append(this.usage)
+                    .append("```");
+
+        // Append Help
+        if (!this.help.equals(""))
+            str.append("\n**Help**: ").append(this.help.replace("{p}", prefix)).append("\n");
+
+        // Append cooldown
+        if (this.cooldown > 0)
+            str.append("**Cooldown**: ").append(this.cooldown).append(" seconds\n");
+
+        EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
+                .setAuthor(title)
+                .setDescription(str.toString());
+
+        ctx.reply(eb.build());
+
+    }
+
     private void sendCoolDown(GuildMessageReceivedEvent event, int seconds) {
         BotUtils.sendMsg(
                 event.getChannel(),
-                EmbedUtils.getDefaultEmbed().setAuthor("Kindly wait " + seconds + " seconds before using this command").build(),
+                EmbedUtils.getDefaultEmbed()
+                        .setAuthor("Kindly wait " + seconds + " seconds before using this command")
+                        .build(),
                 5
         );
     }

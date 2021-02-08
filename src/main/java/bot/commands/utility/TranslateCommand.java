@@ -40,21 +40,28 @@ public class TranslateCommand extends ICommand {
 
         final String input = ctx.getMessage().getContentStripped().split(" ", 3)[2];
 
-        String[] translate = HttpUtils.translate(outputCode, input);
+        try {
+            String[] translate = HttpUtils.translate(outputCode, input);
 
-        if (translate == null) {
-            ctx.reply("No translation found");
-            return;
+            if (translate == null) {
+                ctx.reply("No translation found");
+                return;
+            }
+
+            String footer = translate[2] + " (" + translate[0] + ")" + " ⟶ " + translate[3] + " (" + translate[1] + ")";
+
+            EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
+                    .setDescription(translate[5])
+                    .setAuthor(ctx.getAuthor().getName() + " says", null, ctx.getAuthor().getEffectiveAvatarUrl())
+                    .setFooter(footer);
+
+            ctx.reply(eb.build());
+
+        } catch (Exception ex) {
+            LOGGER.error(ex.getMessage());
+            ctx.replyError(Constants.API_ERROR);
+
         }
-
-        String footer = translate[2] + " (" + translate[0] + ")" + " ⟶ " + translate[3] + " (" + translate[1] + ")";
-
-        EmbedBuilder eb = EmbedUtils.getDefaultEmbed()
-                .setDescription(translate[5])
-                .setAuthor(ctx.getAuthor().getName() + " says", null, ctx.getAuthor().getEffectiveAvatarUrl())
-                .setFooter(footer);
-
-        ctx.reply(eb.build());
 
     }
 

@@ -17,6 +17,18 @@ public abstract class GreetingEmbedBase extends ICommand {
 
     public GreetingEmbedBase(GreetingType type) {
         this.type = type;
+        String text = type.getText().toLowerCase();
+        this.usage = "`{p}{i} <ON | OFF>` : enable or disable " + text + " embed\n" +
+                "`{p}{i} desc <text>` : setup " + text + " embed description\n" +
+                "`{p}{i} footer <text>` : setup " + text + " embed footer\n" +
+                "`{p}{i} color <HexColor>` : setup " + text + " embed color\n\n" +
+                "**Replacements**\n```" +
+                "{server} - Server Name\n" +
+                "{member} - Member Name\n" +
+                "{count} - Server Member Count\n" +
+                "```";
+        this.multilineHelp = true;
+        this.help = "";
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.category = CommandCategory.ADMINISTRATION;
@@ -31,13 +43,13 @@ public abstract class GreetingEmbedBase extends ICommand {
             case "on":
             case "enable":
                 DataSource.INS.enableGreetingEmbed(ctx.getGuildId(), true, type);
-                ctx.reply("Configuration saved!");
+                ctx.replyWithSuccess("Configuration saved! " + type.getText() + " embed is now enabled");
                 break;
 
             case "off":
             case "disable":
                 DataSource.INS.enableGreetingEmbed(ctx.getGuildId(), false, type);
-                ctx.reply("Configuration saved!");
+                ctx.replyWithSuccess("Configuration saved! " + type.getText() + " embed is now disabled");
                 break;
 
             case "desc":
@@ -53,7 +65,7 @@ public abstract class GreetingEmbedBase extends ICommand {
                 break;
 
             default:
-                ctx.reply("Did you provide a valid argument?");
+                this.sendUsageEmbed(ctx, "Incorrect Arguments");
 
         }
 
@@ -71,7 +83,7 @@ public abstract class GreetingEmbedBase extends ICommand {
             description = null;
 
         DataSource.INS.setGreetingDesc(ctx.getGuildId(), description, type);
-        ctx.reply("Configuration saved!");
+        ctx.replyWithSuccess("Configuration saved! Embed description updated");
 
     }
 
@@ -87,7 +99,7 @@ public abstract class GreetingEmbedBase extends ICommand {
             footer = null;
 
         DataSource.INS.setGreetingFooter(ctx.getGuildId(), footer, type);
-        ctx.reply("Configuration saved!");
+        ctx.replyWithSuccess("Configuration saved! Embed footer updated");
 
     }
 
@@ -105,7 +117,7 @@ public abstract class GreetingEmbedBase extends ICommand {
         }
 
         DataSource.INS.setGreetingColor(ctx.getGuildId(), hex, type);
-        ctx.reply("Configuration saved!");
+        ctx.replyWithSuccess("Configuration saved! Embed color updated");
 
     }
 

@@ -45,12 +45,12 @@ public class AddReactionRoleCommand extends ICommand {
 
             tc.addReactionById(messageId, emote).queue();
             DataSource.INS.addReactionRole(ctx.getGuild().getId(), tc.getId(), messageIdString, role.getId(), emote);
-            ctx.reply("Successfully added reaction role!");
+            ctx.replyWithSuccess("Successfully added reaction role!");
 
         } catch (NumberFormatException e) {
             ctx.reply("Did you provide a valid messageId?");
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            LOGGER.error(ex.getMessage());
             ctx.reply("Failed to react! Did you provide valid arguments?");
         }
 

@@ -39,6 +39,9 @@ public abstract class GenBaseCommand extends ICommand {
 
                 ImageUtils.embedImage(channel, embed, bytes, this.getImageType());
 
+            }, err -> {
+                LOGGER.error(err.getMessage());
+                ctx.replyError(Constants.API_ERROR);
             });
         } else if (this.getImageCount() == 2) {
             WebUtils.ins.getByteStream(ImageUtils.getGenerator(this.getGenName(), author.getEffectiveAvatarUrl(), imageUrl)).async(bytes -> {
@@ -48,7 +51,10 @@ public abstract class GenBaseCommand extends ICommand {
 
                 ImageUtils.embedImage(channel, embed, bytes, this.getImageType());
 
-            }, err -> System.out.println(err.getMessage()));
+            }, err -> {
+                LOGGER.error(err.getMessage());
+                ctx.replyError(Constants.API_ERROR);
+            });
         }
 
     }

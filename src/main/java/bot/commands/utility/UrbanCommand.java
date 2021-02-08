@@ -1,5 +1,6 @@
 package bot.commands.utility;
 
+import bot.Constants;
 import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
@@ -48,6 +49,9 @@ public class UrbanCommand extends ICommand {
 
             ctx.reply(eb.build());
 
+        }, err -> {
+            LOGGER.error(err.getMessage());
+            ctx.replyError(Constants.API_ERROR);
         });
 
     }

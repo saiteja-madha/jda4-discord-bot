@@ -17,6 +17,12 @@ public abstract class GreetingBase extends ICommand {
 
     public GreetingBase(GreetingType type) {
         this.type = type;
+        String text = type.getText().toLowerCase();
+        this.usage = "`{p}{i} <ON | OFF>` : enable or disable " + text + " message\n" +
+                "`{p}{i} channel <#channel>` : configure " + text + " channel\n" +
+                "`{p}{i} preview` : preview the configured " + text + "\n";
+        this.help = "setup " + text + " message in your discord server";
+        this.multilineHelp = true;
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.category = CommandCategory.ADMINISTRATION;
@@ -32,13 +38,13 @@ public abstract class GreetingBase extends ICommand {
             case "on":
             case "enable":
                 DataSource.INS.enableGreeting(ctx.getGuildId(), true, type);
-                ctx.reply("Configuration saved!");
+                ctx.replyWithSuccess("Configuration saved! " + type.getText() + " is now enabled");
                 break;
 
             case "off":
             case "disable":
                 DataSource.INS.enableGreeting(ctx.getGuildId(), false, type);
-                ctx.reply("Configuration saved!");
+                ctx.replyWithSuccess("Configuration saved! " + type.getText() + " is now disabled");
                 break;
 
             case "channel":
@@ -50,7 +56,7 @@ public abstract class GreetingBase extends ICommand {
                 break;
 
             default:
-                ctx.reply("Did you provide a valid argument?");
+                this.sendUsageEmbed(ctx, "Incorrect Arguments");
 
         }
 
@@ -63,7 +69,7 @@ public abstract class GreetingBase extends ICommand {
         }
 
         DataSource.INS.setGreetingChannel(ctx.getGuildId(), ctx.getMessage().getMentionedChannels().get(0).getId(), type);
-        ctx.reply("Configuration saved!");
+        ctx.replyWithSuccess("Configuration saved!");
     }
 
     private void sendPreview(CommandContext ctx) {

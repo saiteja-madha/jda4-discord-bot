@@ -12,6 +12,7 @@ public class SetPrefixCommand extends ICommand {
     public SetPrefixCommand() {
         this.name = "setprefix";
         this.help = "Sets the prefix for this server";
+        this.minArgsCount = 1;
         this.usage = "<new-prefix>";
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.category = CommandCategory.ADMINISTRATION;
@@ -22,7 +23,7 @@ public class SetPrefixCommand extends ICommand {
         final String newPrefix = String.join("", ctx.getArgs());
         DataSource.INS.setPrefix(ctx.getGuild().getId(), newPrefix);
 
-        ctx.reply(String.format("New prefix has been set to `%s`", newPrefix));
+        ctx.replyWithSuccess(String.format("New prefix has been set to `%s`", newPrefix));
 
     }
 

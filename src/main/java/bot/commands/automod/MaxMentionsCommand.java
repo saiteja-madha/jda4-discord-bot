@@ -45,9 +45,9 @@ public class MaxMentionsCommand extends ICommand {
         DataSource.INS.setMaxMentions(ctx.getGuildId(), maxmentions);
 
         if (maxmentions == 0)
-            ctx.reply("There is now no maximum user mentions limit.");
+            ctx.replyWithSuccess("Maximum user mentions limit is disabled.");
         else
-            ctx.reply(
+            ctx.replyWithSuccess(
                     "Messages having more than `" + maxmentions + "` user mentions will now be automatically deleted");
 
     }

@@ -19,10 +19,12 @@ public class CounterSetup extends ICommand {
 
     public CounterSetup() {
         this.name = "counter";
-        this.usage = "`{p}counter all <name>` : enable a channel to count members & bots\n" +
-                "`{p}counter members <name>` : enable a channel to count members\n" +
-                "`{p}counter bots <name>` : enable a channel to count bots\n" +
-                "`{p}counter status` : check status on currently configured counters\n";
+        this.usage = "`{p}{i} all <name>` : enable a channel to count members & bots\n" +
+                "`{p}{i} members <name>` : enable a channel to count members\n" +
+                "`{p}{i} bots <name>` : enable a channel to count bots\n" +
+                "`{p}{i} status` : check status on currently configured counters\n";
+        this.help = "setup counter channels in your server";
+        this.multilineHelp = true;
         this.minArgsCount = 1;
         this.botPermissions = new Permission[]{Permission.MANAGE_CHANNEL};
         this.category = CommandCategory.ADMINISTRATION;
@@ -72,10 +74,14 @@ public class CounterSetup extends ICommand {
                     DataSource.INS.updateBotCount(guild.getId(), false, (int) count[1]);
 
                     ctx.reply("Configuration saved! Counter channel created");
-                }, err -> ctx.reply("Setup failed! Unexpected error"));
+                }, err -> {
+                    LOGGER.error(err.getMessage());
+                    ctx.replyError("Setup cancelled! Failed to create voice channel. Try again later");
+                });
 
             } catch (Exception e) {
-                ctx.reply("Setup failed! Unexpected error");
+                LOGGER.error(e.getMessage());
+                ctx.replyError("Setup failed! Unexpected error");
             }
         });
 

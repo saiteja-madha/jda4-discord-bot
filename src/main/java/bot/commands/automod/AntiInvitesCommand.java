@@ -31,16 +31,16 @@ public class AntiInvitesCommand extends ICommand {
         else if (input.equalsIgnoreCase("on"))
             antiinvites = false;
         else {
-            ctx.reply("Not a valid input");
+            this.sendUsageEmbed(ctx, "Incorrect Argument");
             return;
         }
 
         DataSource.INS.antiInvites(ctx.getGuildId(), antiinvites);
 
         if (!antiinvites)
-            ctx.reply("Messages will not be filtered for discord links now");
+            ctx.replyWithSuccess("Messages will not be filtered for discord links now");
         else
-            ctx.reply("Messages with discord invite links will now be automatically deleted");
+            ctx.replyWithSuccess("Messages with discord invite links will now be automatically deleted");
 
     }
 

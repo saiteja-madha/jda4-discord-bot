@@ -59,7 +59,7 @@ public class RemoveReactionRoleCommand extends ICommand {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                ctx.reply("Removed reaction role!");
+                ctx.replyWithSuccess("Removed reaction role!");
             });
         } else {
             msg.clearReactions().queue((__) -> {

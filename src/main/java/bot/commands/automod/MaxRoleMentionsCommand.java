@@ -45,9 +45,9 @@ public class MaxRoleMentionsCommand extends ICommand {
         DataSource.INS.setMaxRoleMentions(ctx.getGuildId(), maxrolementions);
 
         if (maxrolementions == 0)
-            ctx.reply("There is now no maximum user mentions limit.");
+            ctx.replyWithSuccess("Maximum user mentions limit is disabled.");
         else
-            ctx.reply("Messages having more than `" + maxrolementions + "` role mentions will now be automatically deleted");
+            ctx.replyWithSuccess("Messages having more than `" + maxrolementions + "` role mentions will now be automatically deleted");
 
     }
 
