@@ -143,7 +143,10 @@ public class ImageUtils {
         if (config.isEmbedEnabled) {
             EmbedBuilder embed = EmbedUtils.getDefaultEmbed();
             if (config.embedColor != null)
-                embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
+                if (type == GreetingType.WELCOME)
+                    embed.setColor(Constants.SUCCESS_EMBED);
+                else
+                    embed.setColor(Constants.ERROR_EMBED);
             if (config.description != null)
                 embed.setDescription(resolveGreeting(guild, user, config.description));
             if (config.footer != null)

@@ -49,9 +49,9 @@ public class Listener implements EventListener {
 
         // Purge CMD & XP-cooldown cache
         bot.getThreadpool().scheduleWithFixedDelay(() -> bot.getXpHandler().cleanCooldowns(),
-                0, 1, TimeUnit.DAYS);
+                1, 1, TimeUnit.DAYS);
         bot.getThreadpool().scheduleWithFixedDelay(() -> bot.getCmdHandler().cleanCooldowns(),
-                0, 1, TimeUnit.DAYS);
+                1, 1, TimeUnit.DAYS);
 
         // Check Temporary mutes and bans
         bot.getThreadpool().scheduleWithFixedDelay(() -> DataSource.INS.checkTempMutes(jda),

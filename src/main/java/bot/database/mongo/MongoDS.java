@@ -88,11 +88,6 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public void enableModlogs(String guildId, boolean isEnabled) {
-        updateSettings(guildId, "modlog_enabled", isEnabled);
-    }
-
-    @Override
     public void setModLogChannel(String guildId, String logChannel) {
         updateSettings(guildId, "modlog_channel", logChannel);
     }
@@ -188,7 +183,7 @@ public class MongoDS implements DataSource {
 
     @Override
     public void addTranslation(String guildId, String channelId, String messageId, String unicode) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("translations");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("translate_logs");
         Document doc = new Document("_id", new ObjectId());
         doc.append("guild_id", guildId)
                 .append("channel_id", channelId)
@@ -199,7 +194,7 @@ public class MongoDS implements DataSource {
 
     @Override
     public boolean isTranslated(String guildId, String channelId, String messageId, String unicode) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("translations");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("translate_logs");
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
                 Filters.eq("channel_id", guildId),
@@ -538,7 +533,7 @@ public class MongoDS implements DataSource {
     public void setTicketLimit(String guildId, int limit) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("ticket_config");
         Bson filter = Filters.eq("guild_id", guildId);
-        Bson update = Updates.set("limit", limit);
+        Bson update = Updates.set("ticket_limit", limit);
         collection.updateOne(filter, update, new UpdateOptions().upsert(true));
     }
 
@@ -546,7 +541,7 @@ public class MongoDS implements DataSource {
     public void setTicketClose(String guildId, boolean isAdminOnly) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("ticket_config");
         Bson filter = Filters.eq("guild_id", guildId);
-        Bson update = Updates.set("limit", isAdminOnly);
+        Bson update = Updates.set("admin_only", isAdminOnly);
         collection.updateOne(filter, update, new UpdateOptions().upsert(true));
     }
 
@@ -659,7 +654,8 @@ public class MongoDS implements DataSource {
                 .append("guild_name", guild.getName())
                 .append("guild_region", guild.getRegion().getName())
                 .append("guild_ownerId", owner.getId())
-                .append("guild_owner", owner.getUser().getAsTag());
+                .append("guild_owner", owner.getUser().getAsTag())
+                .append("join_timestamp", Instant.now());
 
         collection.insertOne(doc);
     }

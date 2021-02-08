@@ -32,6 +32,9 @@ public class WarnCommand extends ICommand {
             return;
         }
 
+        if (targetMembers.stream().anyMatch((target) -> target.getUser().isBot()))
+            ctx.reply("Skipping bot's from warning!");
+
         // Split content at last member mention
         String[] split = message.getContentRaw().split(targetMembers.get(targetMembers.size() - 1).getId() + "> ");
         final String reason = split.length > 1 ? split[1] : "No reason provided";
@@ -39,6 +42,7 @@ public class WarnCommand extends ICommand {
         targetMembers
                 .stream()
                 // Filter out members with which bot and command author can interact
+                .filter(target -> !target.getUser().isBot())
                 .filter(target -> ModerationUtils.canInteract(ctx.getMember(), target, "warn", ctx.getChannel()))
                 .forEach(member -> ModerationUtils.warn(message, member, reason));
 

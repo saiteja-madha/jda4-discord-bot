@@ -28,7 +28,7 @@ public class AutoModLog extends ICommand {
         List<TextChannel> mentionedChannels = ctx.getMessage().getMentionedChannels();
         TextChannel targetChannel = null;
 
-        if (!input.equalsIgnoreCase("OFF")) {
+        if (!input.equalsIgnoreCase("off") && !input.equalsIgnoreCase("disable")) {
             if (mentionedChannels.isEmpty()) {
                 ctx.reply("Please mention the channel where you want to log");
                 return;
@@ -36,9 +36,10 @@ public class AutoModLog extends ICommand {
             targetChannel = mentionedChannels.get(0);
             if (!ModerationUtils.canSendLogs(ctx.getChannel(), targetChannel))
                 return;
-            DataSource.INS.setAutomodLogChannel(ctx.getGuildId(), targetChannel.getId());
-            ctx.replyWithSuccess("Configuration saved! Log-channel updated");
         }
+
+        DataSource.INS.setAutomodLogChannel(ctx.getGuildId(), (targetChannel == null) ? null : targetChannel.getId());
+        ctx.replyWithSuccess("Configuration saved! Log-channel updated");
 
     }
 

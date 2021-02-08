@@ -19,6 +19,7 @@ public class ReputationCommand extends ICommand {
         this.usage = "<@user>";
         this.minArgsCount = 1;
         this.category = CommandCategory.SOCIAL;
+        this.cooldown = 86400;
     }
 
     @Override

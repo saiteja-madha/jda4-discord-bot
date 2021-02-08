@@ -2,30 +2,39 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>discord-JDA</groupId>
     <artifactId>discord-JDA</artifactId>
     <version>1.0.0</version>
+    <packaging>jar</packaging>
+
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <mainClass>bot.Bot</mainClass>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    <packaging>jar</packaging>
-
-    <name>discord-JDA</name>
-    <url>http://maven.apache.org</url>
 
     <properties>
+        <encoding>UTF-8</encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
     <repositories>
         <repository>
             <id>jcenter</id>

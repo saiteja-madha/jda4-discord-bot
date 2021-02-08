@@ -25,8 +25,7 @@ public interface DataSource {
     void setPrefix(String guildId, String newPrefix);
     void xpSystem(String guildId, boolean isEnabled);
     void setMaxWarnings(String guildId, int warnings);
-    void enableModlogs(String guildId, boolean isEnabled);
-    void setModLogChannel(String guildId, String logChannel);
+    void setModLogChannel(String guildId, @Nullable String logChannel);
 
     // Automod Settings
     void setAutomodLogChannel(String guildId, @Nullable String channelId);

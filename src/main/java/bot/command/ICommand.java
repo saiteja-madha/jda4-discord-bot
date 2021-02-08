@@ -144,4 +144,8 @@ public abstract class ICommand {
         return this.name + "|" + "U:" + ctx.getAuthor().getId();
     }
 
+    public CommandCategory getCategory() {
+        return this.category;
+    }
+
 }

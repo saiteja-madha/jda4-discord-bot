@@ -17,7 +17,6 @@ public class GuildSettings {
     @Nullable
     public final String levelUpChannel;
     public final int maxWarnings;
-    public final boolean modlogEnabled;
     @Nullable
     public final String modlogChannel;
     @Nullable
@@ -31,7 +30,6 @@ public class GuildSettings {
         this.levelUpMessage = Config.get("DEFAULT_LEVELUP_MESSAGE");
         this.levelUpChannel = null;
         this.maxWarnings = 3;
-        this.modlogEnabled = false;
         this.modlogChannel = null;
         this.automod = null;
     }
@@ -44,7 +42,6 @@ public class GuildSettings {
         this.levelUpMessage = doc.get("levelup_message", Config.get("DEFAULT_LEVELUP_MESSAGE"));
         this.levelUpChannel = doc.getString("levelup_channel");
         this.maxWarnings = doc.get("max_warnings", 3);
-        this.modlogEnabled = doc.get("modlog_enabled", false);
         this.modlogChannel = doc.getString("modlog_channel");
         this.automod = new Automod(doc);
     }
