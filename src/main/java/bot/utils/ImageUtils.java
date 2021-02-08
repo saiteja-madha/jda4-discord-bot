@@ -162,8 +162,8 @@ public class ImageUtils {
 
                 }, (err) -> {
                     if (previewChannel != null) {
-                        System.out.println(err.getMessage());
-                        BotUtils.sendMsg(channel, "Unexpected API error! Try again later on contact support server");
+                        LOGGER.error(err.getMessage());
+                        BotUtils.sendMsg(channel, Constants.API_ERROR);
                     } else
                         BotUtils.sendMsg(channel, embed.build());
                 });
@@ -185,7 +185,7 @@ public class ImageUtils {
                     else
                         sendImage(channel, bytes, type.getAttachmentName());
                 },
-                err -> System.out.println(err.getMessage())
+                err -> LOGGER.error(err.getMessage())
         );
 
 
