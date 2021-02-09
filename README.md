@@ -1,5 +1,8 @@
-# JDA 4 Discord Bot
-A cool multipurpose bot built using Java Discord API https://github.com/DV8FromTheWorld/JDA
+<h1 align="center">Strange (JDA 4 Discord Bot)</h1>
+<p align="center">A cool multipurpose bot built using <a href="https://github.com/DV8FromTheWorld/JDA">Java Discord API</a></p>
+<p align="center">
+  <img style="text-align:center" width="200" src="https://raw.githubusercontent.com/saiteja-madha/strange-bot/master/assets/avatar.png" />
+</p>
 
 # Features
 - Powerful Moderation
@@ -54,6 +57,14 @@ Command | Description
 `!userinfo` | Shows information about the user
 
 ### Image Commands
+```
+All the below specified commands can be used in the following format
+
+-cmd: This uses self users avatar as image
+-cmd <image-url>: This picks image from provided URL
+-cmd <@member>: This uses the mentioned users avatar as image
+-cmd <attachment>: This picks image from attachment
+```
 ###### Image Filters
 <table>
    <tr>
