@@ -24,37 +24,37 @@ _And Much more ..._
 ### Utility Commands:
 Command | Description
 ------------ | -------------
-`!covid <country>` | Get covid statistics in the specified country
-`!github <username>` | Shows github statistics of a user
-`!haste <text>` | Posts some text to hastebin
-`!help <command>` | Shows the list with commands in the bot
-`!translate <code> <text>` | Translate from one language to other
-`!trcodes` | Displays a list of available translate codes
-`!urban <search-term>` | Searches the urban dictionary
+`-covid <country>` | Get covid statistics in the specified country
+`-github <username>` | Shows github statistics of a user
+`-haste <text>` | Posts some text to hastebin
+`-help <command>` | Shows the list with commands in the bot
+`-translate <code> <text>` | Translate from one language to other
+`-trcodes` | Displays a list of available translate codes
+`-urban <search-term>` | Searches the urban dictionary
 
 ### Fun Commands:
 Command | Description
 ------------ | -------------
-`!animal <name>` | Show a random image of selected animal types
-`!cat` | Shows a random cat image
-`!dog` | Shows a random dog image
-`!joke` | Shows a random joke
-`!flipcoin` | Flips a coin heads or tails
-`!fliptext` | Reverses the given message
-`!meme` | Shows a random meme
+`-animal <name>` | Show a random image of selected animal types
+`-cat` | Shows a random cat image
+`-dog` | Shows a random dog image
+`-joke` | Shows a random joke
+`-flipcoin` | Flips a coin heads or tails
+`-fliptext` | Reverses the given message
+`-meme` | Shows a random meme
 
 ### Information Commands
 Command | Description
 ------------ | -------------
-`!avatar` | Displays avatar information about the user
-`!botinfo` | Shows bot information
-`!channelinfo [#channel]` | Shows mentioned channel information
-`!guildinfo` | Shows information about the discord server
-`!invite` | Get the bot's invite
-`!ping` | Shows the current ping from the bot to the discord servers
-`!roleinfo` | Shows information of the specified role
-`!uptime` | Shows bot's uptime
-`!userinfo` | Shows information about the user
+`-avatar` | Displays avatar information about the user
+`-botinfo` | Shows bot information
+`-channelinfo [#channel]` | Shows mentioned channel information
+`-guildinfo` | Shows information about the discord server
+`-invite` | Get the bot's invite
+`-ping` | Shows the current ping from the bot to the discord servers
+`-roleinfo` | Shows information of the specified role
+`-uptime` | Shows bot's uptime
+`-userinfo` | Shows information about the user
 
 ### Image Commands
 ```
@@ -133,38 +133,53 @@ All the below specified commands can be used in the following format
 
 Command | Description
 ------------ | -------------
-`!balance [@member]` | Shows your current coin balance
-`!daily` | Receive a daily coin bonus
-`!gamble <amount>` | Try your luck by gambling
-`!transfer <coins> <@member>` | Transfer coins to other user
+`-balance [@member]` | Shows your current coin balance
+`-daily` | Receive a daily coin bonus
+`-gamble <amount>` | Try your luck by gambling
+`-transfer <coins> <@member>` | Transfer coins to other user
 
 ### Social Commands
 
 Command | Description
 ------------ | -------------
-`!rep [@member]` | Give reputation to a user
+`-rep [@member]` | Give reputation to a user
 
 ### Moderation Commands
 
 Command | Description
 ------------ | -------------
-`!ban <@member(s)> [reason]` | Ban the the mentioned member(s)
-`!clearwarnings <@member>` | Clears previous warnings received by a member
-`!deafen <@member(s)> [reason]` | Deafen's the mentioned member(s)
-`!kick <@member(s)> [reason]` | Kick the mentioned member(s)
-`!mute <@member(s)> [reason]` | Mute the mentioned member(s) on all text/voice channels
-`!purgeattach <amount>` | Deletes the specified amount of messages with attachments
-`!purgebots <amount>` | Deletes the specified amount of messages from bots
-`!purge <amount>` | Deletes the specified amount of messages
-`!purgelinks <amount>` | Deletes the specified amount of messages with links
-`!purgeuser <@user> <amount>` | Deletes the specified amount of messages for the mentioned user
-`!setnick <@member> <new-name>`| change the mentioned user's nickname
-`!softban <@member(s)> [reason]` | Kicks a member from the server and delete that users messages
-`!tempban <@member(s)> <time> [reason]` | Bans the mentioned member(s) for the specified amount of time
-`!tempmute <@member(s)> <time> [reason]` | Mute the mentioned member(s) for the specified amount of time
-`!undeafen <@member(s)> [reason]` | Undeafen's the mentioned member(s)
-`!unmute <@member(s)> [reason]` | Unmutes the specified member(s)
-`!vmute <@member(s)> [reason]` | Mute voice of the mentioned member(s)
-`!vunmute <@member(s)> [reason]` | UnMute voice of the mentioned member(s)
-`!warn <@member(s)> [reason]` | Gives warning to the mentioned member(s)
-`!warnings <@member>` | Displays warnings received by mentioned user
+`-ban <@member(s)> [reason]` | Ban the the mentioned member(s)
+`-clearwarnings <@member>` | Clears previous warnings received by a member
+`-deafen <@member(s)> [reason]` | Deafen's the mentioned member(s)
+`-kick <@member(s)> [reason]` | Kick the mentioned member(s)
+`-mute <@member(s)> [reason]` | Mute the mentioned member(s) on all text/voice channels
+`-purgeattach <amount>` | Deletes the specified amount of messages with attachments
+`-purgebots <amount>` | Deletes the specified amount of messages from bots
+`-purge <amount>` | Deletes the specified amount of messages
+`-purgelinks <amount>` | Deletes the specified amount of messages with links
+`-purgeuser <@user> <amount>` | Deletes the specified amount of messages for the mentioned user
+`-setnick <@member> <new-name>`| change the mentioned user's nickname
+`-softban <@member(s)> [reason]` | Kicks a member from the server and delete that users messages
+`-tempban <@member(s)> <time> [reason]` | Bans the mentioned member(s) for the specified amount of time
+`-tempmute <@member(s)> <time> [reason]` | Mute the mentioned member(s) for the specified amount of time
+`-undeafen <@member(s)> [reason]` | Undeafen's the mentioned member(s)
+`-unmute <@member(s)> [reason]` | Unmutes the specified member(s)
+`-vmute <@member(s)> [reason]` | Mute voice of the mentioned member(s)
+`-vunmute <@member(s)> [reason]` | UnMute voice of the mentioned member(s)
+`-warn <@member(s)> [reason]` | Gives warning to the mentioned member(s)
+`-warnings <@member>` | Displays warnings received by mentioned user
+
+### Auto Moderation
+> - These commands can only be configured by members who have Permission.MANAGE_SERVER
+> - The bot moderates messages only in channels where it has Permission.MESSAGE_MANAGE
+> - The bot ignores messages sent by users having Permission.KICK_MEMBERS, Permission.BAN_MEMBERS, Permission.MANAGE_SERVER
+
+Command | Description
+------------ | -------------
+`-automodstatus` | check automod configuration for this guild
+`-automodlog <#channel\|OFF>` | set/disable logging for all automod events
+`-antiinvites <ON\|OFF>` | allow or disallow sending discord links in message
+`-antilinks <ON\|OFF>` | allow or disallow sending links in message
+`-maxlines <number\|OFF>` | sets maximum lines allowed per message
+`-maxmentions <number\|OFF>` | sets maximum user mentions allowed per message
+`-maxrolementions <number\|OFF>` | sets maximum role mentions allowed per message
