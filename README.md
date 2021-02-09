@@ -1,6 +1,22 @@
 # JDA 4 Discord Bot
 A cool multipurpose bot built using Java Discord API https://github.com/DV8FromTheWorld/JDA
 
+# Features
+- Powerful Moderation
+- Auto Moderation
+- Reaction Roles
+- Customised Welcome/Farewell messages
+- Advanced Ticketing System
+- Stats Counter Channels
+- Translation
+- Image Manipulation <br>
+
+_And Much more ..._
+
+# Quick Links
+- Join our support server: [Discord Link](https://discord.gg/nggZxPN)
+- Add me here: [Invite](https://discord.com/oauth2/authorize?scope=bot&client_id=752922609733337190&permissions=8)
+
 ## Available Commands
 ### Utility Commands:
 Command | Description
