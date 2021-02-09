@@ -2,4 +2,3 @@
 .idea/
 target/
 .env
-database.db
