@@ -165,7 +165,7 @@ public class ImageUtils {
                         LOGGER.error(err.getMessage());
                         BotUtils.sendMsg(channel, Constants.API_ERROR);
                     } else
-                        BotUtils.sendMsg(channel, embed.build());
+                        BotUtils.sendEmbed(channel, embed.build());
                 });
                 return;
             }
@@ -173,7 +173,7 @@ public class ImageUtils {
             if (previewChannel != null)
                 channel.sendMessage(embed.build()).append(greetChannelName).queue();
             else
-                BotUtils.sendMsg(channel, embed.build());
+                BotUtils.sendEmbed(channel, embed.build());
 
             return;
         }
@@ -210,7 +210,7 @@ public class ImageUtils {
     private static String resolveGreeting(Guild guild, User user, String message) {
         return message.replace("{server}", guild.getName())
                 .replace("{count}", String.valueOf(guild.getMemberCount()))
-                .replace("{member}", user.getName());
+                .replace("{member}", user.getAsTag());
     }
 
     @NotNull

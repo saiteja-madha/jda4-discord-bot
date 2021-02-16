@@ -133,7 +133,7 @@ public class TicketUtils {
                         + Constants.WHITE_SMALL_SQUARE + "**Reason:** " + (reason != null ? MiscUtils.escapeString(reason) : "No reason provided") + "\n\n"
                         + logsString;
 
-                BotUtils.sendMsg(logChannel, embed.setDescription(lcEmbedDesc).build());
+                BotUtils.sendEmbed(logChannel, embed.setDescription(lcEmbedDesc).build());
             }
 
             BotUtils.sendDM(opened, embed.setDescription(dmEmbedDesc).build());

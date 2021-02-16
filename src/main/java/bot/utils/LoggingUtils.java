@@ -192,7 +192,7 @@ public class LoggingUtils {
         else
             embed.setAuthor("Moderation - " + action.getText());
 
-        BotUtils.sendMsg(logChannel, embed.build());
+        BotUtils.sendEmbed(logChannel, embed.build());
 
     }
 

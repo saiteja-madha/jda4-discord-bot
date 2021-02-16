@@ -34,7 +34,7 @@ public class XPHandler {
         else this.applyCooldown(key);
 
         int xpToAdd = getRandomXP();
-        int[] data = DataSource.INS.updateXp(member, xpToAdd, true);
+        int[] data = DataSource.INS.incrementXp(member, xpToAdd, true);
         int currentLevel = data[0];
         int previousXp = data[1];
         int xpNeeded = getXPNeeded(currentLevel + 1);

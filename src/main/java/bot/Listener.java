@@ -86,13 +86,14 @@ public class Listener implements EventListener {
         if (event.getGuild().getOwner() == null || event.getUser().isBot())
             return;
 
-        if (event.getReactionEmote().isEmoji())
+        if (event.getReactionEmote().isEmoji()) {
             bot.getReactionHandler().handleFlagReaction(event);
 
-        bot.getReactionHandler().handleReactionRole(event, true);
+            // Handle Tickets in async
+            bot.getThreadpool().execute(() -> bot.getReactionHandler().handleTicket(event));
+        }
 
-        // Handle Tickets in async
-        bot.getThreadpool().execute(() -> bot.getReactionHandler().handleTicket(event));
+        bot.getReactionHandler().handleReactionRole(event, true);
 
     }
 

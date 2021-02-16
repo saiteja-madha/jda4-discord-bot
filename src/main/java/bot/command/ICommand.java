@@ -80,10 +80,6 @@ public abstract class ICommand {
 
     public abstract void handle(@Nonnull CommandContext ctx);
 
-    public void sendUsage(@Nonnull CommandContext ctx) {
-        ctx.reply(ctx.getPrefix() + this.name + " " + this.usage);
-    }
-
     protected String parsePerms(Permission[] perms) {
         return Arrays.stream(perms).map(Permission::getName).collect(Collectors.joining("`, `"));
     }
@@ -96,20 +92,19 @@ public abstract class ICommand {
         return aliases;
     }
 
-    public void sendUsageEmbed(@Nonnull CommandContext ctx, String title) {
-        final String prefix = ctx.getPrefix();
+    public void sendUsageEmbed(TextChannel channel, String prefix, String invoke, String title) {
         final StringBuilder str = new StringBuilder();
 
         // Append Usage
         if (this.multilineHelp)
             str.append(this.usage.replace("{p}", prefix)
-                    .replace("{i}", ctx.getInvoke()));
+                    .replace("{i}", invoke));
 
         else
             str.append("**Usage:**\n")
                     .append("```css\n")
                     .append(prefix)
-                    .append(ctx.getInvoke())
+                    .append(invoke)
                     .append(" ")
                     .append(this.usage)
                     .append("```");
@@ -126,12 +121,16 @@ public abstract class ICommand {
                 .setAuthor(title)
                 .setDescription(str.toString());
 
-        ctx.reply(eb.build());
+        BotUtils.sendEmbed(channel, eb.build());
 
     }
 
+    public void sendUsageEmbed(@Nonnull CommandContext ctx, String title) {
+        this.sendUsageEmbed(ctx.getChannel(), ctx.getPrefix(), ctx.getInvoke(), title);
+    }
+
     private void sendCoolDown(GuildMessageReceivedEvent event, int seconds) {
-        BotUtils.sendMsg(
+        BotUtils.sendEmbed(
                 event.getChannel(),
                 EmbedUtils.getDefaultEmbed()
                         .setAuthor("Kindly wait " + seconds + " seconds before using this command")

@@ -49,7 +49,7 @@ public interface DataSource {
     // Social & Levelling
     void setReputation(Member member, int rep);
     void setLevel(Member member, int level);
-    int[] updateXp(Member member, int xp, boolean updateMessages); // [oldLevel, oldXp, oldMessages]
+    int[] incrementXp(Member member, int xp, boolean updateMessages); // [oldLevel, oldXp, oldMessages]
 
     // Economy
     Economy getEconomy(Member member);

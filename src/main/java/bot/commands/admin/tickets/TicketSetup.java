@@ -218,7 +218,7 @@ public class TicketSetup extends ICommand {
     }
 
     private void waitForChannel(CommandContext ctx) {
-        BotUtils.sendMsg(ctx.getChannel(), getEmbed("Ticket Channel", CHANNEL));
+        BotUtils.sendEmbed(ctx.getChannel(), getEmbed("Ticket Channel", CHANNEL));
         wait(ctx, e -> {
             List<TextChannel> mentionedChannels = e.getMessage().getMentionedChannels();
             if (!mentionedChannels.isEmpty()) {
@@ -243,7 +243,7 @@ public class TicketSetup extends ICommand {
     }
 
     private void waitForTitle(CommandContext ctx, TextChannel channel) {
-        BotUtils.sendMsg(ctx.getChannel(), getEmbed("Ticket Message", TITLE));
+        BotUtils.sendEmbed(ctx.getChannel(), getEmbed("Ticket Message", TITLE));
         wait(ctx, e -> {
             String title = e.getMessage().getContentRaw();
             BotUtils.sendSuccess(e.getMessage());
@@ -252,7 +252,7 @@ public class TicketSetup extends ICommand {
     }
 
     private void waitForRoles(CommandContext ctx, TextChannel channel, String title) {
-        BotUtils.sendMsg(ctx.getChannel(), getEmbed("Support Role", ROLE));
+        BotUtils.sendEmbed(ctx.getChannel(), getEmbed("Support Role", ROLE));
 
         wait(ctx, e -> {
             String roleId = null;

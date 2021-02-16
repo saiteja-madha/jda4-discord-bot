@@ -206,7 +206,7 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public int[] updateXp(Member member, int xp, boolean updateMessages) {
+    public int[] incrementXp(Member member, int xp, boolean updateMessages) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("levels");
 
         Bson filter = Filters.and(
@@ -225,9 +225,9 @@ public class MongoDS implements DataSource {
         if (prevDoc == null)
             return new int[]{0, 0, 0};
         else
-            return new int[]{prevDoc.containsKey("level") ? prevDoc.getInteger("level") : 0,
-                    prevDoc.getInteger("xp"),
-                    prevDoc.getInteger("messages")
+            return new int[]{prevDoc.getInteger("level", 0),
+                    prevDoc.getInteger("xp", 0),
+                    prevDoc.getInteger("messages", 0)
             };
     }
 

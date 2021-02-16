@@ -107,7 +107,7 @@ public class AutoModHandler {
                         (__) -> {
                             BotUtils.sendMsg(channel, Constants.TICK + " Auto-Moderation. Message deleted!", 3);
                             if (logChannel != null)
-                                BotUtils.sendMsg(logChannel, embed.build());
+                                BotUtils.sendEmbed(logChannel, embed.build());
                             else
                                 DataSource.INS.setAutomodLogChannel(guild.getId(), null);
                         }, null);

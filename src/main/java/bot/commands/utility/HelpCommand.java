@@ -46,8 +46,8 @@ public class HelpCommand extends ICommand {
                     .setDescription(str)
                     .setThumbnail(selfUser.getEffectiveAvatarUrl())
                     .setColor(Constants.TRANSPARENT_EMBED)
-                    .setFooter("Type " + ctx.getPrefix() + "help <module> to see all related commands\n" +
-                            "If you are admin type " + ctx.getPrefix() + "config", ctx.getAuthor().getEffectiveAvatarUrl());
+                    .setFooter("Type " + ctx.getPrefix() + "help <module> to see all related command",
+                            ctx.getAuthor().getEffectiveAvatarUrl());
 
             ctx.reply(embed.build());
             return;
@@ -82,7 +82,7 @@ public class HelpCommand extends ICommand {
             return;
         }
 
-        cmd.sendUsageEmbed(ctx, "Help");
+        cmd.sendUsageEmbed(ctx.getChannel(), ctx.getPrefix(), invoke, "Help");
 
     }
 

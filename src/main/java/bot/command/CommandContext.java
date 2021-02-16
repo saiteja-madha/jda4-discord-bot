@@ -85,7 +85,7 @@ public class CommandContext {
     }
 
     public void reply(MessageEmbed embed) {
-        BotUtils.sendMsg(this.getChannel(), embed);
+        BotUtils.sendEmbed(this.getChannel(), embed);
     }
 
     public void replyWithSuccess(String message) {
