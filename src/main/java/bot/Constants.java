@@ -29,7 +29,7 @@ public class Constants {
     public final static int ERROR_EMBED = 0xD61A3C;
 
     // Error Message
-    public final static String API_ERROR = "Unexpected API Error! Try again later or contact [support server](" + Config.get("DISCORD_INVITE") + ")";
+    public final static String API_ERROR = "Unexpected Backend Error! Try again later or contact [support server](" + Config.get("DISCORD_INVITE") + ")";
 
     static {
 

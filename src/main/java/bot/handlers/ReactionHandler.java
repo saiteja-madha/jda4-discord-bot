@@ -10,10 +10,7 @@ import bot.utils.TicketUtils;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
@@ -55,17 +52,35 @@ public class ReactionHandler {
         try {
             if (isAdded)
                 guild.addRoleToMember(event.getUserId(), role).queue(
-                        (__) -> BotUtils.sendDM(event.getUser(), "**Reaction Role:** You are given `" + role.getName() + "` role in " + guild.getName()),
+                        (__) -> sendRoleInfo(event.getUser(), guild, role, true),
                         e -> LOGGER.error("ReactionRole - Reaction Add failed : " + e.getMessage()));
             else
                 guild.removeRoleFromMember(event.getUserId(), role).queue(
-                        (__) -> BotUtils.sendDM(event.getUser(), "**Reaction Role:** Removed role `" + role.getName() + "` in " + guild.getName()),
+                        (__) -> sendRoleInfo(event.getUser(), guild, role, false),
                         e -> LOGGER.error("ReactionRole - Reaction Remove failed : " + e.getMessage()));
 
         } catch (PermissionException ex) { /* Ignore */ } catch (Exception e) {
             LOGGER.error("ReactionRole failed : " + e.getMessage());
         }
 
+    }
+
+    private void sendRoleInfo(User user, Guild guild, Role role, boolean isAdded) {
+        String SERVER_LINK = "https://discord.com/channels/";
+        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
+                .setDescription("**Guild Name**: " + BotUtils.getEmbedHyperLink(guild.getName(), SERVER_LINK + guild.getId()) +
+                        "\n**Role Name**: " + role.getName()
+                );
+
+        if (isAdded) {
+            embed.setAuthor("Role Added")
+                    .setColor(role.getColor());
+        } else {
+            embed.setAuthor("Role Removed")
+                    .setColor(Constants.ERROR_EMBED);
+        }
+
+        BotUtils.sendDM(user, embed.build());
     }
 
     public void handleFlagReaction(@NotNull GuildMessageReactionAddEvent event) {

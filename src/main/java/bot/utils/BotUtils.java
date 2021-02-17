@@ -53,6 +53,8 @@ public class BotUtils {
                 Guild guild = channel.getGuild();
                 if (guild.getSelfMember().hasPermission(channel, Permission.MESSAGE_EMBED_LINKS)) {
                     channel.sendMessage(embed).queue(null, (error) -> { /* Ignore */ });
+                } else if (embed.getFields().isEmpty()) {
+                    sendMsg(channel, embed.getDescription());
                 }
             }
         }
@@ -66,6 +68,8 @@ public class BotUtils {
                     channel.sendMessage(embed)
                             .queue((m) -> m.delete().queueAfter(time, TimeUnit.SECONDS, null, (error) -> { /* Ignore */ })
                                     , null);
+                } else if (embed.getFields().isEmpty()) {
+                    sendMsg(channel, embed.getDescription(), time);
                 }
             }
         }
@@ -111,6 +115,10 @@ public class BotUtils {
 
     public static void sendErrorWithMessage(Message message, String content) {
         MessageUtils.sendErrorWithMessage(message, content);
+    }
+
+    public static String getEmbedHyperLink(String text, String link) {
+        return "[" + text + "](" + link + ")";
     }
 
 }

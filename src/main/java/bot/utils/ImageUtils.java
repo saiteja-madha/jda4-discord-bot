@@ -163,7 +163,7 @@ public class ImageUtils {
                 }, (err) -> {
                     if (previewChannel != null) {
                         LOGGER.error(err.getMessage());
-                        BotUtils.sendMsg(channel, Constants.API_ERROR);
+                        BotUtils.sendErrorEmbed(channel, Constants.API_ERROR);
                     } else
                         BotUtils.sendEmbed(channel, embed.build());
                 });
@@ -283,7 +283,7 @@ public class ImageUtils {
                 .setColor(Constants.TRANSPARENT_EMBED);
 
         if (bytes == null) {
-            BotUtils.sendMsg(channel, Constants.API_ERROR);
+            BotUtils.sendErrorEmbed(channel, Constants.API_ERROR);
             return;
         }
 

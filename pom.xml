@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>discord-JDA</groupId>
     <artifactId>discord-JDA</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <build>
@@ -21,6 +21,9 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <arguments>
+                        <argument>-Xmx64M</argument>
+                    </arguments>
                     <mainClass>bot.Bot</mainClass>
                 </configuration>
             </plugin>
@@ -47,7 +50,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.2.0_227</version>
+            <version>4.2.0_228</version>
         </dependency>
         <dependency>
             <groupId>com.jagrosh</groupId>
@@ -65,11 +68,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.19</version>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>

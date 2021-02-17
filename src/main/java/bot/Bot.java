@@ -26,7 +26,7 @@ public class Bot {
 
     private Bot() throws LoginException {
 
-        threadpool = Executors.newScheduledThreadPool((Config.getInt("threadpool_size")));
+        threadpool = Executors.newScheduledThreadPool(Config.getInt("threadpool_size"));
         waiter = new EventWaiter();
         cmdHandler = new CommandHandler(this);
         reactionHandler = new ReactionHandler();

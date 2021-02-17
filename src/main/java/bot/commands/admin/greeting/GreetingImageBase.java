@@ -87,7 +87,7 @@ public abstract class GreetingImageBase extends ICommand {
 
         String url = ctx.getArgs().get(1);
 
-        if (!MiscUtils.isURL(url)) {
+        if (!MiscUtils.isImageUrl(url)) {
             ctx.reply("Oops! That doesn't look like a valid image URL");
             return;
         }

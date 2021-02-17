@@ -189,6 +189,8 @@ public class CommandHandler {
         addCommand(new UsageCommand(bot.getWaiter()));
         addCommand(new EvalCommand());
 
+        LOGGER.info("{} commands loaded!", commands.size());
+
     }
 
     private void addCommand(ICommand cmd) {
@@ -258,7 +260,7 @@ public class CommandHandler {
         final int size = cooldowns.size();
         cooldowns.keySet().stream().filter((str) -> (cooldowns.get(str).isBefore(now))).collect(Collectors.toList())
                 .forEach(cooldowns::remove);
-        LOGGER.info("Command cooldown cache cleared - " + size + " keys released");
+        LOGGER.debug("Command cooldown cache cleared - {} keys released", size);
     }
 
     public int getCommandUses(String name) {
