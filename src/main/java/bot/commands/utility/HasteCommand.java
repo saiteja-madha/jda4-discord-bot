@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 
 public class HasteCommand extends ICommand {
 
-    private static final String HASTE_SERVER = "https://hasteb.in/";
+    private static final String HASTE_SERVER = "https://hastebin.com/";
 
     public HasteCommand() {
         this.name = "haste";
