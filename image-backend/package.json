@@ -1,0 +1,27 @@
+{
+  "name": "discord-image-api",
+  "version": "1.0.0",
+  "description": "Image Manipulation API",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "debug": "node index.js"
+  },
+  "author": "Saiteja M",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "canvacord": "^5.0.8",
+    "canvas": "^2.6.1",
+    "captcha-canvas": "^2.2.2",
+    "common-tags": "^1.8.0",
+    "cors": "^2.8.5",
+    "discord-canvas": "^1.4.1",
+    "discord-image-generation": "^1.4.7",
+    "express": "^4.17.1",
+    "node-superfetch": "^0.1.10"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}

@@ -1,4 +1,5 @@
 .settings/
 .idea/
 target/
+image-backend/node_modules/
 .env
