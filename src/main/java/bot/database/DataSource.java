@@ -86,15 +86,11 @@ public interface DataSource {
     void setGreetingChannel(String guildId, @Nullable String channelId, GreetingType type);
 
     // Welcome & Farewell Embed
-    void enableGreetingEmbed(String guildId, boolean enabled, GreetingType type);
     void setGreetingDesc(String guildId, @Nullable String description, GreetingType type);
     void setGreetingFooter(String guildId, @Nullable String description, GreetingType type);
     void setGreetingColor(String guildId, String color, GreetingType type);
-
-    // Welcome & Farewell Image
-    void enableGreetingImage(String guildId, boolean enabled, GreetingType type);
-    void setGreetingImageMsg(String guildId, @Nullable String message, GreetingType type);
-    void setGreetingImageBkg(String guildId, @Nullable String bkg, GreetingType type);
+    void setGreetingThumbnail(String guildId, boolean enabled, GreetingType type);
+    void setGreetingImage(String guildId, String image, GreetingType type);
 
     // Guild Data
     void registerGuild(Guild guild, Member owner);

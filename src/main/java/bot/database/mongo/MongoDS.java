@@ -600,18 +600,13 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public void enableGreetingEmbed(String guildId, boolean enabled, GreetingType type) {
-        this.updateGreeting(guildId, type, "embed_enabled", enabled);
-    }
-
-    @Override
     public void setGreetingDesc(String guildId, @Nullable String description, GreetingType type) {
         this.updateGreeting(guildId, type, "description", description);
     }
 
     @Override
-    public void setGreetingFooter(String guildId, @Nullable String description, GreetingType type) {
-        this.updateGreeting(guildId, type, "footer", description);
+    public void setGreetingFooter(String guildId, @Nullable String footer, GreetingType type) {
+        this.updateGreeting(guildId, type, "embed_footer", footer);
     }
 
     @Override
@@ -620,18 +615,13 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public void enableGreetingImage(String guildId, boolean enabled, GreetingType type) {
-        this.updateGreeting(guildId, type, "image_enabled", enabled);
+    public void setGreetingThumbnail(String guildId, boolean enabled, GreetingType type) {
+        this.updateGreeting(guildId, type, "embed_thumbnail", enabled);
     }
 
     @Override
-    public void setGreetingImageMsg(String guildId, @Nullable String message, GreetingType type) {
-        this.updateGreeting(guildId, type, "image_message", message);
-    }
-
-    @Override
-    public void setGreetingImageBkg(String guildId, @Nullable String bkg, GreetingType type) {
-        this.updateGreeting(guildId, type, "image_background", bkg);
+    public void setGreetingImage(String guildId, String image, GreetingType type) {
+        this.updateGreeting(guildId, type, "embed_image", image);
     }
 
     @Override

@@ -18,9 +18,10 @@ public abstract class GreetingEmbedBase extends ICommand {
     public GreetingEmbedBase(GreetingType type) {
         this.type = type;
         String text = type.getText().toLowerCase();
-        this.usage = "`{p}{i} <ON | OFF>` : enable or disable " + text + " embed\n" +
-                "`{p}{i} desc <text>` : setup " + text + " embed description\n" +
+        this.usage = "`{p}{i} desc <text>` : setup " + text + " embed description\n" +
                 "`{p}{i} footer <text>` : setup " + text + " embed footer\n" +
+                "`{p}{i} thumbnail <ON | OFF>` : enable/disable " + text + " embed thumbnail\n" +
+                "`{p}{i} image <url | OFF>` : enable/disable " + text + " embed image\n" +
                 "`{p}{i} color <HexColor>` : setup " + text + " embed color\n\n" +
                 "**Replacements**\n```" +
                 "{server} - Server Name\n" +
@@ -40,17 +41,6 @@ public abstract class GreetingEmbedBase extends ICommand {
         final String input = args.get(0);
 
         switch (input.toLowerCase()) {
-            case "on":
-            case "enable":
-                DataSource.INS.enableGreetingEmbed(ctx.getGuildId(), true, type);
-                ctx.replyWithSuccess("Configuration saved! " + type.getText() + " embed is now enabled");
-                break;
-
-            case "off":
-            case "disable":
-                DataSource.INS.enableGreetingEmbed(ctx.getGuildId(), false, type);
-                ctx.replyWithSuccess("Configuration saved! " + type.getText() + " embed is now disabled");
-                break;
 
             case "desc":
                 setupDescription(ctx);
@@ -58,6 +48,14 @@ public abstract class GreetingEmbedBase extends ICommand {
 
             case "footer":
                 setupFooter(ctx);
+                break;
+
+            case "thumbnail":
+                setupThumbnail(ctx);
+                break;
+
+            case "image":
+                setupImage(ctx);
                 break;
 
             case "color":
@@ -100,6 +98,49 @@ public abstract class GreetingEmbedBase extends ICommand {
 
         DataSource.INS.setGreetingFooter(ctx.getGuildId(), footer, type);
         ctx.replyWithSuccess("Configuration saved! Embed footer updated");
+
+    }
+
+    private void setupThumbnail(CommandContext ctx) {
+        if (ctx.getArgs().size() < 2) {
+            ctx.reply("Insufficient Arguments! Please provide a valid argument (`ON/OFF`)");
+            return;
+        }
+
+        boolean input;
+
+        if (ctx.getArgs().get(1).equalsIgnoreCase("on"))
+            input = true;
+        else if (ctx.getArgs().get(1).equalsIgnoreCase("off"))
+            input = false;
+        else {
+            ctx.reply("Invalid input! Setup failed");
+            return;
+        }
+
+        DataSource.INS.setGreetingThumbnail(ctx.getGuildId(), input, type);
+        ctx.replyWithSuccess("Configuration saved! Embed thumbnail " + ((input) ? "enabled" : "disabled"));
+
+    }
+
+    private void setupImage(CommandContext ctx) {
+        if (ctx.getArgs().size() < 2) {
+            ctx.reply("Insufficient Arguments! Please provide a valid image URL");
+            return;
+        }
+
+        String url = ctx.getArgs().get(1);
+
+        if (url.equalsIgnoreCase("OFF"))
+            url = null;
+
+        else if (!MiscUtils.isImageUrl(url)) {
+            ctx.reply("Oops! That doesn't look like a valid image URL");
+            return;
+        }
+
+        DataSource.INS.setGreetingImage(ctx.getGuildId(), url, type);
+        ctx.replyWithSuccess("Configuration saved! Image background" + ((url == null) ? "removed" : "changed"));
 
     }
 

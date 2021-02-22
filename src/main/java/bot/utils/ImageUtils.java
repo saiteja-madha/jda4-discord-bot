@@ -9,7 +9,6 @@ import bot.database.DataSource;
 import bot.database.objects.Greeting;
 import com.jagrosh.jdautilities.commons.utils.FinderUtil;
 import me.duncte123.botcommons.messaging.EmbedUtils;
-import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -110,7 +109,7 @@ public class ImageUtils {
         else
             config = DataSource.INS.getFarewellConfig(guild.getId());
 
-        if (config == null || !config.isEmbedEnabled && !config.isImageEnabled) {
+        if (config == null) {
             if (previewChannel != null)
                 BotUtils.sendMsg(previewChannel, type.getText() + " message is not configured on your server");
             return;
@@ -123,71 +122,22 @@ public class ImageUtils {
         final String greetChannelName = type.getText() + " Channel: " + (greetChannel == null ? "Not configured" : greetChannel.getName());
         final TextChannel channel = (previewChannel != null) ? previewChannel : greetChannel;
 
-        String endpoint = BASE_URL + ((type == GreetingType.WELCOME) ? "/welcome-card" : "/farewell-card");
-        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(endpoint))
-                .newBuilder()
-                .addQueryParameter("avatar", user.getEffectiveAvatarUrl())
-                .addQueryParameter("name", user.getName())
-                .addQueryParameter("discriminator", user.getDiscriminator())
-                .addQueryParameter("count", String.valueOf(guild.getMemberCount()))
-                .addQueryParameter("guild", guild.getName());
+        EmbedBuilder embed = new EmbedBuilder();
+        if (config.embedColor != null)
+            embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
+        if (config.description != null)
+            embed.setDescription(resolveGreeting(guild, user, config.description));
+        if (config.embedFooter != null)
+            embed.setFooter(resolveGreeting(guild, user, config.embedFooter));
+        if (config.embedThumbnail)
+            embed.setThumbnail(user.getEffectiveAvatarUrl());
+        if (config.embedImage != null)
+            embed.setImage(config.embedImage);
 
-        if (config.imageMessage != null)
-            urlBuilder.addQueryParameter("message", config.imageMessage);
-
-        if (config.imageBkg != null)
-            urlBuilder.addQueryParameter("bkg", config.imageBkg);
-
-        final String URI = urlBuilder.build().toString();
-
-        if (config.isEmbedEnabled) {
-            EmbedBuilder embed = new EmbedBuilder();
-            if (config.embedColor != null)
-                embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
-            if (config.description != null)
-                embed.setDescription(resolveGreeting(guild, user, config.description));
-            if (config.footer != null)
-                embed.setFooter(resolveGreeting(guild, user, config.footer));
-
-            // Check if Image is enabled
-            if (config.isImageEnabled) {
-                WebUtils.ins.getByteStream(URI).async((bytes) -> {
-
-                    // Append Image if response is successful
-                    embed.setImage("attachment://" + type.getAttachmentName());
-                    if (previewChannel != null)
-                        channel.sendMessage(embed.build()).append(greetChannelName).addFile(bytes, type.getAttachmentName()).queue();
-                    else
-                        channel.sendMessage(embed.build()).addFile(bytes, type.getAttachmentName()).queue();
-
-                }, (err) -> {
-                    if (previewChannel != null) {
-                        LOGGER.error(err.getMessage());
-                        BotUtils.sendErrorEmbed(channel, Constants.API_ERROR);
-                    } else
-                        BotUtils.sendEmbed(channel, embed.build());
-                });
-                return;
-            }
-
-            if (previewChannel != null)
-                channel.sendMessage(embed.build()).append(greetChannelName).queue();
-            else
-                BotUtils.sendEmbed(channel, embed.build());
-
-            return;
-        }
-
-        WebUtils.ins.getByteStream(URI).async(
-                (bytes) -> {
-                    if (previewChannel != null)
-                        sendImageWithMessage(channel, bytes, type.getAttachmentName(), greetChannelName);
-                    else
-                        sendImage(channel, bytes, type.getAttachmentName());
-                },
-                err -> LOGGER.error(err.getMessage())
-        );
-
+        if (previewChannel != null)
+            channel.sendMessage(embed.build()).append(greetChannelName).queue();
+        else
+            BotUtils.sendEmbed(channel, embed.build());
 
     }
 

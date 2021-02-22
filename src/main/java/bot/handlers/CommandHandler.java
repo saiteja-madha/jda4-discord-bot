@@ -8,7 +8,10 @@ import bot.commands.admin.XPSystem;
 import bot.commands.admin.counter.CounterSetup;
 import bot.commands.admin.flag.FlagtrChannels;
 import bot.commands.admin.flag.FlagtrCommand;
-import bot.commands.admin.greeting.*;
+import bot.commands.admin.greeting.Farewell;
+import bot.commands.admin.greeting.FarewellEmbed;
+import bot.commands.admin.greeting.Welcome;
+import bot.commands.admin.greeting.WelcomeEmbed;
 import bot.commands.admin.mod_config.MaxWarningsCommand;
 import bot.commands.admin.mod_config.ModLogChannel;
 import bot.commands.admin.reaction_role.AddReactionRoleCommand;
@@ -170,10 +173,8 @@ public class CommandHandler {
         addCommand(new TicketSetup(bot.getWaiter()));
         addCommand(new Welcome());
         addCommand(new WelcomeEmbed());
-        addCommand(new WelcomeImage());
         addCommand(new Farewell());
         addCommand(new FarewellEmbed());
-        addCommand(new FarewellImage());
 
         // AUTOMOD COMMANDS
         addCommand(new AntiLinksCommand());
