@@ -88,6 +88,7 @@ public class CommandHandler {
         addCommand(new TranslateCodes(bot.getWaiter()));
         addCommand(new TranslateCommand());
         addCommand(new UrbanCommand());
+        addCommand(new ProxiesCommand());
 
         // FUN COMMANDS
         addCommand(new FlipCoinCommand());

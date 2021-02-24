@@ -33,7 +33,12 @@ public class HasteCommand extends ICommand {
         final int index = contentRaw.indexOf(invoke) + invoke.length();
         final String body = contentRaw.substring(index).trim();
 
-        this.createPaste(body, ctx::reply);
+        this.createPaste(body, (message) -> {
+            if (message == null)
+                ctx.reply("Error connecting to hastebin server");
+            else
+                ctx.reply(message);
+        });
     }
 
     private void createPaste(String text, Consumer<String> callback) {
@@ -48,7 +53,10 @@ public class HasteCommand extends ICommand {
                     String key = json.get("key").asText();
                     callback.accept(HASTE_SERVER + key);
                 },
-                (e) -> callback.accept("Error: " + e.getMessage())
+                (e) -> {
+                    LOGGER.error("Hastebin error: " + e.getMessage());
+                    callback.accept(null);
+                }
         );
     }
 
