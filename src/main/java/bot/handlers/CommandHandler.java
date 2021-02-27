@@ -9,9 +9,7 @@ import bot.commands.admin.counter.CounterSetup;
 import bot.commands.admin.flag.FlagtrChannels;
 import bot.commands.admin.flag.FlagtrCommand;
 import bot.commands.admin.greeting.Farewell;
-import bot.commands.admin.greeting.FarewellEmbed;
 import bot.commands.admin.greeting.Welcome;
-import bot.commands.admin.greeting.WelcomeEmbed;
 import bot.commands.admin.mod_config.MaxWarningsCommand;
 import bot.commands.admin.mod_config.ModLogChannel;
 import bot.commands.admin.reaction_role.AddReactionRoleCommand;
@@ -83,7 +81,6 @@ public class CommandHandler {
         // UTILITY COMMANDS
         addCommand(new CovidCommand());
         addCommand(new GithubCommand());
-        addCommand(new HasteCommand());
         addCommand(new HelpCommand());
         addCommand(new TranslateCodes(bot.getWaiter()));
         addCommand(new TranslateCommand());
@@ -173,9 +170,7 @@ public class CommandHandler {
         addCommand(new CounterSetup());
         addCommand(new TicketSetup(bot.getWaiter()));
         addCommand(new Welcome());
-        addCommand(new WelcomeEmbed());
         addCommand(new Farewell());
-        addCommand(new FarewellEmbed());
 
         // AUTOMOD COMMANDS
         addCommand(new AntiLinksCommand());
