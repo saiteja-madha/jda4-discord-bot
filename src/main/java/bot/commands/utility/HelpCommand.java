@@ -7,6 +7,7 @@ import bot.command.CommandContext;
 import bot.command.ICommand;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,8 +61,12 @@ public class HelpCommand extends ICommand {
         if (invoke.equalsIgnoreCase("info"))
             category = CommandCategory.INFORMATION;
 
-        if (category == CommandCategory.ADMINISTRATION || category == CommandCategory.AUTOMOD)
-            category = null;
+        if (category == CommandCategory.ADMINISTRATION || category == CommandCategory.AUTOMOD) {
+            if (!ctx.getMember().hasPermission(Permission.MANAGE_SERVER)) {
+                ctx.reply("You must have `Manager Server` permission to view commands in this category");
+                return;
+            }
+        }
 
         if (category == CommandCategory.OWNER) {
             if (!Config.get("OWNER_ID").equalsIgnoreCase(ctx.getAuthor().getId())) {

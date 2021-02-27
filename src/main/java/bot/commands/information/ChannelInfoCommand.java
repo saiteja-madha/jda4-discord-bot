@@ -4,6 +4,7 @@ import bot.Constants;
 import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import com.jagrosh.jdautilities.commons.utils.FinderUtil;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.List;
 
 public class ChannelInfoCommand extends ICommand {
 
@@ -28,10 +30,26 @@ public class ChannelInfoCommand extends ICommand {
 
     @Override
     public void handle(@NotNull CommandContext ctx) {
-        TextChannel targetChannel = ctx.getChannel();
+        TextChannel targetChannel;
 
-        if (!ctx.getMessage().getMentionedChannels().isEmpty())
-            targetChannel = ctx.getMessage().getMentionedChannels().get(0);
+        if (ctx.getArgs().isEmpty()) {
+            targetChannel = ctx.getChannel();
+        } else {
+            if (!ctx.getMessage().getMentionedChannels().isEmpty()) {
+                targetChannel = ctx.getMessage().getMentionedChannels().get(0);
+            } else {
+                List<TextChannel> tcByName = FinderUtil.findTextChannels(ctx.getArgsJoined(), ctx.getGuild());
+                if (tcByName.isEmpty()) {
+                    ctx.reply("No channels found matching `" + ctx.getArgs().get(0) + "`!");
+                    return;
+                }
+                if (tcByName.size() != 1) {
+                    ctx.reply("Multiple channels found matching `" + ctx.getArgs().get(0) + "`.Please be more specific");
+                    return;
+                }
+                targetChannel = tcByName.get(0);
+            }
+        }
 
         final String name = targetChannel.getName();
         final String id = targetChannel.getId();

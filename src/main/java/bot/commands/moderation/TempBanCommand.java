@@ -53,6 +53,11 @@ public class TempBanCommand extends ICommand {
             return;
         }
 
+        if (time < 300) {
+            ctx.reply("Tempban time cannot be less than 5 minutes (`5m`)");
+            return;
+        }
+
         targetMembers
                 .stream()
                 // Filter out members with which bot and command author can interact

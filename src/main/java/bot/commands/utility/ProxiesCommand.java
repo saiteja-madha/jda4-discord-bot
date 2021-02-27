@@ -1,12 +1,12 @@
 package bot.commands.utility;
 
+import bot.Constants;
 import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import me.duncte123.botcommons.web.WebUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Timestamp;
 import java.util.Arrays;
 
 public class ProxiesCommand extends ICommand {
@@ -36,12 +36,12 @@ public class ProxiesCommand extends ICommand {
         else
             proxyType = "all";
 
-        WebUtils.ins.getByteStream(String.format(PROXIES_URL, proxyType)).async((bytes) -> {
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-
-            ctx.getChannel().sendMessage(proxyType.toUpperCase() + " Proxies fetched")
-                    .addFile(bytes, proxyType + "_proxies" + timestamp.getTime() + ".txt")
-                    .queue();
+        WebUtils.ins.getByteStream(String.format(PROXIES_URL, proxyType)).async((bytes) ->
+                ctx.getChannel().sendMessage(proxyType.toUpperCase() + " Proxies fetched")
+                        .addFile(bytes, proxyType + "_proxies.txt")
+                        .queue(), err -> {
+            ctx.replyError(Constants.API_ERROR);
+            LOGGER.error(err.getMessage());
         });
 
     }

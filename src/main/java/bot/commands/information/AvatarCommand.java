@@ -14,6 +14,7 @@ public class AvatarCommand extends ICommand {
 
     public AvatarCommand() {
         this.name = "avatar";
+        this.usage = "[@member]";
         this.help = "displays avatar information about the user";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.category = CommandCategory.INFORMATION;

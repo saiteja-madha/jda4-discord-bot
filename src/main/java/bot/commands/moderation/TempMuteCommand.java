@@ -69,6 +69,11 @@ public class TempMuteCommand extends ICommand {
             return;
         }
 
+        if (time < 120) {
+            ctx.reply("Tempmute time cannot be less than 2 minutes (`2m`)");
+            return;
+        }
+
         targetMembers
                 .stream()
                 // Filter out members with which bot and command author can interact
