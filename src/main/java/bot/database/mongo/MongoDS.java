@@ -7,6 +7,8 @@ import bot.database.DataSource;
 import bot.database.objects.*;
 import bot.utils.FixedSizeCache;
 import bot.utils.GuildUtils;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.FindIterable;
@@ -25,6 +27,7 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,6 +44,10 @@ public class MongoDS implements DataSource {
     private final FixedSizeCache<String, Greeting.Farewell> farewellCache = new FixedSizeCache<>(Config.getInt("CACHE_SIZE"));
 
     public MongoDS() {
+
+        // Configure MongoDB Log Level
+        ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.mongodb.driver").setLevel(Level.WARN);
+
         ConnectionString connString = new ConnectionString(Config.get("MONGO_CONNECTION_STRING"));
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(connString)
@@ -90,11 +97,6 @@ public class MongoDS implements DataSource {
     @Override
     public void setModLogChannel(String guildId, String logChannel) {
         updateSettings(guildId, "modlog_channel", logChannel);
-    }
-
-    @Override
-    public void setFlagTranslation(String guildId, boolean isEnabled) {
-        updateSettings(guildId, "flag_translation", isEnabled);
     }
 
     @Override

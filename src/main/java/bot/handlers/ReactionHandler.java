@@ -96,7 +96,7 @@ public class ReactionHandler {
 
         // Check Guild Configuration
         GuildSettings config = DataSource.INS.getSettings(event.getGuild().getId());
-        if (!config.flagTranslation || !config.translationChannels.contains(event.getChannel().getId()))
+        if (!config.translationChannels.contains(event.getChannel().getId()))
             return;
 
         // Check if already translated

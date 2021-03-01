@@ -6,8 +6,7 @@ import bot.command.ICommand;
 import bot.commands.admin.SetPrefixCommand;
 import bot.commands.admin.XPSystem;
 import bot.commands.admin.counter.CounterSetup;
-import bot.commands.admin.flag.FlagtrChannels;
-import bot.commands.admin.flag.FlagtrCommand;
+import bot.commands.admin.FlagtrCommand;
 import bot.commands.admin.greeting.Farewell;
 import bot.commands.admin.greeting.Welcome;
 import bot.commands.admin.mod_config.MaxWarningsCommand;
@@ -164,7 +163,6 @@ public class CommandHandler {
         addCommand(new MaxWarningsCommand());
         addCommand(new XPSystem());
         addCommand(new FlagtrCommand());
-        addCommand(new FlagtrChannels());
         addCommand(new AddReactionRoleCommand());
         addCommand(new RemoveReactionRoleCommand());
         addCommand(new CounterSetup());

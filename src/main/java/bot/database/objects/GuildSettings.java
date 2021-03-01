@@ -5,12 +5,12 @@ import org.bson.Document;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class GuildSettings {
 
     public final String prefix;
-    public final boolean flagTranslation;
     public final List<String> translationChannels;
     public final boolean isRankingEnabled;
     public final String levelUpMessage;
@@ -24,8 +24,7 @@ public class GuildSettings {
 
     public GuildSettings() {
         this.prefix = Config.get("PREFIX");
-        this.flagTranslation = false;
-        this.translationChannels = new ArrayList<>();
+        this.translationChannels = Collections.emptyList();
         this.isRankingEnabled = true;
         this.levelUpMessage = Config.get("DEFAULT_LEVELUP_MESSAGE");
         this.levelUpChannel = null;
@@ -36,7 +35,6 @@ public class GuildSettings {
 
     public GuildSettings(Document doc) {
         this.prefix = doc.get("prefix", Config.get("PREFIX"));
-        this.flagTranslation = doc.get("flag_translation", false);
         this.translationChannels = doc.get("translation_channels", new ArrayList<>());
         this.isRankingEnabled = doc.get("ranking_enabled", false);
         this.levelUpMessage = doc.get("levelup_message", Config.get("DEFAULT_LEVELUP_MESSAGE"));

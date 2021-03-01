@@ -27,9 +27,9 @@ public class AntiInvitesCommand extends ICommand {
         boolean antiinvites;
 
         if (input.equalsIgnoreCase("none") || input.equalsIgnoreCase("off"))
-            antiinvites = true;
-        else if (input.equalsIgnoreCase("on"))
             antiinvites = false;
+        else if (input.equalsIgnoreCase("on"))
+            antiinvites = true;
         else {
             this.sendUsageEmbed(ctx, "Incorrect Argument");
             return;

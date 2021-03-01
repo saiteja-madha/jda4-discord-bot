@@ -41,7 +41,6 @@ public interface DataSource {
     @Nullable String getReactionRoleId(String guildId, String channelId, String messageId, String emote);
 
     // Flag Translations
-    void setFlagTranslation(String guildId, boolean isEnabled);
     void updateTranslationChannels(String guildId, List<String> channels);
     void addTranslation(String guildId, String channelId, String messageId, String unicode);
     boolean isTranslated(String guildId, String channelId, String messageId, String unicode);
