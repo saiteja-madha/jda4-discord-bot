@@ -31,6 +31,10 @@ Command | Description
 `-translate <code> <text>` | Translate from one language to other
 `-trcodes` | Displays a list of available translate codes
 `-urban <search-term>` | Searches the urban dictionary
+`-proxies` | Fetch fresh proxies (http, socks4, socks5)
+`-http` | Fetch fresh http proxies
+`-socks4` | Fetch fresh socks4 proxies
+`-socks5` | Fetch fresh socks5 proxies
 
 ### Fun Commands:
 Command | Description
