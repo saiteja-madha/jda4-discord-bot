@@ -1,13 +1,17 @@
 package bot.commands.admin.greeting;
 
+import bot.Bot;
 import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.data.GreetingType;
 import bot.database.DataSource;
-import bot.utils.ImageUtils;
+import bot.database.objects.Greeting;
+import bot.handlers.InviteTracker;
 import bot.utils.MiscUtils;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,8 +20,10 @@ import java.util.List;
 public abstract class GreetingBase extends ICommand {
 
     private final GreetingType type;
+    private final Bot bot;
 
-    public GreetingBase(GreetingType type) {
+    public GreetingBase(Bot bot, GreetingType type) {
+        this.bot = bot;
         this.type = type;
         String text = type.getText().toLowerCase();
         this.usage = "`{p}{i} <#channel | OFF>` : enable or disable " + text + " message\n" +
@@ -94,7 +100,23 @@ public abstract class GreetingBase extends ICommand {
     }
 
     private void sendPreview(CommandContext ctx) {
-        ImageUtils.sendGreeting(ctx.getGuild(), ctx.getAuthor(), type, ctx.getChannel());
+        final Guild guild = ctx.getGuild();
+
+        Greeting config;
+        if (type == GreetingType.WELCOME)
+            config = DataSource.INS.getWelcomeConfig(guild.getId());
+        else
+            config = DataSource.INS.getFarewellConfig(guild.getId());
+
+        if (config == null) {
+            ctx.reply(type.getText() + " message is not configured on this server");
+            return;
+        }
+
+        final TextChannel greetChannel = InviteTracker.getGreetingChannel(guild, config);
+        final String greetChannelName = type.getText() + " Channel: " + (greetChannel == null ? "Not configured" : greetChannel.getName());
+        final EmbedBuilder embed = InviteTracker.buildEmbed(guild, ctx.getAuthor(), null, config);
+        ctx.getChannel().sendMessage(embed.build()).append(greetChannelName).queue();
     }
 
     private void setupDescription(CommandContext ctx) {
@@ -109,6 +131,14 @@ public abstract class GreetingBase extends ICommand {
             description = null;
 
         DataSource.INS.setGreetingDesc(ctx.getGuildId(), description, type);
+
+        if (description != null && description.contains("{inviter}")) {
+            DataSource.INS.inviteTracking(ctx.getGuildId(), true);
+            bot.getInviteTracker().cacheGuildInvites(ctx.getGuild());
+        }
+        if (description == null || !description.contains("{inviter}"))
+            DataSource.INS.inviteTracking(ctx.getGuildId(), false);
+
         ctx.replyWithSuccess("Configuration saved! Embed description updated");
 
     }
@@ -125,6 +155,14 @@ public abstract class GreetingBase extends ICommand {
             footer = null;
 
         DataSource.INS.setGreetingFooter(ctx.getGuildId(), footer, type);
+
+        if (footer != null && footer.contains("{inviter}")) {
+            DataSource.INS.inviteTracking(ctx.getGuildId(), true);
+            bot.getInviteTracker().cacheGuildInvites(ctx.getGuild());
+        }
+        if (footer == null || !footer.contains("{inviter}"))
+            DataSource.INS.inviteTracking(ctx.getGuildId(), false);
+
         ctx.replyWithSuccess("Configuration saved! Embed footer updated");
 
     }

@@ -102,67 +102,6 @@ public class ImageUtils {
         embedImage(channel, bytes, null, type);
     }
 
-    public static void sendGreeting(Guild guild, User user, GreetingType type, @Nullable TextChannel previewChannel) {
-        Greeting config;
-        if (type == GreetingType.WELCOME)
-            config = DataSource.INS.getWelcomeConfig(guild.getId());
-        else
-            config = DataSource.INS.getFarewellConfig(guild.getId());
-
-        if (config == null) {
-            if (previewChannel != null)
-                BotUtils.sendMsg(previewChannel, type.getText() + " message is not configured on your server");
-            return;
-        }
-
-        final TextChannel greetChannel = getGreetingChannel(guild, config);
-        if (greetChannel == null && previewChannel == null)
-            return;
-
-        final String greetChannelName = type.getText() + " Channel: " + (greetChannel == null ? "Not configured" : greetChannel.getName());
-        final TextChannel channel = (previewChannel != null) ? previewChannel : greetChannel;
-
-        EmbedBuilder embed = new EmbedBuilder();
-        if (config.embedColor != null)
-            embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
-        if (config.description != null)
-            embed.setDescription(resolveGreeting(guild, user, config.description));
-        if (config.embedFooter != null)
-            embed.setFooter(resolveGreeting(guild, user, config.embedFooter));
-        if (config.embedThumbnail)
-            embed.setThumbnail(user.getEffectiveAvatarUrl());
-        if (config.embedImage != null)
-            embed.setImage(config.embedImage);
-
-        if (previewChannel != null)
-            channel.sendMessage(embed.build()).append(greetChannelName).queue();
-        else
-            BotUtils.sendEmbed(channel, embed.build());
-
-    }
-
-    @Nullable
-    private static TextChannel getGreetingChannel(Guild guild, Greeting config) {
-        TextChannel channel = null;
-        if (config != null) {
-            if (config.channel != null) {
-                TextChannel tcById = guild.getTextChannelById(config.channel);
-                if (tcById != null)
-                    channel = tcById;
-                else
-                    DataSource.INS.setGreetingChannel(guild.getId(), null, config.type);
-            }
-        }
-
-        return channel;
-    }
-
-    private static String resolveGreeting(Guild guild, User user, String message) {
-        return message.replace("{server}", guild.getName())
-                .replace("{count}", String.valueOf(guild.getMemberCount()))
-                .replace("{member}", user.getAsTag());
-    }
-
     @NotNull
     public static String getImageFromCommand(@NotNull CommandContext ctx) {
         final List<String> args = ctx.getArgs();

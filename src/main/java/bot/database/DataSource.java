@@ -26,6 +26,7 @@ public interface DataSource {
     void xpSystem(String guildId, boolean isEnabled);
     void setMaxWarnings(String guildId, int warnings);
     void setModLogChannel(String guildId, @Nullable String logChannel);
+    void inviteTracking(String guildId, boolean isEnabled);
 
     // Automod Settings
     void setAutomodLogChannel(String guildId, @Nullable String channelId);
@@ -93,5 +94,8 @@ public interface DataSource {
 
     // Guild Data
     void registerGuild(Guild guild, Member owner);
+
+    // Invites
+    void logInvite(Member member, Member inviter, boolean memberLeft, boolean isFake);
 
 }

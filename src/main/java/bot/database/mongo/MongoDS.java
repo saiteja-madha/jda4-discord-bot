@@ -100,6 +100,11 @@ public class MongoDS implements DataSource {
     }
 
     @Override
+    public void inviteTracking(String guildId, boolean isEnabled) {
+        updateSettings(guildId, "track_invites", isEnabled);
+    }
+
+    @Override
     public void updateTranslationChannels(String guildId, List<String> channels) {
         updateSettings(guildId, "translation_channels", channels);
     }
@@ -638,6 +643,34 @@ public class MongoDS implements DataSource {
                 .append("join_timestamp", Instant.now());
 
         collection.insertOne(doc);
+    }
+
+    @Override
+    public void logInvite(Member member, Member inviter, boolean memberLeft, boolean isFake) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("translate_logs");
+
+        if (!memberLeft) {
+            Document doc = new Document("_id", new ObjectId());
+            doc.append("guild_id", member.getGuild().getId())
+                    .append("member_id", member.getId())
+                    .append("inviter_id", inviter.getId());
+
+            if (isFake) {
+                doc.append("isFake", true);
+            }
+
+            collection.insertOne(doc);
+        }
+
+        if (memberLeft) {
+            Bson filter = Filters.and(
+                    Filters.eq("guild_id", member.getGuild().getId()),
+                    Filters.eq("member_id", member.getId())
+            );
+            Bson update = Updates.set("memberLeft", true);
+            collection.updateOne(filter, update, new UpdateOptions().upsert(false));
+        }
+
     }
 
 }

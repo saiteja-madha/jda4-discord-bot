@@ -21,6 +21,7 @@ public class GuildSettings {
     public final String modlogChannel;
     @Nullable
     public final GuildSettings.Automod automod;
+    public final boolean shouldTrackInvites;
 
     public GuildSettings() {
         this.prefix = Config.get("PREFIX");
@@ -31,6 +32,7 @@ public class GuildSettings {
         this.maxWarnings = 3;
         this.modlogChannel = null;
         this.automod = null;
+        this.shouldTrackInvites = false;
     }
 
     public GuildSettings(Document doc) {
@@ -42,6 +44,7 @@ public class GuildSettings {
         this.maxWarnings = doc.get("max_warnings", 3);
         this.modlogChannel = doc.getString("modlog_channel");
         this.automod = new Automod(doc);
+        this.shouldTrackInvites = doc.get("track_invites", false);
     }
 
     public static class Automod {
