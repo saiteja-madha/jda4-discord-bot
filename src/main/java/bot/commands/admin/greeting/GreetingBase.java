@@ -47,27 +47,27 @@ public abstract class GreetingBase extends ICommand {
         switch (input) {
 
             case "preview":
-                sendPreview(ctx);
+                this.sendPreview(ctx);
                 break;
 
             case "desc":
-                setupDescription(ctx);
+                this.setupDescription(ctx);
                 break;
 
             case "footer":
-                setupFooter(ctx);
+                this.setupFooter(ctx);
                 break;
 
             case "thumbnail":
-                setupThumbnail(ctx);
+                this.setupThumbnail(ctx);
                 break;
 
             case "image":
-                setupImage(ctx);
+                this.setupImage(ctx);
                 break;
 
             case "color":
-                setupColor(ctx);
+                this.setupColor(ctx);
                 break;
 
             default: {
@@ -98,6 +98,9 @@ public abstract class GreetingBase extends ICommand {
     }
 
     private void setupDescription(CommandContext ctx) {
+
+        final String contentRaw = ctx.getMessage().getContentRaw();
+
         if (ctx.getArgs().size() < 2) {
             ctx.reply("Insufficient Arguments! Please provide a embed description");
             return;
@@ -168,7 +171,7 @@ public abstract class GreetingBase extends ICommand {
         }
 
         DataSource.INS.setGreetingImage(ctx.getGuildId(), url, type);
-        ctx.replyWithSuccess("Configuration saved! Image background" + ((url == null) ? "removed" : "changed"));
+        ctx.replyWithSuccess("Configuration saved! Image background " + ((url == null) ? "removed" : "changed"));
 
     }
 
