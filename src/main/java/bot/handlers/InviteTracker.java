@@ -54,15 +54,19 @@ public class InviteTracker extends ListenerAdapter {
 
     @Override
     public void onGuildInviteCreate(@Nonnull GuildInviteCreateEvent event) {
-        final String code = event.getCode();
-        final InviteData invite = new InviteData(event.getInvite());
-        inviteCache.put(code, invite);
+        if (this.shouldInvitesByTracked(event.getGuild())) {
+            final String code = event.getCode();
+            final InviteData invite = new InviteData(event.getInvite());
+            inviteCache.put(code, invite);
+        }
     }
 
     @Override
     public void onGuildInviteDelete(@Nonnull GuildInviteDeleteEvent event) {
-        final String code = event.getCode();
-        inviteCache.remove(code);
+        if (this.shouldInvitesByTracked(event.getGuild())) {
+            final String code = event.getCode();
+            inviteCache.remove(code);
+        }
     }
 
     @Override
@@ -73,7 +77,7 @@ public class InviteTracker extends ListenerAdapter {
             return;
         }
 
-        this.sendGreeting(event.getGuild(), event.getUser(), GreetingType.WELCOME);
+        this.handleGreeting(event.getGuild(), event.getUser(), GreetingType.WELCOME);
 
     }
 
@@ -85,11 +89,56 @@ public class InviteTracker extends ListenerAdapter {
             return;
         }
 
-        this.sendGreeting(event.getGuild(), event.getUser(), GreetingType.FAREWELL);
+        this.handleGreeting(event.getGuild(), event.getUser(), GreetingType.FAREWELL);
 
     }
 
-    public void sendGreeting(Guild guild, User user, GreetingType type) {
+    public void handleGreeting(Guild guild, User user, GreetingType type) {
+        // Invites tracking
+        if (this.shouldInvitesByTracked(guild)) {
+
+            guild.retrieveInvites().queue((invites) -> {
+                Invite inviteUsed = null;
+                for (final Invite invite : invites) {
+
+                    // Skip checking other invites
+                    if (inviteUsed != null) {
+                        break;
+                    }
+
+                    final String code = invite.getCode();
+                    final InviteData cachedInvite = inviteCache.get(code);
+
+                    // Skip if the invite wasn't cached earlier
+                    if (cachedInvite == null) {
+                        continue;
+                    }
+
+                    // Uses are same, so this is not the invite used
+                    if (invite.getUses() == cachedInvite.getUses()) {
+                        continue;
+                    }
+
+                    // Is this even possible?
+                    if (invite.getUses() < cachedInvite.getUses()) {
+                        continue;
+                    }
+
+                    inviteUsed = invite;
+                    cachedInvite.incrementUses();
+                }
+
+                this.sendGreeting(guild, user, inviteUsed, type);
+
+            });
+
+        } else {
+            this.sendGreeting(guild, user, null, type);
+        }
+
+    }
+
+    private void sendGreeting(Guild guild, User user, @Nullable Invite inviteUsed, GreetingType type) {
         Greeting config;
         if (type == GreetingType.WELCOME)
             config = DataSource.INS.getWelcomeConfig(guild.getId());
@@ -104,38 +153,8 @@ public class InviteTracker extends ListenerAdapter {
         if (greetChannel == null)
             return;
 
-        if (config.description != null && config.description.contains("{inviter}") ||
-                config.embedFooter != null && config.embedFooter.contains("{inviter}")) {
-
-            guild.retrieveInvites().queue((invites) -> {
-                boolean inviteFound = false;
-                for (final Invite invite : invites) {
-                    if (inviteFound) {
-                        break;
-                    }
-                    final String code = invite.getCode();
-                    final InviteData cachedInvite = inviteCache.get(code);
-
-                    if (cachedInvite == null) {
-                        continue;
-                    }
-
-                    if (invite.getUses() == cachedInvite.getUses()) {
-                        continue;
-                    }
-
-                    inviteFound = true;
-                    cachedInvite.incrementUses();
-
-                    EmbedBuilder embed = buildEmbed(guild, user, invite.getInviter(), config);
-                    BotUtils.sendEmbed(greetChannel, embed.build());
-
-                }
-            });
-        } else {
-            EmbedBuilder embed = buildEmbed(guild, user, null, config);
-            BotUtils.sendEmbed(greetChannel, embed.build());
-        }
+        EmbedBuilder embed = buildEmbed(guild, user, inviteUsed, config);
+        BotUtils.sendEmbed(greetChannel, embed.build());
 
     }
 
@@ -155,14 +174,14 @@ public class InviteTracker extends ListenerAdapter {
         return channel;
     }
 
-    public static EmbedBuilder buildEmbed(Guild guild, User user, User inviter, Greeting config) {
+    public static EmbedBuilder buildEmbed(Guild guild, User user, @Nullable Invite inviteUsed, Greeting config) {
         EmbedBuilder embed = new EmbedBuilder();
         if (config.embedColor != null)
             embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
         if (config.description != null)
-            embed.setDescription(resolveGreeting(guild, user, inviter, config.description));
+            embed.setDescription(resolveGreeting(guild, user, inviteUsed, config.description));
         if (config.embedFooter != null)
-            embed.setFooter(resolveGreeting(guild, user, inviter, config.embedFooter));
+            embed.setFooter(resolveGreeting(guild, user, inviteUsed, config.embedFooter));
         if (config.embedThumbnail)
             embed.setThumbnail(user.getEffectiveAvatarUrl());
         if (config.embedImage != null)
@@ -171,11 +190,14 @@ public class InviteTracker extends ListenerAdapter {
         return embed;
     }
 
-    public static String resolveGreeting(Guild guild, User user, @Nullable User inviter, String message) {
+    public static String resolveGreeting(Guild guild, User user, @Nullable Invite inviteUsed, String message) {
         return message.replace("{server}", guild.getName())
                 .replace("{count}", String.valueOf(guild.getMemberCount()))
                 .replace("{member}", user.getAsTag())
-                .replace("{inviter}", ((inviter != null) ? inviter.getAsTag() : "NA"));
+                .replace("{inviter}", ((inviteUsed != null)
+                        ? (inviteUsed.getInviter() == null ? "NA" : inviteUsed.getInviter().getAsTag())
+                        : "NA")
+                );
 
     }
 
