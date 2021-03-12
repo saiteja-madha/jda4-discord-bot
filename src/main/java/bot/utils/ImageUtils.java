@@ -160,7 +160,8 @@ public class ImageUtils {
     private static String resolveGreeting(Guild guild, User user, String message) {
         return message.replace("{server}", guild.getName())
                 .replace("{count}", String.valueOf(guild.getMemberCount()))
-                .replace("{member}", user.getAsTag());
+                .replace("{member}", user.getAsTag())
+                .replaceAll("\\\\n", "\n");
     }
 
     @NotNull
