@@ -98,9 +98,6 @@ public abstract class GreetingBase extends ICommand {
     }
 
     private void setupDescription(CommandContext ctx) {
-
-        final String contentRaw = ctx.getMessage().getContentRaw();
-
         if (ctx.getArgs().size() < 2) {
             ctx.reply("Insufficient Arguments! Please provide a embed description");
             return;
