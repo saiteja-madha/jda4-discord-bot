@@ -226,12 +226,12 @@ public class InviteTracker extends ListenerAdapter {
         int[] inviterInvites = {0, 0, 0};
         if (inviter != null)
             inviterInvites = DataSource.INS.getInvites(guild.getId(), inviter.getId());
-        return message.replace("{server}", guild.getName())
+        return message.replaceAll("\\\\n", "\n")
+                .replace("{server}", guild.getName())
                 .replace("{count}", String.valueOf(guild.getMemberCount()))
                 .replace("{member}", user.getAsTag())
-                .replaceAll("\\\\n", "\n")
                 .replace("{inviter}", (inviter == null ? "NA" : inviter.getAsTag()))
-                .replace("{invites}", "Total: `" + inviterInvites[0] + "` Fake: `" + inviterInvites[2] + "` Left: `" + inviterInvites[1] + "`");
+                .replace("{invites}", "Total: `" + inviterInvites[0] + "` Fake: `" + inviterInvites[1] + "` Left: `" + inviterInvites[2] + "`");
     }
 
 }
