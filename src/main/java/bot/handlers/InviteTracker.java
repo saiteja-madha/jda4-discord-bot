@@ -1,6 +1,7 @@
 package bot.handlers;
 
 import bot.data.GreetingType;
+import bot.data.InviteType;
 import bot.data.objects.InviteData;
 import bot.database.DataSource;
 import bot.database.objects.Greeting;
@@ -19,6 +20,8 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -26,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InviteTracker extends ListenerAdapter {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(InviteTracker.class);
     private final Map<String, InviteData> inviteCache = new ConcurrentHashMap<>();
 
     public boolean shouldInvitesByTracked(Guild guild) {
@@ -77,7 +81,7 @@ public class InviteTracker extends ListenerAdapter {
             return;
         }
 
-        this.handleGreeting(event.getGuild(), event.getUser(), GreetingType.WELCOME);
+        this.handleWelcome(event.getGuild(), event.getUser());
 
     }
 
@@ -89,11 +93,11 @@ public class InviteTracker extends ListenerAdapter {
             return;
         }
 
-        this.handleGreeting(event.getGuild(), event.getUser(), GreetingType.FAREWELL);
+        this.handleFarewell(event.getGuild(), event.getUser());
 
     }
 
-    public void handleGreeting(Guild guild, User user, GreetingType type) {
+    public void handleWelcome(Guild guild, User user) {
         // Invites tracking
         if (this.shouldInvitesByTracked(guild)) {
 
@@ -128,17 +132,45 @@ public class InviteTracker extends ListenerAdapter {
                     cachedInvite.incrementUses();
                 }
 
-                this.sendGreeting(guild, user, inviteUsed, type);
+                User inviter = null;
+                if (inviteUsed != null) {
+                    inviter = inviteUsed.getInviter();
+                    if (inviter == null) {
+                        LOGGER.error("GuildId: {} - No user found for invite {}", guild.getId(), inviteUsed);
+                    } else {
+                        DataSource.INS.logInvite(guild.getId(), user.getId(), inviter.getId());
+                        DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), InviteType.TOTAL);
+                    }
+                }
+                this.sendGreeting(guild, user, inviter, GreetingType.WELCOME);
 
             });
 
         } else {
-            this.sendGreeting(guild, user, null, type);
+            this.sendGreeting(guild, user, null, GreetingType.WELCOME);
         }
 
     }
 
-    private void sendGreeting(Guild guild, User user, @Nullable Invite inviteUsed, GreetingType type) {
+    public void handleFarewell(Guild guild, @Nullable User user) {
+        if (this.shouldInvitesByTracked(guild)) {
+            if (user != null) {
+                final String inviterId = DataSource.INS.getInviterId(guild.getId(), user.getId());
+                DataSource.INS.incrementInvites(guild.getId(), inviterId, InviteType.LEFT);
+
+                // Retrieve Member from inviterId
+                if (inviterId != null) {
+                    guild.retrieveMemberById(inviterId).queue(member ->
+                            this.sendGreeting(guild, user, member.getUser(), GreetingType.FAREWELL)
+                    );
+                }
+            }
+            return;
+        }
+        this.sendGreeting(guild, user, null, GreetingType.FAREWELL);
+    }
+
+    private void sendGreeting(Guild guild, User user, User inviter, GreetingType type) {
         Greeting config;
         if (type == GreetingType.WELCOME)
             config = DataSource.INS.getWelcomeConfig(guild.getId());
@@ -153,7 +185,7 @@ public class InviteTracker extends ListenerAdapter {
         if (greetChannel == null)
             return;
 
-        EmbedBuilder embed = buildEmbed(guild, user, inviteUsed, config);
+        EmbedBuilder embed = buildEmbed(guild, user, inviter, config);
         BotUtils.sendEmbed(greetChannel, embed.build());
 
     }
@@ -174,14 +206,14 @@ public class InviteTracker extends ListenerAdapter {
         return channel;
     }
 
-    public static EmbedBuilder buildEmbed(Guild guild, User user, @Nullable Invite inviteUsed, Greeting config) {
+    public static EmbedBuilder buildEmbed(Guild guild, User user, @Nullable User inviter, Greeting config) {
         EmbedBuilder embed = new EmbedBuilder();
         if (config.embedColor != null)
             embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
         if (config.description != null)
-            embed.setDescription(resolveGreeting(guild, user, inviteUsed, config.description));
+            embed.setDescription(resolveGreeting(guild, user, inviter, config.description));
         if (config.embedFooter != null)
-            embed.setFooter(resolveGreeting(guild, user, inviteUsed, config.embedFooter));
+            embed.setFooter(resolveGreeting(guild, user, inviter, config.embedFooter));
         if (config.embedThumbnail)
             embed.setThumbnail(user.getEffectiveAvatarUrl());
         if (config.embedImage != null)
@@ -190,15 +222,16 @@ public class InviteTracker extends ListenerAdapter {
         return embed;
     }
 
-    public static String resolveGreeting(Guild guild, User user, @Nullable Invite inviteUsed, String message) {
+    public static String resolveGreeting(Guild guild, User user, @Nullable User inviter, String message) {
+        int[] inviterInvites = {0, 0, 0};
+        if (inviter != null)
+            inviterInvites = DataSource.INS.getInvites(guild.getId(), inviter.getId());
         return message.replace("{server}", guild.getName())
                 .replace("{count}", String.valueOf(guild.getMemberCount()))
                 .replace("{member}", user.getAsTag())
-                .replace("{inviter}", ((inviteUsed != null)
-                        ? (inviteUsed.getInviter() == null ? "NA" : inviteUsed.getInviter().getAsTag())
-                        : "NA")
-                );
-
+                .replaceAll("\\\\n", "\n")
+                .replace("{inviter}", (inviter == null ? "NA" : inviter.getAsTag()))
+                .replace("{invites}", "Total: `" + inviterInvites[0] + "` Fake: `" + inviterInvites[2] + "` Left: `" + inviterInvites[1] + "`");
     }
 
 }

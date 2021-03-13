@@ -3,6 +3,7 @@ package bot.database.mongo;
 import bot.Config;
 import bot.data.CounterType;
 import bot.data.GreetingType;
+import bot.data.InviteType;
 import bot.database.DataSource;
 import bot.database.objects.*;
 import bot.utils.FixedSizeCache;
@@ -646,31 +647,59 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public void logInvite(Member member, Member inviter, boolean memberLeft, boolean isFake) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("translate_logs");
-
-        if (!memberLeft) {
-            Document doc = new Document("_id", new ObjectId());
-            doc.append("guild_id", member.getGuild().getId())
-                    .append("member_id", member.getId())
-                    .append("inviter_id", inviter.getId());
-
-            if (isFake) {
-                doc.append("isFake", true);
-            }
-
-            collection.insertOne(doc);
+    public int[] getInvites(String guildId, String memberId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_data");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("member_id", memberId)
+        );
+        final Document doc = collection.find(filter).first();
+        if (doc == null) {
+            return new int[]{0, 0, 0};
+        } else {
+            return new int[]{doc.getInteger("total_invites", 0),
+                    doc.getInteger("fake_invites", 0),
+                    doc.getInteger("left_invites", 0)};
         }
+    }
 
-        if (memberLeft) {
-            Bson filter = Filters.and(
-                    Filters.eq("guild_id", member.getGuild().getId()),
-                    Filters.eq("member_id", member.getId())
-            );
-            Bson update = Updates.set("memberLeft", true);
-            collection.updateOne(filter, update, new UpdateOptions().upsert(false));
-        }
+    @Override
+    public String getInviterId(String guildId, String memberId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_logs");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("member_id", memberId)
+        );
+        final Document doc = collection.find(filter).first();
+        return doc == null ? null : doc.getString("inviter_id");
+    }
 
+    @Override
+    public void incrementInvites(String guildId, String memberId, InviteType type) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_data");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("member_id", memberId)
+        );
+        Bson update;
+        if (type == InviteType.TOTAL)
+            update = Updates.inc("total_invites", 1);
+        else if (type == InviteType.FAKE)
+            update = Updates.inc("fake_invites", 1);
+        else
+            update = Updates.inc("left_invites", 1);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void logInvite(String guildId, String memberId, String inviterId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_logs");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("member_id", memberId)
+        );
+        Bson update = Updates.set("inviter_id", inviterId);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
     }
 
 }

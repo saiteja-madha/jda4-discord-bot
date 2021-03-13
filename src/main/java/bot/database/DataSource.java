@@ -2,11 +2,13 @@ package bot.database;
 
 import bot.data.CounterType;
 import bot.data.GreetingType;
+import bot.data.InviteType;
 import bot.database.mongo.MongoDS;
 import bot.database.objects.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -96,6 +98,9 @@ public interface DataSource {
     void registerGuild(Guild guild, Member owner);
 
     // Invites
-    void logInvite(Member member, Member inviter, boolean memberLeft, boolean isFake);
+    int[] getInvites(String guildId, String memberId); // [total, fake, left]
+    String getInviterId(String guildId, String memberId);
+    void incrementInvites(String guildId, String memberId, InviteType type);
+    void logInvite(String guildId, String memberId, String inviterId);
 
 }
