@@ -37,7 +37,7 @@ public class ReactionHandler extends ListenerAdapter {
 
     @Override
     public void onGuildMessageDelete(@Nonnull GuildMessageDeleteEvent event) {
-        DataSource.INS.removeReactionRole(event.getGuild().getId(), event.getChannel().getId(), event.getMessageId(), null);
+        DataSource.INS.removeReactionRole(event.getGuild().getId(), event.getChannel().getId(), event.getMessageId());
     }
 
     @Override
@@ -58,7 +58,7 @@ public class ReactionHandler extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReactionRemove(@Nonnull GuildMessageReactionRemoveEvent event) {
-        if (event.getUser() == null || event.getUser().isBot())
+        if (event.getUser() != null && event.getUser().isBot())
             return;
 
         bot.getReactionHandler().handleReactionRole(event, false);
@@ -83,9 +83,8 @@ public class ReactionHandler extends ListenerAdapter {
 
         final Role role = guild.getRoleById(roleId);
 
-        // If role is removed, remove data from DB
         if (role == null) {
-            DataSource.INS.removeReactionRole(guild.getId(), channel.getId(), event.getMessageId(), emoji);
+            // TODO: If role is removed, remove data from DB
             return;
         }
 
