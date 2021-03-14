@@ -19,7 +19,7 @@ public class InviteTracker extends ICommand {
         this.minArgsCount = 1;
         this.aliases = Collections.singletonList("invite-tracker");
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
-        this.category = CommandCategory.ADMINISTRATION;
+        this.category = CommandCategory.INVITES;
     }
 
     @Override

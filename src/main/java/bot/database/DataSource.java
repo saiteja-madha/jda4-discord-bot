@@ -29,6 +29,7 @@ public interface DataSource {
     void setMaxWarnings(String guildId, int warnings);
     void setModLogChannel(String guildId, @Nullable String logChannel);
     void inviteTracking(String guildId, boolean isEnabled);
+    void addInvitesRank(String guildId, String roleId, int inviteCount);
 
     // Automod Settings
     void setAutomodLogChannel(String guildId, @Nullable String channelId);
@@ -40,7 +41,7 @@ public interface DataSource {
 
     // Reaction Role
     void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote);
-    void removeReactionRole(String guildId, String channelId, String messageId, @Nullable String emote);
+    void removeReactionRole(String guildId, String channelId, String messageId);
     @Nullable String getReactionRoleId(String guildId, String channelId, String messageId, String emote);
 
     // Flag Translations

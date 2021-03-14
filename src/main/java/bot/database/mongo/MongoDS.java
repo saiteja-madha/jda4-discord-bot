@@ -106,6 +106,11 @@ public class MongoDS implements DataSource {
     }
 
     @Override
+    public void addInvitesRank(String guildId, String roleId, int inviteCount) {
+        updateSettings(guildId, "invites_rank." + inviteCount, roleId);
+    }
+
+    @Override
     public void updateTranslationChannels(String guildId, List<String> channels) {
         updateSettings(guildId, "translation_channels", channels);
     }
@@ -142,50 +147,41 @@ public class MongoDS implements DataSource {
 
     @Override
     public void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("rr");
 
-        Bson updates = Updates.combine(Updates.set("guild_id", guildId),
-                Updates.set("channel_id", channelId),
-                Updates.set("message_id", messageId),
-                Updates.set("channel_id", channelId)
-        );
-
-        Bson filter = Filters.and(
-                Filters.eq("guild_id", guildId),
-                Filters.eq("channel_id", channelId),
-                Filters.eq("role_id", roleId),
-                Filters.eq("emote", emote)
-        );
-
-        collection.updateOne(filter, updates, new UpdateOptions().upsert(true));
-    }
-
-    @Override
-    public void removeReactionRole(String guildId, String channelId, String messageId, @Nullable String emote) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
                 Filters.eq("channel_id", channelId),
                 Filters.eq("message_id", messageId)
         );
 
-        if (emote != null)
-            filter = Filters.and(filter, Filters.eq("emote", emote));
-        collection.deleteMany(filter);
+        final Bson update = Updates.set("roles." + emote, roleId);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void removeReactionRole(String guildId, String channelId, String messageId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("rr");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("channel_id", channelId),
+                Filters.eq("message_id", messageId)
+        );
+        collection.deleteOne(filter);
     }
 
     @Override
     public @Nullable String getReactionRoleId(String guildId, String channelId, String messageId, String emote) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("rr");
 
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
                 Filters.eq("channel_id", channelId),
-                Filters.eq("emote", emote)
+                Filters.eq("message_id", messageId)
         );
 
         Document doc = collection.find(filter).first();
-        return (doc == null) ? null : doc.getString("role_id");
+        return (doc == null) ? null : ((Document) doc.get("roles")).getString(emote);
 
     }
 

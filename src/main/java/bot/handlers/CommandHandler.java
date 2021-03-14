@@ -26,9 +26,8 @@ import bot.commands.image.text_generators.Achievement;
 import bot.commands.image.text_generators.BeLikeBill;
 import bot.commands.image.text_generators.Presentation;
 import bot.commands.information.*;
+import bot.commands.invites.*;
 import bot.commands.invites.InviteTracker;
-import bot.commands.invites.InviterCommand;
-import bot.commands.invites.InvitesCommand;
 import bot.commands.moderation.*;
 import bot.commands.owner.EvalCommand;
 import bot.commands.owner.ShutDownCommand;
@@ -68,6 +67,8 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new InvitesCommand());
         addCommand(new InviterCommand());
         addCommand(new InviteTracker());
+        addCommand(new InviteCodesCommand(bot.getWaiter()));
+        addCommand(new InvitesRankCommand());
 
         // SOCIAL COMMANDS
         addCommand(new ReputationCommand());
