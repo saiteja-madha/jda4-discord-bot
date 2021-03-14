@@ -2,11 +2,13 @@ package bot.database;
 
 import bot.data.CounterType;
 import bot.data.GreetingType;
+import bot.data.InviteType;
 import bot.database.mongo.MongoDS;
 import bot.database.objects.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -26,6 +28,8 @@ public interface DataSource {
     void xpSystem(String guildId, boolean isEnabled);
     void setMaxWarnings(String guildId, int warnings);
     void setModLogChannel(String guildId, @Nullable String logChannel);
+    void inviteTracking(String guildId, boolean isEnabled);
+    void addInvitesRank(String guildId, String roleId, int inviteCount);
 
     // Automod Settings
     void setAutomodLogChannel(String guildId, @Nullable String channelId);
@@ -37,7 +41,7 @@ public interface DataSource {
 
     // Reaction Role
     void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote);
-    void removeReactionRole(String guildId, String channelId, String messageId, @Nullable String emote);
+    void removeReactionRole(String guildId, String channelId, String messageId);
     @Nullable String getReactionRoleId(String guildId, String channelId, String messageId, String emote);
 
     // Flag Translations
@@ -93,5 +97,11 @@ public interface DataSource {
 
     // Guild Data
     void registerGuild(Guild guild, Member owner);
+
+    // Invites
+    int[] getInvites(String guildId, String memberId); // [total, fake, left]
+    String getInviterId(String guildId, String memberId);
+    void incrementInvites(String guildId, String memberId, InviteType type);
+    void logInvite(String guildId, String memberId, String inviterId);
 
 }

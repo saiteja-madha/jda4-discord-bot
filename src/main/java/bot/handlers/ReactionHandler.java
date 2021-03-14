@@ -1,5 +1,6 @@
 package bot.handlers;
 
+import bot.Bot;
 import bot.Constants;
 import bot.database.DataSource;
 import bot.database.objects.GuildSettings;
@@ -11,19 +12,58 @@ import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-public class ReactionHandler {
+public class ReactionHandler extends ListenerAdapter {
 
     private final Logger LOGGER = LoggerFactory.getLogger(ReactionHandler.class);
+    private final Bot bot;
+
+    public ReactionHandler(Bot bot) {
+        this.bot = bot;
+    }
+
+    @Override
+    public void onGuildMessageDelete(@Nonnull GuildMessageDeleteEvent event) {
+        DataSource.INS.removeReactionRole(event.getGuild().getId(), event.getChannel().getId(), event.getMessageId());
+    }
+
+    @Override
+    public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
+        if (event.getUser().isBot())
+            return;
+
+        if (event.getReactionEmote().isEmoji()) {
+            bot.getReactionHandler().handleFlagReaction(event);
+
+            // Handle Tickets in async
+            bot.getThreadpool().execute(() -> bot.getReactionHandler().handleTicket(event));
+        }
+
+        bot.getReactionHandler().handleReactionRole(event, true);
+
+    }
+
+    @Override
+    public void onGuildMessageReactionRemove(@Nonnull GuildMessageReactionRemoveEvent event) {
+        if (event.getUser() != null && event.getUser().isBot())
+            return;
+
+        bot.getReactionHandler().handleReactionRole(event, false);
+
+    }
 
     public void handleReactionRole(@NotNull GenericGuildMessageReactionEvent event, boolean isAdded) {
         final MessageReaction.ReactionEmote reactionEmote = event.getReaction().getReactionEmote();
@@ -43,9 +83,8 @@ public class ReactionHandler {
 
         final Role role = guild.getRoleById(roleId);
 
-        // If role is removed, remove data from DB
         if (role == null) {
-            DataSource.INS.removeReactionRole(guild.getId(), channel.getId(), event.getMessageId(), emoji);
+            // TODO: If role is removed, remove data from DB
             return;
         }
 

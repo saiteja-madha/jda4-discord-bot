@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 import javax.security.auth.login.LoginException;
 import java.util.concurrent.Executors;
@@ -21,19 +22,21 @@ public class Bot {
     private final EventWaiter waiter;
     private final CommandHandler cmdHandler;
     private final ReactionHandler reactionHandler;
-    private final MemberHandler memberHandler;
+    private final CounterHandler memberHandler;
     private final XPHandler xpHandler;
     private final AutoModHandler automodHandler;
+    private final InviteTracker inviteTracker;
 
     private Bot() throws LoginException {
 
         threadpool = Executors.newScheduledThreadPool(Config.getInt("threadpool_size"));
         waiter = new EventWaiter();
         cmdHandler = new CommandHandler(this);
-        reactionHandler = new ReactionHandler();
-        memberHandler = new MemberHandler(this);
-        xpHandler = new XPHandler();
+        reactionHandler = new ReactionHandler(this);
+        memberHandler = new CounterHandler(this);
+        xpHandler = new XPHandler(this);
         automodHandler = new AutoModHandler();
+        inviteTracker = new InviteTracker();
 
         EmbedUtils.setEmbedBuilder(() -> new EmbedBuilder()
                 .setColor(Constants.BOT_EMBED)
@@ -41,10 +44,21 @@ public class Bot {
         );
 
         JDABuilder.createDefault(Config.get("TOKEN"))
-                .enableIntents(GatewayIntent.GUILD_MEMBERS)
-                .setMemberCachePolicy(MemberCachePolicy.DEFAULT)
-                .setChunkingFilter(ChunkingFilter.ALL)
-                .addEventListeners(waiter, new Listener(this))
+                .enableIntents(GatewayIntent.GUILD_MEMBERS,
+                        GatewayIntent.GUILD_PRESENCES
+                )
+                .setMemberCachePolicy(MemberCachePolicy.VOICE)
+                .enableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
+                .setChunkingFilter(ChunkingFilter.NONE)
+                .addEventListeners(new Listener(this),
+                        waiter,
+                        cmdHandler,
+                        reactionHandler,
+                        memberHandler,
+                        xpHandler,
+                        automodHandler,
+                        inviteTracker
+                )
                 .setStatus(OnlineStatus.ONLINE)
                 .setActivity(Activity.playing("Booting..."))
                 .build();
@@ -71,7 +85,7 @@ public class Bot {
         return reactionHandler;
     }
 
-    public MemberHandler getMemberHandler() {
+    public CounterHandler getMemberHandler() {
         return memberHandler;
     }
 
@@ -81,6 +95,10 @@ public class Bot {
 
     public AutoModHandler getAutomodHandler() {
         return automodHandler;
+    }
+
+    public InviteTracker getInviteTracker() {
+        return inviteTracker;
     }
 
 }

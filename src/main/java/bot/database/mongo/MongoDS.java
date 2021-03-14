@@ -3,6 +3,7 @@ package bot.database.mongo;
 import bot.Config;
 import bot.data.CounterType;
 import bot.data.GreetingType;
+import bot.data.InviteType;
 import bot.database.DataSource;
 import bot.database.objects.*;
 import bot.utils.FixedSizeCache;
@@ -100,6 +101,16 @@ public class MongoDS implements DataSource {
     }
 
     @Override
+    public void inviteTracking(String guildId, boolean isEnabled) {
+        updateSettings(guildId, "track_invites", isEnabled);
+    }
+
+    @Override
+    public void addInvitesRank(String guildId, String roleId, int inviteCount) {
+        updateSettings(guildId, "invites_rank." + inviteCount, roleId);
+    }
+
+    @Override
     public void updateTranslationChannels(String guildId, List<String> channels) {
         updateSettings(guildId, "translation_channels", channels);
     }
@@ -136,50 +147,41 @@ public class MongoDS implements DataSource {
 
     @Override
     public void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("rr");
 
-        Bson updates = Updates.combine(Updates.set("guild_id", guildId),
-                Updates.set("channel_id", channelId),
-                Updates.set("message_id", messageId),
-                Updates.set("channel_id", channelId)
-        );
-
-        Bson filter = Filters.and(
-                Filters.eq("guild_id", guildId),
-                Filters.eq("channel_id", channelId),
-                Filters.eq("role_id", roleId),
-                Filters.eq("emote", emote)
-        );
-
-        collection.updateOne(filter, updates, new UpdateOptions().upsert(true));
-    }
-
-    @Override
-    public void removeReactionRole(String guildId, String channelId, String messageId, @Nullable String emote) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
                 Filters.eq("channel_id", channelId),
                 Filters.eq("message_id", messageId)
         );
 
-        if (emote != null)
-            filter = Filters.and(filter, Filters.eq("emote", emote));
-        collection.deleteMany(filter);
+        final Bson update = Updates.set("roles." + emote, roleId);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void removeReactionRole(String guildId, String channelId, String messageId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("rr");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("channel_id", channelId),
+                Filters.eq("message_id", messageId)
+        );
+        collection.deleteOne(filter);
     }
 
     @Override
     public @Nullable String getReactionRoleId(String guildId, String channelId, String messageId, String emote) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("rr");
 
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
                 Filters.eq("channel_id", channelId),
-                Filters.eq("emote", emote)
+                Filters.eq("message_id", messageId)
         );
 
         Document doc = collection.find(filter).first();
-        return (doc == null) ? null : doc.getString("role_id");
+        return (doc == null) ? null : ((Document) doc.get("roles")).getString(emote);
 
     }
 
@@ -638,6 +640,62 @@ public class MongoDS implements DataSource {
                 .append("join_timestamp", Instant.now());
 
         collection.insertOne(doc);
+    }
+
+    @Override
+    public int[] getInvites(String guildId, String memberId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_data");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("member_id", memberId)
+        );
+        final Document doc = collection.find(filter).first();
+        if (doc == null) {
+            return new int[]{0, 0, 0};
+        } else {
+            return new int[]{doc.getInteger("total_invites", 0),
+                    doc.getInteger("fake_invites", 0),
+                    doc.getInteger("left_invites", 0)};
+        }
+    }
+
+    @Override
+    public String getInviterId(String guildId, String memberId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_logs");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("member_id", memberId)
+        );
+        final Document doc = collection.find(filter).first();
+        return doc == null ? null : doc.getString("inviter_id");
+    }
+
+    @Override
+    public void incrementInvites(String guildId, String memberId, InviteType type) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_data");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("member_id", memberId)
+        );
+        Bson update;
+        if (type == InviteType.TOTAL)
+            update = Updates.inc("total_invites", 1);
+        else if (type == InviteType.FAKE)
+            update = Updates.inc("fake_invites", 1);
+        else
+            update = Updates.inc("left_invites", 1);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void logInvite(String guildId, String memberId, String inviterId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_logs");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("member_id", memberId)
+        );
+        Bson update = Updates.set("inviter_id", inviterId);
+        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
     }
 
 }

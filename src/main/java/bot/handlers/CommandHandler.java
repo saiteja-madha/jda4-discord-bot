@@ -3,10 +3,10 @@ package bot.handlers;
 import bot.Bot;
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import bot.commands.admin.FlagtrCommand;
 import bot.commands.admin.SetPrefixCommand;
 import bot.commands.admin.XPSystem;
 import bot.commands.admin.counter.CounterSetup;
-import bot.commands.admin.FlagtrCommand;
 import bot.commands.admin.greeting.Farewell;
 import bot.commands.admin.greeting.Welcome;
 import bot.commands.admin.mod_config.MaxWarningsCommand;
@@ -26,17 +26,23 @@ import bot.commands.image.text_generators.Achievement;
 import bot.commands.image.text_generators.BeLikeBill;
 import bot.commands.image.text_generators.Presentation;
 import bot.commands.information.*;
+import bot.commands.invites.*;
+import bot.commands.invites.InviteTracker;
 import bot.commands.moderation.*;
 import bot.commands.owner.EvalCommand;
 import bot.commands.owner.ShutDownCommand;
 import bot.commands.owner.UsageCommand;
 import bot.commands.social.ReputationCommand;
 import bot.commands.utility.*;
+import bot.database.DataSource;
+import bot.database.objects.GuildSettings;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -46,7 +52,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class CommandHandler {
+public class CommandHandler extends ListenerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandHandler.class);
 
@@ -56,6 +62,13 @@ public class CommandHandler {
     private final HashMap<String, Integer> uses = new HashMap<>();
 
     public CommandHandler(Bot bot) {
+
+        // INVITE COMMANDS
+        addCommand(new InvitesCommand());
+        addCommand(new InviterCommand());
+        addCommand(new InviteTracker());
+        addCommand(new InviteCodesCommand(bot.getWaiter()));
+        addCommand(new InvitesRankCommand());
 
         // SOCIAL COMMANDS
         addCommand(new ReputationCommand());
@@ -167,8 +180,8 @@ public class CommandHandler {
         addCommand(new RemoveReactionRoleCommand());
         addCommand(new CounterSetup());
         addCommand(new TicketSetup(bot.getWaiter()));
-        addCommand(new Welcome());
-        addCommand(new Farewell());
+        addCommand(new Welcome(bot));
+        addCommand(new Farewell(bot));
 
         // AUTOMOD COMMANDS
         addCommand(new AntiLinksCommand());
@@ -185,6 +198,21 @@ public class CommandHandler {
         addCommand(new EvalCommand());
 
         LOGGER.info("{} commands loaded!", commands.size());
+
+    }
+
+    @Override
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+        if (event.getAuthor().isBot() || event.isWebhookMessage()) {
+            return;
+        }
+
+        GuildSettings settings = DataSource.INS.getSettings(event.getGuild().getId());
+        String raw = event.getMessage().getContentRaw();
+
+        if (raw.startsWith(settings.prefix)) {
+            this.handle(event, settings.prefix);
+        }
 
     }
 
@@ -217,7 +245,7 @@ public class CommandHandler {
         return i != -1 ? this.commands.get(i) : null;
     }
 
-    public void handle(GuildMessageReceivedEvent event, String prefix) {
+    private void handle(GuildMessageReceivedEvent event, String prefix) {
         String[] split = event.getMessage().getContentRaw()
                 .replaceFirst("(?i)" + Pattern.quote(prefix), "")
                 .split("\\s+");
