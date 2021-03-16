@@ -101,7 +101,7 @@ public interface DataSource {
     // Invites
     int[] getInvites(String guildId, String memberId); // [total, fake, left]
     String getInviterId(String guildId, String memberId);
-    void incrementInvites(String guildId, String memberId, InviteType type);
+    int[] incrementInvites(String guildId, String memberId, InviteType type); // [total, fake, left]
     void logInvite(String guildId, String memberId, String inviterId);
 
 }

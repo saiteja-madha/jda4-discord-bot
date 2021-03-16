@@ -25,7 +25,7 @@ public class Bot {
     private final CounterHandler memberHandler;
     private final XPHandler xpHandler;
     private final AutoModHandler automodHandler;
-    private final InviteTracker inviteTracker;
+    private final InviteHandler inviteHandler;
 
     private Bot() throws LoginException {
 
@@ -36,7 +36,7 @@ public class Bot {
         memberHandler = new CounterHandler(this);
         xpHandler = new XPHandler(this);
         automodHandler = new AutoModHandler();
-        inviteTracker = new InviteTracker();
+        inviteHandler = new InviteHandler();
 
         EmbedUtils.setEmbedBuilder(() -> new EmbedBuilder()
                 .setColor(Constants.BOT_EMBED)
@@ -57,7 +57,7 @@ public class Bot {
                         memberHandler,
                         xpHandler,
                         automodHandler,
-                        inviteTracker
+                        inviteHandler
                 )
                 .setStatus(OnlineStatus.ONLINE)
                 .setActivity(Activity.playing("Booting..."))
@@ -97,8 +97,8 @@ public class Bot {
         return automodHandler;
     }
 
-    public InviteTracker getInviteTracker() {
-        return inviteTracker;
+    public InviteHandler getInviteTracker() {
+        return inviteHandler;
     }
 
 }

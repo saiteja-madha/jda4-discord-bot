@@ -52,7 +52,7 @@ public class GuildSettings {
         if (!doc.containsKey("invites_rank"))
             return Collections.emptyMap();
 
-        Map<Integer, String> map = new HashMap<>();
+        Map<Integer, String> map = new TreeMap<>();
         for (final Map.Entry<String, Object> entry : ((Document) doc.get("invites_rank")).entrySet()) {
             map.put(Integer.parseInt(entry.getKey()), (String) entry.getValue());
         }

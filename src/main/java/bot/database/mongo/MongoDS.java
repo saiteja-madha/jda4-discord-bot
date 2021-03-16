@@ -147,7 +147,7 @@ public class MongoDS implements DataSource {
 
     @Override
     public void addReactionRole(String guildId, String channelId, String messageId, String roleId, String emote) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("rr");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
 
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
@@ -161,7 +161,7 @@ public class MongoDS implements DataSource {
 
     @Override
     public void removeReactionRole(String guildId, String channelId, String messageId) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("rr");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
                 Filters.eq("channel_id", channelId),
@@ -172,7 +172,7 @@ public class MongoDS implements DataSource {
 
     @Override
     public @Nullable String getReactionRoleId(String guildId, String channelId, String messageId, String emote) {
-        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("rr");
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("reaction_roles");
 
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
@@ -671,7 +671,7 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public void incrementInvites(String guildId, String memberId, InviteType type) {
+    public int[] incrementInvites(String guildId, String memberId, InviteType type) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_data");
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
@@ -684,7 +684,14 @@ public class MongoDS implements DataSource {
             update = Updates.inc("fake_invites", 1);
         else
             update = Updates.inc("left_invites", 1);
-        collection.updateOne(filter, update, new UpdateOptions().upsert(true));
+        final Document oneAndUpdate = collection.findOneAndUpdate(filter, update, new FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER));
+
+        if (oneAndUpdate == null)
+            return new int[]{0, 0, 0};
+
+        return new int[]{oneAndUpdate.getInteger("total_invites", 0),
+                oneAndUpdate.getInteger("fake_invites", 0),
+                oneAndUpdate.getInteger("left_invites", 0)};
     }
 
     @Override

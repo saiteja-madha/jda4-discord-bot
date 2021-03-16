@@ -7,12 +7,10 @@ import bot.database.DataSource;
 import bot.database.objects.Greeting;
 import bot.utils.BotUtils;
 import bot.utils.MiscUtils;
+import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Invite;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.guild.invite.GuildInviteCreateEvent;
 import net.dv8tion.jda.api.events.guild.invite.GuildInviteDeleteEvent;
@@ -27,9 +25,9 @@ import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class InviteTracker extends ListenerAdapter {
+public class InviteHandler extends ListenerAdapter {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(InviteTracker.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(InviteHandler.class);
     private final Map<String, InviteData> inviteCache = new ConcurrentHashMap<>();
 
     public boolean shouldInvitesByTracked(Guild guild) {
@@ -136,18 +134,24 @@ public class InviteTracker extends ListenerAdapter {
                 if (inviteUsed != null) {
                     inviter = inviteUsed.getInviter();
                     if (inviter == null) {
-                        LOGGER.error("GuildId: {} - No user found for invite {}", guild.getId(), inviteUsed);
+                        LOGGER.error("GuildId: {} - No user found for invite {}", guild.getId(), inviteUsed.getCode());
                     } else {
                         DataSource.INS.logInvite(guild.getId(), user.getId(), inviter.getId());
-                        DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), InviteType.TOTAL);
+                        final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), InviteType.TOTAL);
+
+                        // Handle Invite Ranks
+                        this.handleInviteRanks(guild, user, ints, GreetingType.WELCOME);
                     }
+                } else {
+                    // Failed to track invite
+                    LOGGER.info("Failed to track in guild: {}", guild.getId());
                 }
-                this.sendGreeting(guild, user, inviter, GreetingType.WELCOME);
+                this.sendGreeting(guild, user, inviter, new int[]{0, 0, 0}, GreetingType.WELCOME);
 
             });
 
         } else {
-            this.sendGreeting(guild, user, null, GreetingType.WELCOME);
+            this.sendGreeting(guild, user, null, new int[]{0, 0, 0}, GreetingType.WELCOME);
         }
 
     }
@@ -156,21 +160,76 @@ public class InviteTracker extends ListenerAdapter {
         if (this.shouldInvitesByTracked(guild)) {
             if (user != null) {
                 final String inviterId = DataSource.INS.getInviterId(guild.getId(), user.getId());
-                DataSource.INS.incrementInvites(guild.getId(), inviterId, InviteType.LEFT);
+                final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviterId, InviteType.LEFT);
+
+                // Handle Invite Ranks
+                this.handleInviteRanks(guild, user, ints, GreetingType.FAREWELL);
 
                 // Retrieve Member from inviterId
                 if (inviterId != null) {
-                    guild.retrieveMemberById(inviterId).queue(member ->
-                            this.sendGreeting(guild, user, member.getUser(), GreetingType.FAREWELL)
+                    guild.retrieveMemberById(inviterId).queue(inviter ->
+                            this.sendGreeting(guild, user, inviter.getUser(), ints, GreetingType.FAREWELL)
                     );
                 }
             }
             return;
         }
-        this.sendGreeting(guild, user, null, GreetingType.FAREWELL);
+        this.sendGreeting(guild, user, null, new int[]{0, 0, 0}, GreetingType.FAREWELL);
     }
 
-    private void sendGreeting(Guild guild, User user, User inviter, GreetingType type) {
+    private void handleInviteRanks(Guild guild, User user, int[] ints, GreetingType type) {
+        final Map<Integer, String> inviteRanks = DataSource.INS.getSettings(guild.getId()).inviteRanks;
+        final int effectiveInvites = ints[0] - ints[1] - ints[2];
+
+        if (type == GreetingType.WELCOME) {
+            // Invites count is equal to required (i.e) Add rank
+            if (inviteRanks.containsKey(effectiveInvites)) {
+                final String roleId = inviteRanks.get(effectiveInvites);
+                final Role roleById = guild.getRoleById(roleId);
+
+                if (roleById != null) {
+                    guild.addRoleToMember(user.getId(), roleById).queue((__) -> {
+                        String SERVER_LINK = "https://discord.com/channels/";
+                        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
+                                .setDescription("**Guild Name**: " + BotUtils.getEmbedHyperLink(guild.getName(), SERVER_LINK + guild.getId()) +
+                                        "\n**Role Name**: " + roleById.getName() +
+                                        "\n**Invites Count:** " + effectiveInvites
+                                ).setAuthor("Invite Role Added")
+                                .setColor(roleById.getColor());
+
+                        BotUtils.sendDM(user, embed.build());
+
+                    });
+                }
+            }
+        }
+
+        if (type == GreetingType.FAREWELL) {
+            // Invites count is less than required (i.e) Remove rank
+            if (inviteRanks.containsKey(effectiveInvites + 1)) {
+                final String roleId = inviteRanks.get(effectiveInvites);
+                final Role roleById = guild.getRoleById(roleId);
+
+                if (roleById != null) {
+                    guild.removeRoleFromMember(user.getId(), roleById).queue((__) -> {
+                        String SERVER_LINK = "https://discord.com/channels/";
+                        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
+                                .setDescription("**Guild Name**: " + BotUtils.getEmbedHyperLink(guild.getName(), SERVER_LINK + guild.getId()) +
+                                        "\n**Role Name**: " + roleById.getName() +
+                                        "\n**Invites:** " + effectiveInvites
+                                ).setAuthor("Invite Role Removed")
+                                .setColor(roleById.getColor());
+
+                        BotUtils.sendDM(user, embed.build());
+
+                    });
+                }
+            }
+        }
+
+    }
+
+    private void sendGreeting(Guild guild, User user, User inviter, int[] inviterInvites, GreetingType type) {
         Greeting config;
         if (type == GreetingType.WELCOME)
             config = DataSource.INS.getWelcomeConfig(guild.getId());
@@ -185,7 +244,7 @@ public class InviteTracker extends ListenerAdapter {
         if (greetChannel == null)
             return;
 
-        EmbedBuilder embed = buildEmbed(guild, user, inviter, config);
+        EmbedBuilder embed = buildEmbed(guild, user, inviter, inviterInvites, config);
         BotUtils.sendEmbed(greetChannel, embed.build());
 
     }
@@ -206,14 +265,14 @@ public class InviteTracker extends ListenerAdapter {
         return channel;
     }
 
-    public static EmbedBuilder buildEmbed(Guild guild, User user, @Nullable User inviter, Greeting config) {
+    public static EmbedBuilder buildEmbed(Guild guild, User user, @Nullable User inviter, int[] inviterInvites, Greeting config) {
         EmbedBuilder embed = new EmbedBuilder();
         if (config.embedColor != null)
             embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
         if (config.description != null)
-            embed.setDescription(resolveGreeting(guild, user, inviter, config.description));
+            embed.setDescription(resolveGreeting(guild, user, inviter, inviterInvites, config.description));
         if (config.embedFooter != null)
-            embed.setFooter(resolveGreeting(guild, user, inviter, config.embedFooter));
+            embed.setFooter(resolveGreeting(guild, user, inviter, inviterInvites, config.embedFooter));
         if (config.embedThumbnail)
             embed.setThumbnail(user.getEffectiveAvatarUrl());
         if (config.embedImage != null)
@@ -222,10 +281,7 @@ public class InviteTracker extends ListenerAdapter {
         return embed;
     }
 
-    public static String resolveGreeting(Guild guild, User user, @Nullable User inviter, String message) {
-        int[] inviterInvites = {0, 0, 0};
-        if (inviter != null)
-            inviterInvites = DataSource.INS.getInvites(guild.getId(), inviter.getId());
+    public static String resolveGreeting(Guild guild, User user, @Nullable User inviter, int[] inviterInvites, String message) {
         return message.replaceAll("\\\\n", "\n")
                 .replace("{server}", guild.getName())
                 .replace("{count}", String.valueOf(guild.getMemberCount()))

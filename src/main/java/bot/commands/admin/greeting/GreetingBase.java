@@ -7,7 +7,7 @@ import bot.command.ICommand;
 import bot.data.GreetingType;
 import bot.database.DataSource;
 import bot.database.objects.Greeting;
-import bot.handlers.InviteTracker;
+import bot.handlers.InviteHandler;
 import bot.utils.MiscUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -115,9 +115,9 @@ public abstract class GreetingBase extends ICommand {
             return;
         }
 
-        final TextChannel greetChannel = InviteTracker.getGreetingChannel(guild, config);
+        final TextChannel greetChannel = InviteHandler.getGreetingChannel(guild, config);
         final String greetChannelName = type.getText() + " Channel: " + (greetChannel == null ? "Not configured" : greetChannel.getName());
-        final EmbedBuilder embed = InviteTracker.buildEmbed(guild, ctx.getAuthor(), null, config);
+        final EmbedBuilder embed = InviteHandler.buildEmbed(guild, ctx.getAuthor(), null, new int[]{0, 0, 0}, config);
         ctx.getChannel().sendMessage(embed.build()).append(greetChannelName).queue();
     }
 
