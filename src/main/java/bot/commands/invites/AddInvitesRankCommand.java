@@ -11,9 +11,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class InvitesRankCommand extends ICommand {
+public class AddInvitesRankCommand extends ICommand {
 
-    public InvitesRankCommand() {
+    public AddInvitesRankCommand() {
         this.name = "addinviterank";
         this.help = "add auto-rank after reaching a particular number of invites";
         this.usage = "<@role> <invites>";

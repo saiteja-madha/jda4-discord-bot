@@ -7,6 +7,7 @@ import bot.command.ICommand;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +20,7 @@ public class GithubCommand extends ICommand {
         this.help = "Shows github statistics of a user";
         this.usage = "<username>";
         this.minArgsCount = 1;
+        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.category = CommandCategory.UTILS;
         this.cooldown = 5;
     }

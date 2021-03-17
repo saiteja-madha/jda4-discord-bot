@@ -23,7 +23,7 @@ public class InviteCodesCommand extends ICommand {
         this.name = "invitecodes";
         this.help = "list all your invites codes in this guild";
         this.aliases = Collections.singletonList("invite-codes");
-        this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+        this.botPermissions = new Permission[]{Permission.MANAGE_SERVER, Permission.MESSAGE_EMBED_LINKS};
         this.category = CommandCategory.INVITES;
         this.pBuilder = new Paginator.Builder()
                 .setColumns(1)

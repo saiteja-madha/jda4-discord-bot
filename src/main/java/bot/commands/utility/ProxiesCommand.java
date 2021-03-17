@@ -5,6 +5,7 @@ import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import me.duncte123.botcommons.web.WebUtils;
+import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -18,6 +19,7 @@ public class ProxiesCommand extends ICommand {
         this.name = "proxies";
         this.help = "fetch proxies";
         this.aliases = Arrays.asList("socks5", "socks4", "http");
+        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ATTACH_FILES};
         this.category = CommandCategory.UTILS;
         this.cooldown = 10;
     }
