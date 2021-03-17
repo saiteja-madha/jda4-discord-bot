@@ -28,8 +28,6 @@ public interface DataSource {
     void xpSystem(String guildId, boolean isEnabled);
     void setMaxWarnings(String guildId, int warnings);
     void setModLogChannel(String guildId, @Nullable String logChannel);
-    void inviteTracking(String guildId, boolean isEnabled);
-    void addInvitesRank(String guildId, String roleId, int inviteCount);
 
     // Automod Settings
     void setAutomodLogChannel(String guildId, @Nullable String channelId);
@@ -100,8 +98,12 @@ public interface DataSource {
 
     // Invites
     int[] getInvites(String guildId, String memberId); // [total, fake, left]
-    String getInviterId(String guildId, String memberId);
-    int[] incrementInvites(String guildId, String memberId, InviteType type); // [total, fake, left]
+    @Nullable String getInviterId(String guildId, String memberId);
+    int[] incrementInvites(String guildId, String memberId, int amount, InviteType type); // [total, fake, left, added]
+    void clearInvites(String guildId, String memberId);
     void logInvite(String guildId, String memberId, String inviterId);
+    void inviteTracking(String guildId, boolean isEnabled);
+    void addInvitesRank(String guildId, String roleId, int inviteCount);
+    void removeInvitesRank(String guildId, int inviteCount);
 
 }

@@ -95,138 +95,151 @@ public class InviteHandler extends ListenerAdapter {
 
     }
 
-    public void handleWelcome(Guild guild, User user) {
-        // Invites tracking
-        if (this.shouldInvitesByTracked(guild)) {
-
-            guild.retrieveInvites().queue((invites) -> {
-                Invite inviteUsed = null;
-                for (final Invite invite : invites) {
-
-                    // Skip checking other invites
-                    if (inviteUsed != null) {
-                        break;
-                    }
-
-                    final String code = invite.getCode();
-                    final InviteData cachedInvite = inviteCache.get(code);
-
-                    // Skip if the invite wasn't cached earlier
-                    if (cachedInvite == null) {
-                        continue;
-                    }
-
-                    // Uses are same, so this is not the invite used
-                    if (invite.getUses() == cachedInvite.getUses()) {
-                        continue;
-                    }
-
-                    // Is this even possible?
-                    if (invite.getUses() < cachedInvite.getUses()) {
-                        continue;
-                    }
-
-                    inviteUsed = invite;
-                    cachedInvite.incrementUses();
-                }
-
-                User inviter = null;
-                if (inviteUsed != null) {
-                    inviter = inviteUsed.getInviter();
-                    if (inviter == null) {
-                        LOGGER.error("GuildId: {} - No user found for invite {}", guild.getId(), inviteUsed.getCode());
-                    } else {
-                        DataSource.INS.logInvite(guild.getId(), user.getId(), inviter.getId());
-                        final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), InviteType.TOTAL);
-
-                        // Handle Invite Ranks
-                        this.handleInviteRanks(guild, user, ints, GreetingType.WELCOME);
-                    }
-                } else {
-                    // Failed to track invite
-                    LOGGER.info("Failed to track in guild: {}", guild.getId());
-                }
-                this.sendGreeting(guild, user, inviter, new int[]{0, 0, 0}, GreetingType.WELCOME);
-
-            });
-
-        } else {
-            this.sendGreeting(guild, user, null, new int[]{0, 0, 0}, GreetingType.WELCOME);
-        }
-
-    }
-
-    public void handleFarewell(Guild guild, @Nullable User user) {
-        if (this.shouldInvitesByTracked(guild)) {
-            if (user != null) {
-                final String inviterId = DataSource.INS.getInviterId(guild.getId(), user.getId());
-                final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviterId, InviteType.LEFT);
-
-                // Handle Invite Ranks
-                this.handleInviteRanks(guild, user, ints, GreetingType.FAREWELL);
-
-                // Retrieve Member from inviterId
-                if (inviterId != null) {
-                    guild.retrieveMemberById(inviterId).queue(inviter ->
-                            this.sendGreeting(guild, user, inviter.getUser(), ints, GreetingType.FAREWELL)
-                    );
-                }
-            }
+    private void handleWelcome(Guild guild, User user) {
+        // Invites tracking is disabled
+        if (!this.shouldInvitesByTracked(guild)) {
+            this.sendGreetingWithoutInviter(guild, user, GreetingType.WELCOME);
             return;
         }
-        this.sendGreeting(guild, user, null, new int[]{0, 0, 0}, GreetingType.FAREWELL);
+
+        guild.retrieveInvites().queue((invites) -> {
+            Invite inviteUsed = null;
+            for (final Invite invite : invites) {
+
+                // Skip checking other invites
+                if (inviteUsed != null) {
+                    break;
+                }
+
+                final String code = invite.getCode();
+                final InviteData cachedInvite = inviteCache.get(code);
+
+                // Skip if the invite wasn't cached earlier
+                if (cachedInvite == null) {
+                    continue;
+                }
+
+                // Uses are same, so this is not the invite used
+                if (invite.getUses() == cachedInvite.getUses()) {
+                    continue;
+                }
+
+                // Is this even possible?
+                if (invite.getUses() < cachedInvite.getUses()) {
+                    continue;
+                }
+
+                inviteUsed = invite;
+                cachedInvite.incrementUses();
+            }
+
+            User inviter;
+            if (inviteUsed != null) {
+                inviter = inviteUsed.getInviter();
+                if (inviter == null) {
+                    LOGGER.error("GuildId: {} - No user found for invite {}", guild.getId(), inviteUsed.getCode());
+                } else {
+                    DataSource.INS.logInvite(guild.getId(), user.getId(), inviter.getId());
+                    final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), 1, InviteType.TOTAL);
+
+                    // Handle Invite Ranks
+                    this.addInviteRole(guild, inviter, ints);
+                    this.sendGreeting(guild, user, inviter, ints, GreetingType.WELCOME);
+
+                    return;
+                }
+            } else {
+                // Failed to track invite
+                LOGGER.info("Failed to track in guild: {}", guild.getId());
+            }
+            this.sendGreetingWithoutInviter(guild, user, GreetingType.WELCOME);
+
+        });
+
+
     }
 
-    private void handleInviteRanks(Guild guild, User user, int[] ints, GreetingType type) {
+    private void handleFarewell(Guild guild, User user) {
+        if (this.shouldInvitesByTracked(guild)) {
+            final String inviterId = DataSource.INS.getInviterId(guild.getId(), user.getId());
+
+            // Inviter ID found in Database
+            if (inviterId != null) {
+                final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviterId, 1, InviteType.LEFT);
+
+                // Handle Invite Ranks
+                this.removeInviteRole(guild, inviterId, ints);
+
+                // Retrieve Member from inviterId
+                guild.retrieveMemberById(inviterId).queue(inviter -> {
+                            if (inviter == null)
+                                this.sendGreetingWithoutInviter(guild, user, GreetingType.FAREWELL);
+                            else
+                                this.sendGreeting(guild, user, inviter.getUser(), ints, GreetingType.FAREWELL);
+                        }
+                );
+                return;
+            }
+        }
+        this.sendGreetingWithoutInviter(guild, user, GreetingType.FAREWELL);
+    }
+
+    private void addInviteRole(Guild guild, User user, int[] ints) {
         final Map<Integer, String> inviteRanks = DataSource.INS.getSettings(guild.getId()).inviteRanks;
-        final int effectiveInvites = ints[0] - ints[1] - ints[2];
+        final int effectiveInvites = getEffectiveInvites(ints);
 
-        if (type == GreetingType.WELCOME) {
-            // Invites count is equal to required (i.e) Add rank
-            if (inviteRanks.containsKey(effectiveInvites)) {
-                final String roleId = inviteRanks.get(effectiveInvites);
-                final Role roleById = guild.getRoleById(roleId);
+        // Invites count is equal to required (i.e) Add rank
+        if (inviteRanks.containsKey(effectiveInvites)) {
+            final String roleId = inviteRanks.get(effectiveInvites);
+            final Role roleById = guild.getRoleById(roleId);
 
-                if (roleById != null) {
-                    guild.addRoleToMember(user.getId(), roleById).queue((__) -> {
-                        String SERVER_LINK = "https://discord.com/channels/";
-                        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
-                                .setDescription("**Guild Name**: " + BotUtils.getEmbedHyperLink(guild.getName(), SERVER_LINK + guild.getId()) +
-                                        "\n**Role Name**: " + roleById.getName() +
-                                        "\n**Invites Count:** " + effectiveInvites
-                                ).setAuthor("Invite Role Added")
-                                .setColor(roleById.getColor());
+            if (roleById != null) {
+                guild.addRoleToMember(user.getId(), roleById).queue((__) -> {
+                    String SERVER_LINK = "https://discord.com/channels/";
+                    EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
+                            .setDescription("**Guild Name**: " + BotUtils.getEmbedHyperLink(guild.getName(), SERVER_LINK + guild.getId()) +
+                                    "\n**Role Name**: " + roleById.getName() +
+                                    "\n**Invites Count:** " + effectiveInvites
+                            ).setAuthor("Invite Role Added")
+                            .setColor(roleById.getColor());
 
-                        BotUtils.sendDM(user, embed.build());
+                    BotUtils.sendDM(user, embed.build());
 
-                    });
-                }
+                });
+            }
+        }
+    }
+
+    private void removeInviteRole(Guild guild, String inviterId, int[] ints) {
+        final Map<Integer, String> inviteRanks = DataSource.INS.getSettings(guild.getId()).inviteRanks;
+        final int effectiveInvites = getEffectiveInvites(ints);
+
+        // Invites count is less than required (i.e) Remove rank
+        if (inviteRanks.containsKey(effectiveInvites + 1)) {
+            final String roleId = inviteRanks.get(effectiveInvites + 1);
+            final Role roleById = guild.getRoleById(roleId);
+
+            if (roleById != null) {
+                guild.removeRoleFromMember(inviterId, roleById).queue((__) -> {
+                    String SERVER_LINK = "https://discord.com/channels/";
+                    EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
+                            .setDescription("**Guild Name**: " + BotUtils.getEmbedHyperLink(guild.getName(), SERVER_LINK + guild.getId()) +
+                                    "\n**Role Name**: " + roleById.getName() +
+                                    "\n**Invites**: " + effectiveInvites +
+                                    "\n**Required Invites**: " + (effectiveInvites + 1)
+                            ).setAuthor("Invite Role Removed")
+                            .setColor(roleById.getColor());
+
+                    guild.getJDA().retrieveUserById(inviterId).queue(inviter -> BotUtils.sendDM(inviter, embed.build()));
+
+                });
             }
         }
 
-        if (type == GreetingType.FAREWELL) {
-            // Invites count is less than required (i.e) Remove rank
-            if (inviteRanks.containsKey(effectiveInvites + 1)) {
-                final String roleId = inviteRanks.get(effectiveInvites);
-                final Role roleById = guild.getRoleById(roleId);
+    }
 
-                if (roleById != null) {
-                    guild.removeRoleFromMember(user.getId(), roleById).queue((__) -> {
-                        String SERVER_LINK = "https://discord.com/channels/";
-                        EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
-                                .setDescription("**Guild Name**: " + BotUtils.getEmbedHyperLink(guild.getName(), SERVER_LINK + guild.getId()) +
-                                        "\n**Role Name**: " + roleById.getName() +
-                                        "\n**Invites:** " + effectiveInvites
-                                ).setAuthor("Invite Role Removed")
-                                .setColor(roleById.getColor());
-
-                        BotUtils.sendDM(user, embed.build());
-
-                    });
-                }
-            }
-        }
-
+    private void sendGreetingWithoutInviter(Guild guild, User user, GreetingType type) {
+        this.sendGreeting(guild, user, null, new int[]{0, 0, 0}, type);
     }
 
     private void sendGreeting(Guild guild, User user, User inviter, int[] inviterInvites, GreetingType type) {
@@ -285,9 +298,18 @@ public class InviteHandler extends ListenerAdapter {
         return message.replaceAll("\\\\n", "\n")
                 .replace("{server}", guild.getName())
                 .replace("{count}", String.valueOf(guild.getMemberCount()))
-                .replace("{member}", user.getAsTag())
-                .replace("{inviter}", (inviter == null ? "NA" : inviter.getAsTag()))
+                .replace("{member}", user.getName())
+                .replace("{@member}", user.getAsMention())
+                .replace("{inviter}", (inviter == null ? "NA" : inviter.getName()))
+                .replace("{@inviter}", (inviter == null ? "NA" : inviter.getAsMention()))
                 .replace("{invites}", "Total: `" + inviterInvites[0] + "` Fake: `" + inviterInvites[1] + "` Left: `" + inviterInvites[2] + "`");
+    }
+
+    public static int getEffectiveInvites(int[] invites) {
+        if (invites.length == 4)
+            return invites[0] - invites[1] - invites[2] + invites[3];
+        else
+            return invites[0] - invites[1] - invites[2];
     }
 
 }

@@ -36,8 +36,10 @@ public abstract class GreetingBase extends ICommand {
                 "**Replacements**\n```" +
                 "{server} - Server Name\n" +
                 "{member} - Member Name\n" +
+                "{@member} - Member Mention\n" +
                 "{count} - Server Member Count\n" +
                 "{inviter} - Inviter Name\n" +
+                "{@inviter} - Inviter Mention\n" +
                 "{invites} - Inviter invites\n" +
                 "```";
         this.help = "setup " + text + " message in your discord server";

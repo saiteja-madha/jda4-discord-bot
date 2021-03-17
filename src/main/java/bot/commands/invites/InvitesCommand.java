@@ -4,6 +4,7 @@ import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
+import bot.handlers.InviteHandler;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -36,8 +37,8 @@ public class InvitesCommand extends ICommand {
                 .setAuthor("Invites for " + target.getEffectiveName())
                 .setThumbnail(target.getUser().getEffectiveAvatarUrl())
                 .setFooter("")
-                .setDescription(target.getAsMention() + " has " + (invites[0] - invites[1] - invites[2]) + " invites")
-                .addField("Total Invites", "**" + invites[0] + "**", true)
+                .setDescription(target.getAsMention() + " has " + InviteHandler.getEffectiveInvites(invites) + " invites")
+                .addField("Total Invites", "**" + InviteHandler.getEffectiveInvites(invites) + "**", true)
                 .addField("Fake Invites", "**" + invites[1] + "**", true)
                 .addField("Left Invites", "**" + invites[2] + "**", true);
 
