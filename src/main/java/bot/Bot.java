@@ -97,7 +97,7 @@ public class Bot {
         return automodHandler;
     }
 
-    public InviteHandler getInviteTracker() {
+    public InviteHandler getInviteHandler() {
         return inviteHandler;
     }
 

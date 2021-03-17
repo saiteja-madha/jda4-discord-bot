@@ -30,6 +30,56 @@ public class InviteHandler extends ListenerAdapter {
     private final Logger LOGGER = LoggerFactory.getLogger(InviteHandler.class);
     private final Map<String, InviteData> inviteCache = new ConcurrentHashMap<>();
 
+    @Nullable
+    public static TextChannel getGreetingChannel(Guild guild, Greeting config) {
+        TextChannel channel = null;
+        if (config != null) {
+            if (config.channel != null) {
+                TextChannel tcById = guild.getTextChannelById(config.channel);
+                if (tcById != null)
+                    channel = tcById;
+                else
+                    DataSource.INS.setGreetingChannel(guild.getId(), null, config.type);
+            }
+        }
+
+        return channel;
+    }
+
+    public static EmbedBuilder buildEmbed(Guild guild, User user, @Nullable User inviter, int[] inviterInvites, Greeting config) {
+        EmbedBuilder embed = new EmbedBuilder();
+        if (config.embedColor != null)
+            embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
+        if (config.description != null)
+            embed.setDescription(resolveGreeting(guild, user, inviter, inviterInvites, config.description));
+        if (config.embedFooter != null)
+            embed.setFooter(resolveGreeting(guild, user, inviter, inviterInvites, config.embedFooter));
+        if (config.embedThumbnail)
+            embed.setThumbnail(user.getEffectiveAvatarUrl());
+        if (config.embedImage != null)
+            embed.setImage(config.embedImage);
+
+        return embed;
+    }
+
+    public static String resolveGreeting(Guild guild, User user, @Nullable User inviter, int[] inviterInvites, String message) {
+        return message.replaceAll("\\\\n", "\n")
+                .replace("{server}", guild.getName())
+                .replace("{count}", String.valueOf(guild.getMemberCount()))
+                .replace("{member}", user.getName())
+                .replace("{@member}", user.getAsMention())
+                .replace("{inviter}", (inviter == null ? "NA" : inviter.getName()))
+                .replace("{@inviter}", (inviter == null ? "NA" : inviter.getAsMention()))
+                .replace("{invites}", "Total: `" + inviterInvites[0] + "` Fake: `" + inviterInvites[1] + "` Left: `" + inviterInvites[2] + "`");
+    }
+
+    public static int getEffectiveInvites(int[] invites) {
+        if (invites.length == 4)
+            return invites[0] - invites[1] - invites[2] + invites[3];
+        else
+            return invites[0] - invites[1] - invites[2];
+    }
+
     // Cache All invites when enabled and save existing invite count
     public void enableTracking(Guild guild) {
         if (!DataSource.INS.getSettings(guild.getId()).shouldTrackInvites) {
@@ -286,56 +336,6 @@ public class InviteHandler extends ListenerAdapter {
         EmbedBuilder embed = buildEmbed(guild, user, inviter, inviterInvites, config);
         BotUtils.sendEmbed(greetChannel, embed.build());
 
-    }
-
-    @Nullable
-    public static TextChannel getGreetingChannel(Guild guild, Greeting config) {
-        TextChannel channel = null;
-        if (config != null) {
-            if (config.channel != null) {
-                TextChannel tcById = guild.getTextChannelById(config.channel);
-                if (tcById != null)
-                    channel = tcById;
-                else
-                    DataSource.INS.setGreetingChannel(guild.getId(), null, config.type);
-            }
-        }
-
-        return channel;
-    }
-
-    public static EmbedBuilder buildEmbed(Guild guild, User user, @Nullable User inviter, int[] inviterInvites, Greeting config) {
-        EmbedBuilder embed = new EmbedBuilder();
-        if (config.embedColor != null)
-            embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
-        if (config.description != null)
-            embed.setDescription(resolveGreeting(guild, user, inviter, inviterInvites, config.description));
-        if (config.embedFooter != null)
-            embed.setFooter(resolveGreeting(guild, user, inviter, inviterInvites, config.embedFooter));
-        if (config.embedThumbnail)
-            embed.setThumbnail(user.getEffectiveAvatarUrl());
-        if (config.embedImage != null)
-            embed.setImage(config.embedImage);
-
-        return embed;
-    }
-
-    public static String resolveGreeting(Guild guild, User user, @Nullable User inviter, int[] inviterInvites, String message) {
-        return message.replaceAll("\\\\n", "\n")
-                .replace("{server}", guild.getName())
-                .replace("{count}", String.valueOf(guild.getMemberCount()))
-                .replace("{member}", user.getName())
-                .replace("{@member}", user.getAsMention())
-                .replace("{inviter}", (inviter == null ? "NA" : inviter.getName()))
-                .replace("{@inviter}", (inviter == null ? "NA" : inviter.getAsMention()))
-                .replace("{invites}", "Total: `" + inviterInvites[0] + "` Fake: `" + inviterInvites[1] + "` Left: `" + inviterInvites[2] + "`");
-    }
-
-    public static int getEffectiveInvites(int[] invites) {
-        if (invites.length == 4)
-            return invites[0] - invites[1] - invites[2] + invites[3];
-        else
-            return invites[0] - invites[1] - invites[2];
     }
 
 }

@@ -26,7 +26,7 @@ public class InviteTracker extends ICommand {
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.botPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.category = CommandCategory.INVITE;
-        this.inviteHandler = bot.getInviteTracker();
+        this.inviteHandler = bot.getInviteHandler();
     }
 
     @Override
