@@ -1,5 +1,7 @@
 package bot.data.objects;
 
+import net.dv8tion.jda.api.entities.Invite;
+
 import java.util.Objects;
 
 public class InviteData {
@@ -8,7 +10,7 @@ public class InviteData {
     private final int maxAge;
     private int uses;
 
-    public InviteData(net.dv8tion.jda.api.entities.Invite invite) {
+    public InviteData(Invite invite) {
         this.guildId = Objects.requireNonNull(invite.getGuild()).getId();
         this.uses = invite.getUses();
         this.maxAge = invite.getMaxAge();

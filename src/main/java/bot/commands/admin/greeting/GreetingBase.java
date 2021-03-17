@@ -137,11 +137,8 @@ public abstract class GreetingBase extends ICommand {
         DataSource.INS.setGreetingDesc(ctx.getGuildId(), description, type);
 
         if (description != null && description.contains("{inviter}")) {
-            DataSource.INS.inviteTracking(ctx.getGuildId(), true);
-            bot.getInviteTracker().cacheGuildInvites(ctx.getGuild());
+            bot.getInviteTracker().enableTracking(ctx.getGuild());
         }
-        if (description == null || !description.contains("{inviter}"))
-            DataSource.INS.inviteTracking(ctx.getGuildId(), false);
 
         ctx.replyWithSuccess("Configuration saved! Embed description updated");
 
@@ -161,11 +158,8 @@ public abstract class GreetingBase extends ICommand {
         DataSource.INS.setGreetingFooter(ctx.getGuildId(), footer, type);
 
         if (footer != null && footer.contains("{inviter}")) {
-            DataSource.INS.inviteTracking(ctx.getGuildId(), true);
-            bot.getInviteTracker().cacheGuildInvites(ctx.getGuild());
+            bot.getInviteTracker().enableTracking(ctx.getGuild());
         }
-        if (footer == null || !footer.contains("{inviter}"))
-            DataSource.INS.inviteTracking(ctx.getGuildId(), false);
 
         ctx.replyWithSuccess("Configuration saved! Embed footer updated");
 

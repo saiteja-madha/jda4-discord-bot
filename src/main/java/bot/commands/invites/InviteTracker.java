@@ -1,21 +1,22 @@
 package bot.commands.invites;
 
+import bot.Bot;
 import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
-import bot.data.InviteType;
 import bot.database.DataSource;
+import bot.handlers.InviteHandler;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Invite;
-import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 
 public class InviteTracker extends ICommand {
 
-    public InviteTracker() {
+    private final InviteHandler inviteHandler;
+
+    public InviteTracker(Bot bot) {
         this.name = "invitetracker";
         this.help = "enable or disable invite tracking in the server\n" +
                 "disabling this manually may cause greeting to work incorrectly";
@@ -25,44 +26,24 @@ public class InviteTracker extends ICommand {
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.botPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.category = CommandCategory.INVITE;
+        this.inviteHandler = bot.getInviteTracker();
     }
 
     @Override
     public void handle(@NotNull CommandContext ctx) {
         final Guild guild = ctx.getGuild();
         final String input = ctx.getArgs().get(0);
-        boolean inviteTracking;
 
-        if (input.equalsIgnoreCase("none") || input.equalsIgnoreCase("off"))
-            inviteTracking = false;
-        else if (input.equalsIgnoreCase("on"))
-            inviteTracking = true;
-        else {
+        if (input.equalsIgnoreCase("none") || input.equalsIgnoreCase("off")) {
+            DataSource.INS.inviteTracking(guild.getId(), false);
+            ctx.replyWithSuccess("Configuration saved! Invite Tracking is now disabled");
+        } else if (input.equalsIgnoreCase("on")) {
+            inviteHandler.enableTracking(guild);
+            ctx.replyWithSuccess("Configuration saved! Invite Tracking is now enabled");
+        } else {
             ctx.reply("Please provide a valid input");
-            return;
         }
 
-        if (inviteTracking) {
-            guild.retrieveInvites().queue((invites) -> {
-                for (Invite invite : invites) {
-                    final User inviter = invite.getInviter();
-
-                    if (inviter == null)
-                        continue;
-
-                    int uses = invite.getUses();
-
-                    if (uses == 0)
-                        continue;
-
-                    DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), uses, InviteType.TOTAL);
-
-                }
-            });
-        }
-
-        DataSource.INS.inviteTracking(guild.getId(), inviteTracking);
-        ctx.replyWithSuccess("Configuration saved! Invite Tracking is now " + (inviteTracking ? "enabled" : "disabled"));
     }
 
 }

@@ -30,6 +30,32 @@ public class InviteHandler extends ListenerAdapter {
     private final Logger LOGGER = LoggerFactory.getLogger(InviteHandler.class);
     private final Map<String, InviteData> inviteCache = new ConcurrentHashMap<>();
 
+    // Cache All invites when enabled and save existing invite count
+    public void enableTracking(Guild guild) {
+        if (!DataSource.INS.getSettings(guild.getId()).shouldTrackInvites) {
+            DataSource.INS.inviteTracking(guild.getId(), true);
+            guild.retrieveInvites().queue((invites) -> {
+                for (Invite invite : invites) {
+                    final User inviter = invite.getInviter();
+
+                    if (inviter == null)
+                        continue;
+
+                    int uses = invite.getUses();
+
+                    if (uses == 0)
+                        continue;
+
+                    DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), uses, InviteType.TOTAL);
+
+                }
+            });
+
+            this.cacheGuildInvites(guild);
+
+        }
+    }
+
     public boolean shouldInvitesByTracked(Guild guild) {
         return DataSource.INS.getSettings(guild.getId()).shouldTrackInvites
                 && guild.getSelfMember().hasPermission(Permission.MANAGE_SERVER);
