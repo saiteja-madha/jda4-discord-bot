@@ -1,24 +1,15 @@
 package bot;
 
-import bot.data.GreetingType;
+import bot.data.PresenceType;
 import bot.database.DataSource;
-import bot.database.objects.CounterConfig;
-import bot.database.objects.GuildSettings;
-import bot.utils.ImageUtils;
+import bot.utils.BotUtils;
 import bot.utils.WebhookUtil;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +33,10 @@ public class Listener implements EventListener {
 
         LOGGER.info("{} is ready", jda.getSelfUser().getAsTag());
         LOGGER.info("Watching {} guilds", jda.getGuilds().size());
-        jda.getPresence().setActivity(Activity.watching("this server"));
+
+        // Update Presence
+        bot.getThreadpool().scheduleWithFixedDelay(() -> BotUtils.updatePresence(jda, PresenceType.MEMBERS),
+                0, 30, TimeUnit.MINUTES);
 
         // Update Counter Channels
         bot.getThreadpool().execute(() -> bot.getMemberHandler().updateCountersOnStartup(jda));
@@ -59,82 +53,6 @@ public class Listener implements EventListener {
         bot.getThreadpool().scheduleWithFixedDelay(() -> DataSource.INS.checkTempBans(jda),
                 0, 2, TimeUnit.MINUTES);
 
-    }
-
-    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
-        // Ignore bots and webhook message
-        if (event.getAuthor().isBot() || event.isWebhookMessage()) {
-            return;
-        }
-
-        GuildSettings settings = DataSource.INS.getSettings(event.getGuild().getId());
-        String raw = event.getMessage().getContentRaw();
-
-        if (raw.startsWith(settings.prefix)) {
-            bot.getCmdHandler().handle(event, settings.prefix);
-        }
-
-        if (settings.isRankingEnabled) {
-            bot.getThreadpool().execute(() -> bot.getXpHandler().handle(event, settings));
-        }
-
-        bot.getAutomodHandler().performAutomod(settings.automod, event.getMessage());
-
-    }
-
-    public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
-        if (event.getGuild().getOwner() == null || event.getUser().isBot())
-            return;
-
-        if (event.getReactionEmote().isEmoji()) {
-            bot.getReactionHandler().handleFlagReaction(event);
-
-            // Handle Tickets in async
-            bot.getThreadpool().execute(() -> bot.getReactionHandler().handleTicket(event));
-        }
-
-        bot.getReactionHandler().handleReactionRole(event, true);
-
-    }
-
-    public void onGuildMessageReactionRemove(@Nonnull GuildMessageReactionRemoveEvent event) {
-        if (event.getUser() == null || event.getUser().isBot() || event.getGuild().getOwner() == null)
-            return;
-
-        bot.getReactionHandler().handleReactionRole(event, false);
-
-    }
-
-    private void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
-        final Guild guild = event.getGuild();
-        final CounterConfig config = DataSource.INS.getCounterConfig(guild.getId());
-
-        if (config != null) {
-            if (event.getUser().isBot())
-                DataSource.INS.updateBotCount(guild.getId(), true, 1);
-            bot.getMemberHandler().handleMemberCounter(guild);
-        }
-
-        ImageUtils.sendGreeting(guild, event.getUser(), GreetingType.WELCOME, null);
-
-    }
-
-    private void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
-        final Guild guild = event.getGuild();
-        final CounterConfig config = DataSource.INS.getCounterConfig(guild.getId());
-
-        if (config != null) {
-            if (event.getUser().isBot())
-                DataSource.INS.updateBotCount(guild.getId(), true, -1);
-            bot.getMemberHandler().handleMemberCounter(guild);
-        }
-
-        ImageUtils.sendGreeting(guild, event.getUser(), GreetingType.FAREWELL, null);
-
-    }
-
-    private void onGuildMessageDelete(@Nonnull GuildMessageDeleteEvent event) {
-        DataSource.INS.removeReactionRole(event.getGuild().getId(), event.getChannel().getId(), event.getMessageId(), null);
     }
 
     private void onGuildJoin(@Nonnull GuildJoinEvent event) {
@@ -162,18 +80,6 @@ public class Listener implements EventListener {
             this.onGuildJoin((GuildJoinEvent) event);
         } else if (event instanceof GuildLeaveEvent) {
             this.onGuildLeave((GuildLeaveEvent) event);
-        } else if (event instanceof GuildMessageReceivedEvent) {
-            this.onGuildMessageReceived((GuildMessageReceivedEvent) event);
-        } else if (event instanceof GuildMessageReactionAddEvent) {
-            this.onGuildMessageReactionAdd((GuildMessageReactionAddEvent) event);
-        } else if (event instanceof GuildMessageReactionRemoveEvent) {
-            this.onGuildMessageReactionRemove((GuildMessageReactionRemoveEvent) event);
-        } else if (event instanceof GuildMemberJoinEvent) {
-            this.onGuildMemberJoin((GuildMemberJoinEvent) event);
-        } else if (event instanceof GuildMemberRemoveEvent) {
-            this.onGuildMemberRemove((GuildMemberRemoveEvent) event);
-        } else if (event instanceof GuildMessageDeleteEvent) {
-            this.onGuildMessageDelete((GuildMessageDeleteEvent) event);
         }
     }
 

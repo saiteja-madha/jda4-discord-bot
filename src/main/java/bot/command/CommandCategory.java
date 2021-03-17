@@ -10,6 +10,7 @@ public enum CommandCategory {
     FUN("Fun", "https://cdn4.iconfinder.com/data/icons/instagram-highlight/64/just-for-fun-512.png"),
     IMAGE("Image", "https://www.freeiconspng.com/uploads/multimedia-photo-icon-31.png"),
     INFORMATION("Information", "https://freepngimg.com/thumb/logo/88430-information-icons-text-wallpaper-question-computer.png"),
+    INVITES("Invites"),
     MODERATION("Moderation", "https://cdn3.iconfinder.com/data/icons/web-marketing-1-3/48/30-512.png"),
     OWNER("Owner"),
     SOCIAL("Social", "https://cdn1.iconfinder.com/data/icons/business-and-finance-2-5/130/99-512.png"),

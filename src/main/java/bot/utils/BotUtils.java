@@ -1,10 +1,12 @@
 package bot.utils;
 
 import bot.Constants;
+import bot.data.PresenceType;
 import com.jagrosh.jdautilities.commons.utils.TableBuilder.Borders;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.messaging.MessageUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 
@@ -119,6 +121,25 @@ public class BotUtils {
 
     public static String getEmbedHyperLink(String text, String link) {
         return "[" + text + "](" + link + ")";
+    }
+
+    public static void updatePresence(JDA jda, PresenceType presence) {
+        if (presence == PresenceType.GUILDS)
+            jda.getPresence().setActivity(Activity.listening("-help | " + jda.getGuildCache().size() + " guilds"));
+
+        if (presence == PresenceType.CHANNELS)
+            jda.getPresence().setActivity(Activity.listening("-help | " + jda.getTextChannelCache().size() + " channels"));
+
+        if (presence == PresenceType.ROLES)
+            jda.getPresence().setActivity(Activity.playing("-help | " + jda.getRoleCache().size() + " roles"));
+
+        if (presence == PresenceType.MEMBERS) {
+            long count = 0;
+            for (Guild g : jda.getGuilds())
+                count += g.getMemberCount();
+            jda.getPresence().setActivity(Activity.watching("-help | " + count + " members"));
+        }
+
     }
 
 }

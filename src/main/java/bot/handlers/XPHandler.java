@@ -1,5 +1,6 @@
 package bot.handlers;
 
+import bot.Bot;
 import bot.database.DataSource;
 import bot.database.objects.GuildSettings;
 import bot.utils.BotUtils;
@@ -7,19 +8,37 @@ import bot.utils.MiscUtils;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class XPHandler {
+public class XPHandler extends ListenerAdapter {
 
+    private final Bot bot;
     private final Map<String, OffsetDateTime> xpCooldown;
 
-    public XPHandler() {
+    public XPHandler(Bot bot) {
+        this.bot = bot;
         this.xpCooldown = new HashMap<>();
+    }
+
+    @Override
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+        if (event.getAuthor().isBot() || event.isWebhookMessage()) {
+            return;
+        }
+
+        GuildSettings settings = DataSource.INS.getSettings(event.getGuild().getId());
+
+        if (settings.isRankingEnabled) {
+            bot.getThreadpool().execute(() -> bot.getXpHandler().handle(event, settings));
+        }
+
     }
 
     public void handle(GuildMessageReceivedEvent event, GuildSettings settings) {

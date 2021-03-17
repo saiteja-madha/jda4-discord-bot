@@ -4,9 +4,7 @@ import bot.Config;
 import org.bson.Document;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class GuildSettings {
 
@@ -21,6 +19,8 @@ public class GuildSettings {
     public final String modlogChannel;
     @Nullable
     public final GuildSettings.Automod automod;
+    public final boolean shouldTrackInvites;
+    public final Map<Integer, String> inviteRanks;
 
     public GuildSettings() {
         this.prefix = Config.get("PREFIX");
@@ -31,6 +31,8 @@ public class GuildSettings {
         this.maxWarnings = 3;
         this.modlogChannel = null;
         this.automod = null;
+        this.shouldTrackInvites = false;
+        this.inviteRanks = Collections.emptyMap();
     }
 
     public GuildSettings(Document doc) {
@@ -42,6 +44,20 @@ public class GuildSettings {
         this.maxWarnings = doc.get("max_warnings", 3);
         this.modlogChannel = doc.getString("modlog_channel");
         this.automod = new Automod(doc);
+        this.shouldTrackInvites = doc.get("track_invites", false);
+        this.inviteRanks = this.retrieveInviteRanks(doc);
+    }
+
+    private Map<Integer, String> retrieveInviteRanks(Document doc) {
+        if (!doc.containsKey("invites_rank"))
+            return Collections.emptyMap();
+
+        Map<Integer, String> map = new TreeMap<>();
+        for (final Map.Entry<String, Object> entry : ((Document) doc.get("invites_rank")).entrySet()) {
+            map.put(Integer.parseInt(entry.getKey()), (String) entry.getValue());
+        }
+
+        return map;
     }
 
     public static class Automod {

@@ -12,7 +12,10 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -20,13 +23,23 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AutoModHandler {
+public class AutoModHandler extends ListenerAdapter {
 
     public final static int MENTION_MINIMUM = 2;
     public final static int ROLE_MENTION_MINIMUM = 2;
     private final Pattern LINKS = Pattern.compile("https?:\\/\\/\\S+", Pattern.CASE_INSENSITIVE);
 
-    public void performAutomod(GuildSettings.Automod config, Message message) {
+    @Override
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+        if (event.getAuthor().isBot() || event.isWebhookMessage()) {
+            return;
+        }
+
+        GuildSettings settings = DataSource.INS.getSettings(event.getGuild().getId());
+        this.performAutomod(settings.automod, event.getMessage());
+    }
+
+    private void performAutomod(GuildSettings.Automod config, Message message) {
         // Return if auto-moderation is not configured
         if (config == null)
             return;

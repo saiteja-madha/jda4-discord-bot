@@ -8,27 +8,56 @@ import bot.utils.GuildUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class MemberHandler {
+public class CounterHandler extends ListenerAdapter {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(MemberHandler.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(CounterHandler.class);
     // Prevent Rate-limiting
     private final Set<String> counterProgress = new HashSet<>();
     private final Bot bot;
 
-    public MemberHandler(Bot bot) {
+    public CounterHandler(Bot bot) {
         this.bot = bot;
     }
 
-    public void handleMemberCounter(Guild guild) {
+    @Override
+    public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
+        final Guild guild = event.getGuild();
+        final CounterConfig config = DataSource.INS.getCounterConfig(guild.getId());
 
+        if (config != null) {
+            if (event.getUser().isBot())
+                DataSource.INS.updateBotCount(guild.getId(), true, 1);
+            this.handleMemberCounter(guild);
+        }
+
+    }
+
+    @Override
+    public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
+        final Guild guild = event.getGuild();
+        final CounterConfig config = DataSource.INS.getCounterConfig(guild.getId());
+
+        if (config != null) {
+            if (event.getUser().isBot())
+                DataSource.INS.updateBotCount(guild.getId(), true, -1);
+            this.handleMemberCounter(guild);
+        }
+
+    }
+
+    private void handleMemberCounter(Guild guild) {
         // If update is already scheduled - Skip GUILD
         if (counterProgress.contains(guild.getId())) {
             return;
