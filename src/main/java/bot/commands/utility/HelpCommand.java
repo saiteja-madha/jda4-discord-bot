@@ -41,7 +41,8 @@ public class HelpCommand extends ICommand {
             str += Constants.ARROW + " image" + "\n";
             str += Constants.ARROW + " information" + "\n";
             str += Constants.ARROW + " social" + "\n";
-            str += Constants.ARROW + " moderation" + "\n\n";
+            str += Constants.ARROW + " moderation" + "\n";
+            str += Constants.ARROW + " invite" + "\n\n";
             str += "**Admin Modules:**" + "\n";
             str += Constants.ARROW + " admin" + "\n";
             str += Constants.ARROW + " automod" + "\n";

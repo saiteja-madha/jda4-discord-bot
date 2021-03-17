@@ -18,7 +18,7 @@ public class InviterCommand extends ICommand {
         this.name = "inviter";
         this.help = "shows inviter information";
         this.usage = "[@member]";
-        this.category = CommandCategory.INVITES;
+        this.category = CommandCategory.INVITE;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
 

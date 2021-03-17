@@ -10,7 +10,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: net.dv8tion:JDA:4.2.0_229" level="project" />
+    <orderEntry type="library" name="Maven: net.dv8tion:JDA:4.2.0_241" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:3.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains:annotations:16.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
@@ -36,9 +36,9 @@
     <orderEntry type="library" name="Maven: me.duncte123:reliqua:2.4.10" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.2.3" level="project" />
-    <orderEntry type="library" name="Maven: org.mongodb:mongodb-driver-sync:4.2.1" level="project" />
-    <orderEntry type="library" name="Maven: org.mongodb:bson:4.2.1" level="project" />
-    <orderEntry type="library" name="Maven: org.mongodb:mongodb-driver-core:4.2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.mongodb:mongodb-driver-sync:4.2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.mongodb:bson:4.2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.mongodb:mongodb-driver-core:4.2.2" level="project" />
     <orderEntry type="library" name="Maven: io.github.cdimascio:dotenv-java:2.2.0" level="project" />
     <orderEntry type="library" name="Maven: club.minnced:discord-webhooks:0.5.4-rc" level="project" />
     <orderEntry type="library" name="Maven: org.json:json:20180813" level="project" />

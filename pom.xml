@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>strange-bot</groupId>
     <artifactId>strange-bot</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
 
     <build>
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.2.0_229</version>
+            <version>4.2.0_241</version>
         </dependency>
         <dependency>
             <groupId>com.jagrosh</groupId>
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.2.1</version>
+            <version>4.2.2</version>
         </dependency>
         <dependency>
             <groupId>io.github.cdimascio</groupId>

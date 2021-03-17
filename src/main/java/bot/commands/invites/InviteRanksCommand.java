@@ -20,7 +20,7 @@ public class InviteRanksCommand extends ICommand {
     public InviteRanksCommand(EventWaiter waiter) {
         this.name = "inviteranks";
         this.help = "check the configured invite ranks";
-        this.category = CommandCategory.INVITES;
+        this.category = CommandCategory.INVITE;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.pBuilder = new Paginator.Builder()
                 .setColumns(1)

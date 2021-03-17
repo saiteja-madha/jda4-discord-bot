@@ -19,7 +19,7 @@ public class InvitesCommand extends ICommand {
         this.name = "invites";
         this.help = "shows number of invites in this server";
         this.usage = "[@member]";
-        this.category = CommandCategory.INVITES;
+        this.category = CommandCategory.INVITE;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
 

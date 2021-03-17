@@ -24,7 +24,7 @@ public class AddInvitesCommand extends ICommand {
         this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.category = CommandCategory.INVITES;
+        this.category = CommandCategory.INVITE;
     }
 
     @Override

@@ -24,7 +24,7 @@ public class InviteCodesCommand extends ICommand {
         this.help = "list all your invites codes in this guild";
         this.aliases = Collections.singletonList("invite-codes");
         this.botPermissions = new Permission[]{Permission.MANAGE_SERVER, Permission.MESSAGE_EMBED_LINKS};
-        this.category = CommandCategory.INVITES;
+        this.category = CommandCategory.INVITE;
         this.pBuilder = new Paginator.Builder()
                 .setColumns(1)
                 .setItemsPerPage(5)

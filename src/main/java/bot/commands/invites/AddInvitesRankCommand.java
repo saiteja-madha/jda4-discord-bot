@@ -19,7 +19,7 @@ public class AddInvitesRankCommand extends ICommand {
         this.usage = "<@role> <invites>";
         this.minArgsCount = 2;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
-        this.category = CommandCategory.INVITES;
+        this.category = CommandCategory.INVITE;
     }
 
     @Override

@@ -18,7 +18,7 @@ public class ClearInvitesCommand extends ICommand {
         this.usage = "<@member>";
         this.minArgsCount = 1;
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
-        this.category = CommandCategory.INVITES;
+        this.category = CommandCategory.INVITE;
     }
 
     @Override
