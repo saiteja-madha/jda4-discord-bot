@@ -33,6 +33,7 @@ public interface DataSource {
     void setAutomodLogChannel(String guildId, @Nullable String channelId);
     void antiInvites(String guildId, boolean isEnabled);
     void antiLinks(String guildId, boolean isEnabled);
+    void antiGhostPing(String guildId, boolean isEnabled);
     void setMaxLines(String guildId, int count);
     void setMaxMentions(String guildId, int count);
     void setMaxRoleMentions(String guildId, int count);

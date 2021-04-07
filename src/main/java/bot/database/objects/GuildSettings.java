@@ -65,6 +65,7 @@ public class GuildSettings {
         public final int maxMentions, maxRoleMentions;
         public final int maxLines;
         public final boolean preventLinks, preventInvites;
+        public final boolean antiGhostPing;
         @Nullable
         public final String logChannel;
 
@@ -74,6 +75,7 @@ public class GuildSettings {
             this.maxLines = doc.get("max_lines", 0);
             this.preventLinks = doc.get("anti_links", false);
             this.preventInvites = doc.get("anti_invites", false);
+            this.antiGhostPing = doc.get("anti_ghostping", false);
             this.logChannel = doc.getString("automodlog_channel");
         }
 

@@ -194,6 +194,7 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new MaxLinesCommand());
         addCommand(new MaxMentionsCommand());
         addCommand(new MaxRoleMentionsCommand());
+        addCommand(new AntiGhostPingCommand());
 
         // OWNER COMMANDS
         addCommand(new ShutDownCommand(bot));

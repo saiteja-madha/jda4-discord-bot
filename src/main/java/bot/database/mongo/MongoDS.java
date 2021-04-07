@@ -140,6 +140,11 @@ public class MongoDS implements DataSource {
     }
 
     @Override
+    public void antiGhostPing(String guildId, boolean isEnabled) {
+        updateSettings(guildId, "anti_ghostping", isEnabled);
+    }
+
+    @Override
     public void setMaxLines(String guildId, int count) {
         updateSettings(guildId, "max_lines", count);
     }
