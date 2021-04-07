@@ -31,12 +31,12 @@ public class Bot {
 
         threadpool = Executors.newScheduledThreadPool(Config.getInt("threadpool_size"));
         waiter = new EventWaiter();
-        cmdHandler = new CommandHandler(this);
+        automodHandler = new AutoModHandler();
+        inviteHandler = new InviteHandler();
         reactionHandler = new ReactionHandler(this);
         memberHandler = new CounterHandler(this);
         xpHandler = new XPHandler(this);
-        automodHandler = new AutoModHandler();
-        inviteHandler = new InviteHandler();
+        cmdHandler = new CommandHandler(this);
 
         EmbedUtils.setEmbedBuilder(() -> new EmbedBuilder()
                 .setColor(Constants.BOT_EMBED)
@@ -47,7 +47,7 @@ public class Bot {
                 .enableIntents(GatewayIntent.GUILD_MEMBERS,
                         GatewayIntent.GUILD_PRESENCES
                 )
-                .setMemberCachePolicy(MemberCachePolicy.VOICE)
+                .setMemberCachePolicy(MemberCachePolicy.VOICE.or(MemberCachePolicy.OWNER))
                 .enableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
                 .setChunkingFilter(ChunkingFilter.NONE)
                 .addEventListeners(new Listener(this),
