@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -28,6 +29,49 @@ public class AutoModHandler extends ListenerAdapter {
     public final static int MENTION_MINIMUM = 2;
     public final static int ROLE_MENTION_MINIMUM = 2;
     private final Pattern LINKS = Pattern.compile("https?:\\/\\/\\S+", Pattern.CASE_INSENSITIVE);
+
+    @Override
+    public void onGuildMessageDelete(@Nonnull GuildMessageDeleteEvent event) {
+        final Guild guild = event.getGuild();
+        final GuildSettings settings = DataSource.INS.getSettings(guild.getId());
+
+        // Return if anti-ghost ping is disabled
+        if (settings.automod == null || !settings.automod.antiGhostPing)
+            return;
+
+        final TextChannel channel = event.getChannel();
+        final Member selfMember = guild.getSelfMember();
+
+        // Check if bot has required permissions
+        if (!selfMember.hasPermission(channel, Permission.MESSAGE_READ, Permission.MANAGE_SERVER))
+            return;
+
+        channel.retrieveMessageById(event.getMessageId()).queue(message -> {
+            if (message.isWebhookMessage())
+                return;
+
+            final List<Member> menMembers = message.getMentionedMembers();
+
+            // No ghost-pings detected
+            if (menMembers.isEmpty())
+                return;
+
+            final TextChannel logChannel = GuildUtils.getTextChannelById(guild, settings.automod.logChannel);
+
+            if (logChannel != null) {
+                EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
+                        .setAuthor("Ghost ping detected")
+                        .setDescription("**Message**:\n" + message.getContentDisplay())
+                        .addField("Author", message.getAuthor().getAsTag(), true)
+                        .addField("Mentions", menMembers.size() + "", true)
+                        .setFooter(OffsetDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME));
+
+                BotUtils.sendEmbed(logChannel, embed);
+
+            }
+
+        });
+    }
 
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
