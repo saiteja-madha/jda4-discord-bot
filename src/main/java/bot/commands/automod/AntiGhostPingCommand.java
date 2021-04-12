@@ -32,7 +32,7 @@ public class AntiGhostPingCommand extends ICommand {
             return;
         }
 
-        DataSource.INS.antiInvites(ctx.getGuildId(), antighostping);
+        DataSource.INS.antiGhostPing(ctx.getGuildId(), antighostping);
 
         if (!antighostping)
             ctx.replyWithSuccess("Anti-ghostping logging is now disabled");

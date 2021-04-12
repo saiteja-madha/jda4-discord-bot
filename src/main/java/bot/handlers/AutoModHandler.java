@@ -15,12 +15,15 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.jodah.expiringmap.ExpiringMap;
 
 import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +32,13 @@ public class AutoModHandler extends ListenerAdapter {
     public final static int MENTION_MINIMUM = 2;
     public final static int ROLE_MENTION_MINIMUM = 2;
     private final Pattern LINKS = Pattern.compile("https?:\\/\\/\\S+", Pattern.CASE_INSENSITIVE);
+    private final Map<String, CachedMessage> messageCache;
+
+    public AutoModHandler() {
+        this.messageCache = ExpiringMap.builder()
+                .expiration(5, TimeUnit.MINUTES)
+                .build();
+    }
 
     @Override
     public void onGuildMessageDelete(@Nonnull GuildMessageDeleteEvent event) {
@@ -39,38 +49,22 @@ public class AutoModHandler extends ListenerAdapter {
         if (settings.automod == null || !settings.automod.antiGhostPing)
             return;
 
-        final TextChannel channel = event.getChannel();
-        final Member selfMember = guild.getSelfMember();
-
-        // Check if bot has required permissions
-        if (!selfMember.hasPermission(channel, Permission.MESSAGE_READ, Permission.MANAGE_SERVER))
-            return;
-
-        channel.retrieveMessageById(event.getMessageId()).queue(message -> {
-            if (message.isWebhookMessage())
-                return;
-
-            final List<Member> menMembers = message.getMentionedMembers();
-
-            // No ghost-pings detected
-            if (menMembers.isEmpty())
-                return;
-
+        String key = guild.getId() + "|" + event.getChannel().getId() + "|" + event.getMessageId();
+        if (messageCache.containsKey(key)) {
+            final CachedMessage cachedMessage = messageCache.get(key);
             final TextChannel logChannel = GuildUtils.getTextChannelById(guild, settings.automod.logChannel);
-
             if (logChannel != null) {
                 EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                         .setAuthor("Ghost ping detected")
-                        .setDescription("**Message**:\n" + message.getContentDisplay())
-                        .addField("Author", message.getAuthor().getAsTag(), true)
-                        .addField("Mentions", menMembers.size() + "", true)
-                        .setFooter(OffsetDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME));
+                        .setDescription("**Message**:\n" + cachedMessage.content)
+                        .addField("Author", cachedMessage.authorTag, true)
+                        .addField("Mentions", cachedMessage.mentions + "", true)
+                        .setFooter("Sent At: " + cachedMessage.timeSent);
 
                 BotUtils.sendEmbed(logChannel, embed);
 
             }
-
-        });
+        }
     }
 
     @Override
@@ -79,8 +73,15 @@ public class AutoModHandler extends ListenerAdapter {
             return;
         }
 
+        final Message message = event.getMessage();
+
+        if (!message.getMentionedMembers().isEmpty()) {
+            String key = event.getGuild().getId() + "|" + event.getChannel().getId() + "|" + message.getId();
+            messageCache.put(key, new CachedMessage(message));
+        }
+
         GuildSettings settings = DataSource.INS.getSettings(event.getGuild().getId());
-        this.performAutomod(settings.automod, event.getMessage());
+        this.performAutomod(settings.automod, message);
     }
 
     private void performAutomod(GuildSettings.Automod config, Message message) {
@@ -193,5 +194,25 @@ public class AutoModHandler extends ListenerAdapter {
         return !member.hasPermission(channel, Permission.MESSAGE_MANAGE);
 
     }
+
+    private static class CachedMessage {
+
+        public final String content;
+        public final int mentions;
+        public final String channelId;
+        public final String authorId, authorTag;
+        public final String timeSent;
+
+        public CachedMessage(Message message) {
+            this.content = message.getContentRaw();
+            this.mentions = message.getMentionedMembers().size();
+            this.channelId = message.getTextChannel().getId();
+            this.authorId = message.getAuthor().getId();
+            this.authorTag = message.getAuthor().getAsTag();
+            this.timeSent = message.getTimeCreated().format(DateTimeFormatter.RFC_1123_DATE_TIME);
+        }
+
+    }
+
 
 }

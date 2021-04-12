@@ -1,6 +1,5 @@
 package bot.commands.automod;
 
-import bot.Constants;
 import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
@@ -16,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 public class AutoModStatus extends ICommand {
 
     private final String[] headersList = new String[]{"Status"};
-    private final String[] rowNames = new String[]{"Max Lines", "Max Mentions", "MaxRole Mentions", "AntiLinks", "AntiInvites"};
+    private final String[] rowNames = new String[]{"Max Lines", "Max Mentions", "MaxRole Mentions", "AntiLinks", "AntiInvites", "AntiGhostPing"};
 
     public AutoModStatus() {
         this.name = "automodstatus";
@@ -39,7 +38,8 @@ public class AutoModStatus extends ICommand {
                 {get(config.maxMentions)},
                 {get(config.maxRoleMentions)},
                 {get(config.preventLinks)},
-                {get(config.preventInvites)}
+                {get(config.preventInvites)},
+                {get(config.antiGhostPing)}
         };
 
         String table = new TableBuilder()
