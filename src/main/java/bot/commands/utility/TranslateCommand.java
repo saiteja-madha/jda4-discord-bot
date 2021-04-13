@@ -16,11 +16,11 @@ public class TranslateCommand extends ICommand {
 
     public TranslateCommand() {
         this.name = "translate";
-        this.help = "translate from one language to other.\n" +
-                "Type `{p}trcodes` to see list of supported language codes";
+        this.help = "translate from one language to other";
         this.minArgsCount = 2;
+        this.multilineHelp = true;
+        this.usage = "```{p}{i} <language-code> <text>```\nType `{p}trcodes` to see list of supported language codes\n";
         this.aliases = Collections.singletonList("tr");
-        this.usage = "<language-code> <text>";
         this.category = CommandCategory.UTILS;
         this.cooldown = 5;
     }
