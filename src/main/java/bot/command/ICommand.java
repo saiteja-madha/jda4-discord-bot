@@ -88,6 +88,10 @@ public abstract class ICommand {
         return this.name;
     }
 
+    public String getHelp() {
+        return this.help;
+    }
+
     public List<String> getAliases() {
         return aliases;
     }

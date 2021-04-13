@@ -16,9 +16,8 @@ public class FlagtrCommand extends ICommand {
 
     public FlagtrCommand() {
         this.name = "flagtr";
-        this.help = "enable or disable translation by reaction in mentioned channels";
+        this.help = "enable or disable translation by reaction";
         this.minArgsCount = 1;
-        this.multilineHelp = true;
         this.usage = "<#channel(s) | OFF>";
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.category = CommandCategory.ADMINISTRATION;

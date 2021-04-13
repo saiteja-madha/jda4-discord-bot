@@ -96,7 +96,7 @@ public class CommandHandler extends ListenerAdapter {
         // UTILITY COMMANDS
         addCommand(new CovidCommand());
         addCommand(new GithubCommand());
-        addCommand(new HelpCommand());
+        addCommand(new HelpCommand(bot.getWaiter()));
         addCommand(new TranslateCodes(bot.getWaiter()));
         addCommand(new TranslateCommand());
         addCommand(new UrbanCommand());
