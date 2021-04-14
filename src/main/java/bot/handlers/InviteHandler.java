@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -83,7 +84,7 @@ public class InviteHandler extends ListenerAdapter {
     // Cache All invites when enabled and save existing invite count
     public void enableTracking(Guild guild) {
         if (!DataSource.INS.getSettings(guild.getId()).shouldTrackInvites) {
-            DataSource.INS.inviteTracking(guild.getId(), true);
+
             guild.retrieveInvites().queue((invites) -> {
                 for (Invite invite : invites) {
                     final User inviter = invite.getInviter();
@@ -99,9 +100,10 @@ public class InviteHandler extends ListenerAdapter {
                     DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), uses, InviteType.TOTAL);
 
                 }
+                this.cacheGuildInvites(invites);
             });
 
-            this.cacheGuildInvites(guild);
+            DataSource.INS.inviteTracking(guild.getId(), true);
 
         }
     }
@@ -111,13 +113,14 @@ public class InviteHandler extends ListenerAdapter {
                 && guild.getSelfMember().hasPermission(Permission.MANAGE_SERVER);
     }
 
-    public void cacheGuildInvites(Guild guild) {
-        guild.retrieveInvites().queue((invites) -> {
-                    for (Invite invite : invites) {
-                        inviteCache.put(invite.getCode(), new InviteData(invite));
-                    }
-                }
-        );
+    private void cacheGuildInvites(Guild guild) {
+        guild.retrieveInvites().queue(this::cacheGuildInvites);
+    }
+
+    private void cacheGuildInvites(List<Invite> invites) {
+        for (Invite invite : invites) {
+            inviteCache.put(invite.getCode(), new InviteData(invite));
+        }
     }
 
     @Override
