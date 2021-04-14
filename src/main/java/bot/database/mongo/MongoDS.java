@@ -685,12 +685,20 @@ public class MongoDS implements DataSource {
     }
 
     @Override
+    public void clearInviteData(String guildId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_data");
+        Bson filter = Filters.eq("guild_id", guildId);
+        collection.deleteMany(filter);
+    }
+
+    @Override
     public int[] incrementInvites(String guildId, String memberId, int amount, InviteType type) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_data");
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
                 Filters.eq("member_id", memberId)
         );
+
         Bson update;
         if (type == InviteType.TOTAL)
             update = Updates.inc("total_invites", amount);

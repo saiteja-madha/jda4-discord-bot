@@ -1,6 +1,7 @@
 package bot.handlers;
 
 import bot.Constants;
+import bot.data.objects.CachedMessage;
 import bot.database.DataSource;
 import bot.database.objects.GuildSettings;
 import bot.utils.BotUtils;
@@ -56,10 +57,11 @@ public class AutoModHandler extends ListenerAdapter {
             if (logChannel != null) {
                 EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                         .setAuthor("Ghost ping detected")
-                        .setDescription("**Message**:\n" + cachedMessage.content)
-                        .addField("Author", cachedMessage.authorTag, true)
-                        .addField("Mentions", cachedMessage.mentions + "", true)
-                        .setFooter("Sent At: " + cachedMessage.timeSent);
+                        .setDescription("**Message**:\n" + cachedMessage.getContent())
+                        .addField("Author", cachedMessage.getAuthor().getAsTag() + " `[" + cachedMessage.getAuthor().getId() + "]`", true)
+                        .addField("Channel", "<#" + cachedMessage.getChannelId() + ">", true)
+                        .addField("Mentions", cachedMessage.getMentions() + "", true)
+                        .setFooter("Sent At: " + cachedMessage.getTimeSent().format(DateTimeFormatter.RFC_1123_DATE_TIME));
 
                 BotUtils.sendEmbed(logChannel, embed);
 
@@ -194,25 +196,5 @@ public class AutoModHandler extends ListenerAdapter {
         return !member.hasPermission(channel, Permission.MESSAGE_MANAGE);
 
     }
-
-    private static class CachedMessage {
-
-        public final String content;
-        public final int mentions;
-        public final String channelId;
-        public final String authorId, authorTag;
-        public final String timeSent;
-
-        public CachedMessage(Message message) {
-            this.content = message.getContentRaw();
-            this.mentions = message.getMentionedMembers().size();
-            this.channelId = message.getTextChannel().getId();
-            this.authorId = message.getAuthor().getId();
-            this.authorTag = message.getAuthor().getAsTag();
-            this.timeSent = message.getTimeCreated().format(DateTimeFormatter.RFC_1123_DATE_TIME);
-        }
-
-    }
-
 
 }

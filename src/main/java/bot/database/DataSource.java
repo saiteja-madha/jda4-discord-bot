@@ -101,6 +101,7 @@ public interface DataSource {
     int[] getInvites(String guildId, String memberId); // [total, fake, left]
     @Nullable String getInviterId(String guildId, String memberId);
     int[] incrementInvites(String guildId, String memberId, int amount, InviteType type); // [total, fake, left, added]
+    void clearInviteData(String guildId);
     void clearInvites(String guildId, String memberId);
     void logInvite(String guildId, String memberId, String inviterId);
     void inviteTracking(String guildId, boolean isEnabled);
