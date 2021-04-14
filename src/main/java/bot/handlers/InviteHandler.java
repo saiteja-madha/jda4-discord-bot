@@ -255,7 +255,7 @@ public class InviteHandler extends ListenerAdapter {
                                 this.sendGreetingWithoutInviter(guild, user, GreetingType.FAREWELL);
                             else
                                 this.sendGreeting(guild, user, inviter.getUser(), ints, GreetingType.FAREWELL);
-                        }
+                        }, (err) -> this.sendGreetingWithoutInviter(guild, user, GreetingType.FAREWELL)
                 );
                 return;
             }
