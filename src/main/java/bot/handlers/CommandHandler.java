@@ -5,7 +5,7 @@ import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.commands.admin.FlagtrCommand;
 import bot.commands.admin.SetPrefixCommand;
-import bot.commands.admin.XPSystem;
+import bot.commands.admin.XPSetup;
 import bot.commands.admin.counter.CounterSetup;
 import bot.commands.admin.greeting.Farewell;
 import bot.commands.admin.greeting.Welcome;
@@ -177,7 +177,7 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new SetPrefixCommand());
         addCommand(new ModLogChannel());
         addCommand(new MaxWarningsCommand());
-        addCommand(new XPSystem());
+        addCommand(new XPSetup());
         addCommand(new FlagtrCommand());
         addCommand(new AddReactionRoleCommand());
         addCommand(new RemoveReactionRoleCommand());
