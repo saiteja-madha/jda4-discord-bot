@@ -665,11 +665,12 @@ public class MongoDS implements DataSource {
         );
         final Document doc = collection.find(filter).first();
         if (doc == null) {
-            return new int[]{0, 0, 0};
+            return new int[]{0, 0, 0, 0};
         } else {
-            return new int[]{doc.getInteger("total_invites", 0),
+            return new int[]{doc.getInteger("tracked_invites", 0),
                     doc.getInteger("fake_invites", 0),
-                    doc.getInteger("left_invites", 0)};
+                    doc.getInteger("left_invites", 0),
+                    doc.getInteger("added_invites", 0)};
         }
     }
 
@@ -700,20 +701,22 @@ public class MongoDS implements DataSource {
         );
 
         Bson update;
-        if (type == InviteType.TOTAL)
-            update = Updates.inc("total_invites", amount);
+        if (type == InviteType.TRACKED)
+            update = Updates.inc("tracked_invites", amount);
         else if (type == InviteType.FAKE)
             update = Updates.inc("fake_invites", amount);
         else if (type == InviteType.LEFT)
             update = Updates.inc("left_invites", amount);
-        else
+        else if (type == InviteType.ADDED)
             update = Updates.inc("added_invites", amount);
+        else
+            return new int[]{0, 0, 0, 0};
         final Document updatedDoc = collection.findOneAndUpdate(filter, update, new FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER));
 
         if (updatedDoc == null)
             return new int[]{0, 0, 0, 0};
 
-        return new int[]{updatedDoc.getInteger("total_invites", 0),
+        return new int[]{updatedDoc.getInteger("tracked_invites", 0),
                 updatedDoc.getInteger("fake_invites", 0),
                 updatedDoc.getInteger("left_invites", 0),
                 updatedDoc.getInteger("added_invites", 0)

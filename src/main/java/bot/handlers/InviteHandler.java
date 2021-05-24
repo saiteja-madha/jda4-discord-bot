@@ -71,40 +71,28 @@ public class InviteHandler extends ListenerAdapter {
                 .replace("{@member}", user.getAsMention())
                 .replace("{inviter}", (inviter == null ? "NA" : inviter.getName()))
                 .replace("{@inviter}", (inviter == null ? "NA" : inviter.getAsMention()))
-                .replace("{invites}", "Total: `" + inviterInvites[0] + "` Fake: `" + inviterInvites[1] + "` Left: `" + inviterInvites[2] + "`");
+                .replace("{invites}", "Total: `" + getTotalInvites(inviterInvites) + "` Fake: `" + inviterInvites[1] + "` Left: `" + inviterInvites[2] + "`");
+    }
+
+    public static int getTotalInvites(int[] invites) {
+        if (invites.length == 4)
+            return invites[0] + invites[1] + invites[3]; // Tracked + Fake + Added
+        else
+            return -1;
     }
 
     public static int getEffectiveInvites(int[] invites) {
         if (invites.length == 4)
-            return invites[0] - invites[1] - invites[2] + invites[3];
+            return invites[0] + invites[3] - invites[1] - invites[2]; // Tracked + Added - Fake - Left
         else
-            return invites[0] - invites[1] - invites[2];
+            return -1;
     }
 
     // Cache All invites when enabled and save existing invite count
     public void enableTracking(Guild guild) {
         if (!DataSource.INS.getSettings(guild.getId()).shouldTrackInvites) {
-
-            guild.retrieveInvites().queue((invites) -> {
-                for (Invite invite : invites) {
-                    final User inviter = invite.getInviter();
-
-                    if (inviter == null)
-                        continue;
-
-                    int uses = invite.getUses();
-
-                    if (uses == 0)
-                        continue;
-
-                    DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), uses, InviteType.TOTAL);
-
-                }
-                this.cacheGuildInvites(invites);
-            });
-
+            this.cacheGuildInvites(guild);
             DataSource.INS.inviteTracking(guild.getId(), true);
-
         }
     }
 
@@ -219,7 +207,7 @@ public class InviteHandler extends ListenerAdapter {
                     LOGGER.error("GuildId: {} - No user found for invite {}", guild.getId(), inviteUsed.getCode());
                 } else {
                     DataSource.INS.logInvite(guild.getId(), user.getId(), inviter.getId());
-                    final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), 1, InviteType.TOTAL);
+                    final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), 1, InviteType.TRACKED);
 
                     // Handle Invite Ranks
                     this.addInviteRole(guild, inviter, ints);
@@ -234,7 +222,6 @@ public class InviteHandler extends ListenerAdapter {
             this.sendGreetingWithoutInviter(guild, user, GreetingType.WELCOME);
 
         });
-
 
     }
 

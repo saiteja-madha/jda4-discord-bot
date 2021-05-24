@@ -72,6 +72,7 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new RemInvitesRankCommand());
         addCommand(new AddInvitesCommand());
         addCommand(new ClearInvitesCommand());
+        addCommand(new InviteImportCommand(bot.getWaiter()));
 
         // SOCIAL COMMANDS
         addCommand(new ReputationCommand());

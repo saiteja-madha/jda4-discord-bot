@@ -38,7 +38,7 @@ public class InvitesCommand extends ICommand {
                 .setThumbnail(target.getUser().getEffectiveAvatarUrl())
                 .setFooter("")
                 .setDescription(target.getAsMention() + " has " + InviteHandler.getEffectiveInvites(invites) + " invites")
-                .addField("Total Invites", "**" + InviteHandler.getEffectiveInvites(invites) + "**", true)
+                .addField("Total Invites", "**" + InviteHandler.getTotalInvites(invites) + "**", true)
                 .addField("Fake Invites", "**" + invites[1] + "**", true)
                 .addField("Left Invites", "**" + invites[2] + "**", true);
 
