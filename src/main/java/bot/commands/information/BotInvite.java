@@ -9,16 +9,19 @@ import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
 
-public class InviteCommand extends ICommand {
+public class BotInvite extends ICommand {
 
-    public InviteCommand() {
-        this.name = "invite";
+    public BotInvite() {
+        this.name = "botinvite";
         this.help = "get the bot's invite";
         this.category = CommandCategory.INFORMATION;
     }
 
     @Override
     public void handle(@NotNull CommandContext ctx) {
+        if (!ctx.getArgs().isEmpty())
+            return;
+
         final String inviteUrl = Config.get("BOT_INVITE");
 
         String desc = "";

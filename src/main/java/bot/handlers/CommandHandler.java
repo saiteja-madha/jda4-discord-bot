@@ -88,7 +88,7 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new BotInfoCommand());
         addCommand(new ChannelInfoCommand());
         addCommand(new GuildInfoCommand());
-        addCommand(new InviteCommand());
+        addCommand(new BotInvite());
         addCommand(new PingCommand());
         addCommand(new RoleInfoCommand());
         addCommand(new UptimeCommand());

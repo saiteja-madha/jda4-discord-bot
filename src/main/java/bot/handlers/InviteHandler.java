@@ -38,19 +38,18 @@ public class InviteHandler extends ListenerAdapter {
     @Override
     public void onGuildReady(final GuildReadyEvent event) {
         final Guild guild = event.getGuild();
-
         if (this.shouldInvitesByTracked(guild)) {
             this.cacheGuildInvites(guild);
         }
-
     }
 
     @Override
     public void onGuildInviteCreate(@Nonnull GuildInviteCreateEvent event) {
-        if (this.shouldInvitesByTracked(event.getGuild())) {
+        final Guild guild = event.getGuild();
+        if (this.shouldInvitesByTracked(guild)) {
             final String code = event.getCode();
             final int uses = event.getInvite().getUses();
-            inviteCache.get(event.getGuild().getId()).put(code, uses);
+            inviteCache.get(guild.getId()).put(code, uses);
         }
     }
 
@@ -65,25 +64,19 @@ public class InviteHandler extends ListenerAdapter {
     @Override
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
         final User user = event.getUser();
-
         if (user.isBot()) {
             return;
         }
-
-        this.handleWelcome(event.getGuild(), event.getUser());
-
+        this.handleWelcome(event.getGuild(), user);
     }
 
     @Override
     public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
         final User user = event.getUser();
-
         if (user.isBot()) {
             return;
         }
-
-        this.handleFarewell(event.getGuild(), event.getUser());
-
+        this.handleFarewell(event.getGuild(), user);
     }
 
     @Nullable
@@ -98,7 +91,6 @@ public class InviteHandler extends ListenerAdapter {
                     DataSource.INS.setGreetingChannel(guild.getId(), null, config.type);
             }
         }
-
         return channel;
     }
 
@@ -248,15 +240,12 @@ public class InviteHandler extends ListenerAdapter {
                 DataSource.INS.logInvite(guild.getId(), user.getId(), "VANITY_URL", guild.getVanityCode());
                 final int[] ints = DataSource.INS.incrementInvites(guild.getId(), "VANITY_URL", 1, InviteType.TRACKED);
                 this.sendVanityGreeting(guild, user, ints, GreetingType.WELCOME);
-
             } else {
                 // Failed to track invite
                 LOGGER.info("Failed to track in guild: {}", guild.getId());
                 this.sendGreetingWithoutInvite(guild, user, GreetingType.WELCOME);
             }
-
         });
-
     }
 
     private void handleFarewell(Guild guild, User user) {
@@ -285,7 +274,6 @@ public class InviteHandler extends ListenerAdapter {
 
                 // Delete inviter log
                 DataSource.INS.removeInviterId(guild.getId(), user.getId());
-
                 return;
             }
         }
@@ -312,7 +300,6 @@ public class InviteHandler extends ListenerAdapter {
                             .setColor(roleById.getColor());
 
                     BotUtils.sendDM(user, embed.build());
-
                 });
             }
         }
