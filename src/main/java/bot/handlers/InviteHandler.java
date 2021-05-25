@@ -2,7 +2,6 @@ package bot.handlers;
 
 import bot.data.GreetingType;
 import bot.data.InviteType;
-import bot.data.objects.InviteData;
 import bot.database.DataSource;
 import bot.database.objects.Greeting;
 import bot.utils.BotUtils;
@@ -22,14 +21,63 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class InviteHandler extends ListenerAdapter {
 
     private final Logger LOGGER = LoggerFactory.getLogger(InviteHandler.class);
-    private final Map<String, InviteData> inviteCache = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, Integer>> inviteCache = new ConcurrentHashMap<>();
+    private static final long FAKE_INVITE_DAYS_OFFSET = 1;
+
+    @Override
+    public void onGuildReady(final GuildReadyEvent event) {
+        final Guild guild = event.getGuild();
+        if (this.shouldInvitesByTracked(guild)) {
+            this.cacheGuildInvites(guild);
+        }
+    }
+
+    @Override
+    public void onGuildInviteCreate(@Nonnull GuildInviteCreateEvent event) {
+        final Guild guild = event.getGuild();
+        if (this.shouldInvitesByTracked(guild)) {
+            final String code = event.getCode();
+            final int uses = event.getInvite().getUses();
+            inviteCache.get(guild.getId()).put(code, uses);
+        }
+    }
+
+    @Override
+    public void onGuildInviteDelete(@Nonnull GuildInviteDeleteEvent event) {
+        if (this.shouldInvitesByTracked(event.getGuild())) {
+            final String code = event.getCode();
+            inviteCache.get(event.getGuild().getId()).remove(code);
+        }
+    }
+
+    @Override
+    public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
+        final User user = event.getUser();
+        if (user.isBot()) {
+            return;
+        }
+        this.handleWelcome(event.getGuild(), user);
+    }
+
+    @Override
+    public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
+        final User user = event.getUser();
+        if (user.isBot()) {
+            return;
+        }
+        this.handleFarewell(event.getGuild(), user);
+    }
 
     @Nullable
     public static TextChannel getGreetingChannel(Guild guild, Greeting config) {
@@ -43,199 +91,161 @@ public class InviteHandler extends ListenerAdapter {
                     DataSource.INS.setGreetingChannel(guild.getId(), null, config.type);
             }
         }
-
         return channel;
     }
 
-    public static EmbedBuilder buildEmbed(Guild guild, User user, @Nullable User inviter, int[] inviterInvites, Greeting config) {
-        EmbedBuilder embed = new EmbedBuilder();
-        if (config.embedColor != null)
-            embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
-        if (config.description != null)
-            embed.setDescription(resolveGreeting(guild, user, inviter, inviterInvites, config.description));
-        if (config.embedFooter != null)
-            embed.setFooter(resolveGreeting(guild, user, inviter, inviterInvites, config.embedFooter));
-        if (config.embedThumbnail)
-            embed.setThumbnail(user.getEffectiveAvatarUrl());
-        if (config.embedImage != null)
-            embed.setImage(config.embedImage);
-
-        return embed;
-    }
-
-    public static String resolveGreeting(Guild guild, User user, @Nullable User inviter, int[] inviterInvites, String message) {
-        return message.replaceAll("\\\\n", "\n")
-                .replace("{server}", guild.getName())
-                .replace("{count}", String.valueOf(guild.getMemberCount()))
-                .replace("{member}", user.getName())
-                .replace("{@member}", user.getAsMention())
-                .replace("{inviter}", (inviter == null ? "NA" : inviter.getName()))
-                .replace("{@inviter}", (inviter == null ? "NA" : inviter.getAsMention()))
-                .replace("{invites}", "Total: `" + inviterInvites[0] + "` Fake: `" + inviterInvites[1] + "` Left: `" + inviterInvites[2] + "`");
+    public static int getTotalInvites(int[] invites) {
+        if (invites.length == 4)
+            return invites[0] + invites[1] + invites[3]; // Tracked + Fake + Added
+        else
+            return -1;
     }
 
     public static int getEffectiveInvites(int[] invites) {
         if (invites.length == 4)
-            return invites[0] - invites[1] - invites[2] + invites[3];
+            return invites[0] + invites[3] - invites[1] - invites[2]; // Tracked + Added - Fake - Left
         else
-            return invites[0] - invites[1] - invites[2];
+            return -1;
     }
 
-    // Cache All invites when enabled and save existing invite count
-    public void enableTracking(Guild guild) {
-        if (!DataSource.INS.getSettings(guild.getId()).shouldTrackInvites) {
-
-            guild.retrieveInvites().queue((invites) -> {
-                for (Invite invite : invites) {
-                    final User inviter = invite.getInviter();
-
-                    if (inviter == null)
-                        continue;
-
-                    int uses = invite.getUses();
-
-                    if (uses == 0)
-                        continue;
-
-                    DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), uses, InviteType.TOTAL);
-
-                }
-                this.cacheGuildInvites(invites);
-            });
-
-            DataSource.INS.inviteTracking(guild.getId(), true);
-
-        }
-    }
-
-    public boolean shouldInvitesByTracked(Guild guild) {
+    private boolean shouldInvitesByTracked(Guild guild) {
         return DataSource.INS.getSettings(guild.getId()).shouldTrackInvites
                 && guild.getSelfMember().hasPermission(Permission.MANAGE_SERVER);
     }
 
     private void cacheGuildInvites(Guild guild) {
-        guild.retrieveInvites().queue(this::cacheGuildInvites);
+        guild.retrieveInvites().queue(invites -> cacheGuildInvites(guild, invites));
     }
 
-    private void cacheGuildInvites(List<Invite> invites) {
+    private void cacheGuildInvites(Guild guild, List<Invite> invites) {
+        Map<String, Integer> cache = new ConcurrentHashMap<>();
         for (Invite invite : invites) {
-            inviteCache.put(invite.getCode(), new InviteData(invite));
+            cache.put(invite.getCode(), invite.getUses());
         }
+        if (guild.getVanityCode() != null) {
+            cache.put(guild.getVanityCode(), this.getVanityInviteUses(guild));
+        }
+        inviteCache.put(guild.getId(), cache);
     }
 
-    @Override
-    public void onGuildReady(final GuildReadyEvent event) {
-        final Guild guild = event.getGuild();
-
-        if (this.shouldInvitesByTracked(guild)) {
+    public void enableTracking(Guild guild) {
+        if (!DataSource.INS.getSettings(guild.getId()).shouldTrackInvites) {
             this.cacheGuildInvites(guild);
-        }
-
-    }
-
-    @Override
-    public void onGuildInviteCreate(@Nonnull GuildInviteCreateEvent event) {
-        if (this.shouldInvitesByTracked(event.getGuild())) {
-            final String code = event.getCode();
-            final InviteData invite = new InviteData(event.getInvite());
-            inviteCache.put(code, invite);
+            DataSource.INS.inviteTracking(guild.getId(), true);
         }
     }
 
-    @Override
-    public void onGuildInviteDelete(@Nonnull GuildInviteDeleteEvent event) {
-        if (this.shouldInvitesByTracked(event.getGuild())) {
-            final String code = event.getCode();
-            inviteCache.remove(code);
+    private int getVanityInviteUses(Guild guild) {
+        int vanityUses = 0;
+        try {
+            vanityUses = guild.retrieveVanityInvite().submit().get().getUses();
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Failed to fetch vanity url for guild: {} | Error: {}", guild.getId(), e.getMessage());
         }
+        return vanityUses;
     }
 
-    @Override
-    public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
-        final User user = event.getUser();
-
-        if (user.isBot()) {
-            return;
-        }
-
-        this.handleWelcome(event.getGuild(), event.getUser());
-
-    }
-
-    @Override
-    public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
-        final User user = event.getUser();
-
-        if (user.isBot()) {
-            return;
-        }
-
-        this.handleFarewell(event.getGuild(), event.getUser());
-
+    private boolean isFakeInvite(User user) {
+        final String avatar = user.getAvatarUrl();
+        final OffsetDateTime timeCreated = user.getTimeCreated();
+        final long days = DAYS.between(timeCreated, OffsetDateTime.now());
+        return days > FAKE_INVITE_DAYS_OFFSET && avatar == null;
     }
 
     private void handleWelcome(Guild guild, User user) {
         // Invites tracking is disabled
         if (!this.shouldInvitesByTracked(guild)) {
-            this.sendGreetingWithoutInviter(guild, user, GreetingType.WELCOME);
+            this.sendGreetingWithoutInvite(guild, user, GreetingType.WELCOME);
             return;
         }
 
         guild.retrieveInvites().queue((invites) -> {
+            final Map<String, Integer> cachedInvites = inviteCache.get(guild.getId());
+            this.cacheGuildInvites(guild, invites);
+
+            boolean vanity = false;
             Invite inviteUsed = null;
+
+            // Check if invite is used
             for (final Invite invite : invites) {
-
-                // Skip checking other invites
-                if (inviteUsed != null) {
-                    break;
-                }
-
                 final String code = invite.getCode();
-                final InviteData cachedInvite = inviteCache.get(code);
+                final int uses = invite.getUses();
 
-                // Skip if the invite wasn't cached earlier
-                if (cachedInvite == null) {
-                    continue;
+                // Code was not cached previously
+                if (!cachedInvites.containsKey(code)) {
+                    if (uses == 1) {
+                        inviteUsed = invite;
+                        break;
+                    }
+                } else {
+                    // Number of uses has increased
+                    if (uses > cachedInvites.get(code)) {
+                        inviteUsed = invite;
+                        break;
+                    }
                 }
+            }
 
-                // Uses are same, so this is not the invite used
-                if (invite.getUses() == cachedInvite.getUses()) {
-                    continue;
+            // Check if Vanity URL is used
+            if (inviteUsed == null) {
+                if (guild.getVanityCode() != null) {
+                    String code = guild.getVanityCode();
+                    int uses = this.getVanityInviteUses(guild);
+                    if (!cachedInvites.containsKey(code)) {
+                        if (uses == 1) {
+                            vanity = true;
+                        }
+                    } else {
+                        // Number of uses has increased
+                        if (uses > cachedInvites.get(code)) {
+                            vanity = true;
+                        }
+                    }
+                }
+            }
+
+            User inviter = null;
+            if (inviteUsed != null) {
+                if (!inviteUsed.isExpanded()) {
+                    try {
+                        inviter = inviteUsed.expand().submit().get().getInviter();
+                    } catch (InterruptedException | ExecutionException e) {
+                        LOGGER.error("Expanding invite failed in guild: {} | Error: {}", guild.getId(), e);
+                        e.printStackTrace();
+                    }
+                } else {
+                    inviter = inviteUsed.getInviter();
                 }
 
                 // Is this even possible?
-                if (invite.getUses() < cachedInvite.getUses()) {
-                    continue;
-                }
-
-                inviteUsed = invite;
-                cachedInvite.incrementUses();
-            }
-
-            User inviter;
-            if (inviteUsed != null) {
-                inviter = inviteUsed.getInviter();
                 if (inviter == null) {
                     LOGGER.error("GuildId: {} - No user found for invite {}", guild.getId(), inviteUsed.getCode());
                 } else {
-                    DataSource.INS.logInvite(guild.getId(), user.getId(), inviter.getId());
-                    final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), 1, InviteType.TOTAL);
+                    DataSource.INS.logInvite(guild.getId(), user.getId(), inviter.getId(), inviteUsed.getCode());
+
+                    int[] ints;
+                    // check possible fake invite
+                    if (isFakeInvite(user)) {
+                        ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), 1, InviteType.FAKE);
+                    } else {
+                        ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), 1, InviteType.TRACKED);
+                    }
 
                     // Handle Invite Ranks
                     this.addInviteRole(guild, inviter, ints);
-                    this.sendGreeting(guild, user, inviter, ints, GreetingType.WELCOME);
+                    this.sendInviterGreeting(guild, user, inviter, ints, GreetingType.WELCOME);
 
-                    return;
                 }
+            } else if (vanity) {
+                DataSource.INS.logInvite(guild.getId(), user.getId(), "VANITY_URL", guild.getVanityCode());
+                final int[] ints = DataSource.INS.incrementInvites(guild.getId(), "VANITY_URL", 1, InviteType.TRACKED);
+                this.sendVanityGreeting(guild, user, ints, GreetingType.WELCOME);
             } else {
                 // Failed to track invite
                 LOGGER.info("Failed to track in guild: {}", guild.getId());
+                this.sendGreetingWithoutInvite(guild, user, GreetingType.WELCOME);
             }
-            this.sendGreetingWithoutInviter(guild, user, GreetingType.WELCOME);
-
         });
-
-
     }
 
     private void handleFarewell(Guild guild, User user) {
@@ -245,6 +255,10 @@ public class InviteHandler extends ListenerAdapter {
             // Inviter ID found in Database
             if (inviterId != null) {
                 final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviterId, 1, InviteType.LEFT);
+                if (inviterId.equals("VANITY_URL")) {
+                    this.sendVanityGreeting(guild, user, ints, GreetingType.FAREWELL);
+                    return;
+                }
 
                 // Handle Invite Ranks
                 this.removeInviteRole(guild, inviterId, ints);
@@ -252,15 +266,18 @@ public class InviteHandler extends ListenerAdapter {
                 // Retrieve Member from inviterId
                 guild.retrieveMemberById(inviterId).queue(inviter -> {
                             if (inviter == null)
-                                this.sendGreetingWithoutInviter(guild, user, GreetingType.FAREWELL);
+                                this.sendGreetingWithoutInvite(guild, user, GreetingType.FAREWELL);
                             else
-                                this.sendGreeting(guild, user, inviter.getUser(), ints, GreetingType.FAREWELL);
-                        }, (err) -> this.sendGreetingWithoutInviter(guild, user, GreetingType.FAREWELL)
+                                this.sendInviterGreeting(guild, user, inviter.getUser(), ints, GreetingType.FAREWELL);
+                        }, (err) -> this.sendGreetingWithoutInvite(guild, user, GreetingType.FAREWELL)
                 );
+
+                // Delete inviter log
+                DataSource.INS.removeInviterId(guild.getId(), user.getId());
                 return;
             }
         }
-        this.sendGreetingWithoutInviter(guild, user, GreetingType.FAREWELL);
+        this.sendGreetingWithoutInvite(guild, user, GreetingType.FAREWELL);
     }
 
     private void addInviteRole(Guild guild, User user, int[] ints) {
@@ -283,7 +300,6 @@ public class InviteHandler extends ListenerAdapter {
                             .setColor(roleById.getColor());
 
                     BotUtils.sendDM(user, embed.build());
-
                 });
             }
         }
@@ -314,31 +330,67 @@ public class InviteHandler extends ListenerAdapter {
                 });
             }
         }
-
     }
 
-    private void sendGreetingWithoutInviter(Guild guild, User user, GreetingType type) {
-        this.sendGreeting(guild, user, null, new int[]{0, 0, 0}, type);
+    private void sendGreetingWithoutInvite(Guild guild, User user, GreetingType type) {
+        this.sendGreeting(guild, user, null, new int[]{0, 0, 0, 0}, type, false);
     }
 
-    private void sendGreeting(Guild guild, User user, User inviter, int[] inviterInvites, GreetingType type) {
+    private void sendInviterGreeting(Guild guild, User user, User inviter, int[] invites, GreetingType type) {
+        this.sendGreeting(guild, user, inviter, invites, type, false);
+    }
+
+    private void sendVanityGreeting(Guild guild, User user, int[] ints, GreetingType type) {
+        this.sendGreeting(guild, user, null, ints, type, true);
+    }
+
+    private void sendGreeting(Guild guild, User user, @Nullable User inviter, int[] invites, GreetingType type, boolean isVanity) {
         Greeting config;
         if (type == GreetingType.WELCOME)
             config = DataSource.INS.getWelcomeConfig(guild.getId());
         else
             config = DataSource.INS.getFarewellConfig(guild.getId());
 
-        if (config == null) {
+        if (config == null)
             return;
-        }
+
 
         final TextChannel greetChannel = getGreetingChannel(guild, config);
         if (greetChannel == null)
             return;
 
-        EmbedBuilder embed = buildEmbed(guild, user, inviter, inviterInvites, config);
+        EmbedBuilder embed = buildEmbed(guild, user, inviter, invites, config, isVanity);
         BotUtils.sendEmbed(greetChannel, embed.build());
+    }
 
+    public static EmbedBuilder buildEmbed(Guild guild, User user, @Nullable User inviter, int[] invites, Greeting config, boolean isVanity) {
+        EmbedBuilder embed = new EmbedBuilder();
+        if (config.embedColor != null)
+            embed.setColor(MiscUtils.hex2Rgb(config.embedColor));
+        if (config.description != null)
+            embed.setDescription(replace(guild, user, inviter, invites, config.description, isVanity));
+        if (config.embedFooter != null)
+            embed.setFooter(replace(guild, user, inviter, invites, config.embedFooter, isVanity));
+        if (config.embedThumbnail)
+            embed.setThumbnail(user.getEffectiveAvatarUrl());
+        if (config.embedImage != null)
+            embed.setImage(config.embedImage);
+
+        return embed;
+    }
+
+    private static String replace(Guild guild, User user, @Nullable User inviter, int[] invites, String message, boolean isVanity) {
+        return message.replaceAll("\\\\n", "\n")
+                .replace("{server}", guild.getName())
+                .replace("{count}", String.valueOf(guild.getMemberCount()))
+                .replace("{member:name}", user.getName())
+                .replace("{member:mention}", user.getAsMention())
+                .replace("{inviter:name}", isVanity ? "Vanity Url" : (inviter == null ? "NA" : inviter.getName()))
+                .replace("{inviter:mention}", isVanity ? "Vanity Url" : (inviter == null ? "NA" : inviter.getAsMention()))
+                .replace("{invites}", getEffectiveInvites(invites) + "")
+                .replace("{invites:total}", getTotalInvites(invites) + "")
+                .replace("{invites:fake}", invites[1] + "")
+                .replace("{invites:left}", invites[2] + "");
     }
 
 }

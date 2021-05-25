@@ -72,6 +72,7 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new RemInvitesRankCommand());
         addCommand(new AddInvitesCommand());
         addCommand(new ClearInvitesCommand());
+        addCommand(new InviteImportCommand(bot.getWaiter()));
 
         // SOCIAL COMMANDS
         addCommand(new ReputationCommand());
@@ -87,7 +88,7 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new BotInfoCommand());
         addCommand(new ChannelInfoCommand());
         addCommand(new GuildInfoCommand());
-        addCommand(new InviteCommand());
+        addCommand(new BotInvite());
         addCommand(new PingCommand());
         addCommand(new RoleInfoCommand());
         addCommand(new UptimeCommand());
@@ -292,6 +293,10 @@ public class CommandHandler extends ListenerAdapter {
 
     public int getCommandUses(String name) {
         return uses.getOrDefault(name, 0);
+    }
+
+    public void invalidateCooldown(String key) {
+        cooldowns.remove(key);
     }
 
 }

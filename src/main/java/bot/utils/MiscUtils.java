@@ -106,9 +106,20 @@ public class MiscUtils {
         String dayStr = day > 1 ? " Days " : " Day ";
         String hourStr = hours > 1 ? " Hours " : " Hour ";
         String minStr = minute > 1 ? " Minutes " : " Minute ";
-        String secStr = minute > 1 ? " Seconds " : " Second ";
+        String secStr = minute > 1 ? " Seconds" : " Second";
 
-        return day + dayStr + hours + hourStr + minute + minStr + second + secStr;
+        String str = "";
+
+        if (day > 0)
+            str += day + dayStr;
+        if (hours > 0)
+            str += hours + hourStr;
+        if (minute > 0)
+            str += minute + minStr;
+        if (second > 0)
+            str += second + secStr;
+
+        return str;
     }
 
     public static String getRemainingTime(Instant instant) {

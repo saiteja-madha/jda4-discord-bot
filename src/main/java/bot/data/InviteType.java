@@ -1,5 +1,5 @@
 package bot.data;
 
 public enum InviteType {
-    TOTAL, FAKE, LEFT, ADDED
+    TRACKED, LEFT, FAKE, ADDED
 }

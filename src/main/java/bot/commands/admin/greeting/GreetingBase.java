@@ -119,7 +119,7 @@ public abstract class GreetingBase extends ICommand {
 
         final TextChannel greetChannel = InviteHandler.getGreetingChannel(guild, config);
         final String greetChannelName = type.getText() + " Channel: " + (greetChannel == null ? "Not configured" : greetChannel.getName());
-        final EmbedBuilder embed = InviteHandler.buildEmbed(guild, ctx.getAuthor(), null, new int[]{0, 0, 0}, config);
+        final EmbedBuilder embed = InviteHandler.buildEmbed(guild, ctx.getAuthor(), null, new int[]{0, 0, 0}, config, false);
         ctx.getChannel().sendMessage(embed.build()).append(greetChannelName).queue();
     }
 

@@ -1,6 +1,7 @@
 package bot.command;
 
 import bot.utils.BotUtils;
+import bot.utils.MiscUtils;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -137,13 +138,13 @@ public abstract class ICommand {
         BotUtils.sendEmbed(
                 event.getChannel(),
                 EmbedUtils.getDefaultEmbed()
-                        .setAuthor("Kindly wait " + seconds + " seconds before using this command")
+                        .setAuthor("Kindly wait `" + MiscUtils.formatTime(seconds) + "` before using this command")
                         .build(),
                 5
         );
     }
 
-    private String getCooldownKey(CommandContext ctx) {
+    public String getCooldownKey(CommandContext ctx) {
         return this.name + "|" + "U:" + ctx.getAuthor().getId();
     }
 

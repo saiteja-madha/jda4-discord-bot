@@ -401,7 +401,7 @@ public class MongoDS implements DataSource {
     @Override
     public void checkTempMutes(JDA jda) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("tempmute_logs");
-        Bson filter = Filters.gt("unmute_time", Instant.now());
+        Bson filter = Filters.lt("unmute_time", Instant.now());
         FindIterable<Document> documents = collection.find(filter);
         for (Document doc : documents) {
             final String guildId = doc.getString("guild_id");
@@ -430,7 +430,7 @@ public class MongoDS implements DataSource {
     @Override
     public void checkTempBans(JDA jda) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("tempban_logs");
-        Bson filter = Filters.gt("unban_time", Instant.now());
+        Bson filter = Filters.lt("unban_time", Instant.now());
         FindIterable<Document> documents = collection.find(filter);
         for (Document doc : documents) {
             final String guildId = doc.getString("guild_id");
@@ -665,11 +665,12 @@ public class MongoDS implements DataSource {
         );
         final Document doc = collection.find(filter).first();
         if (doc == null) {
-            return new int[]{0, 0, 0};
+            return new int[]{0, 0, 0, 0};
         } else {
-            return new int[]{doc.getInteger("total_invites", 0),
+            return new int[]{doc.getInteger("tracked_invites", 0),
                     doc.getInteger("fake_invites", 0),
-                    doc.getInteger("left_invites", 0)};
+                    doc.getInteger("left_invites", 0),
+                    doc.getInteger("added_invites", 0)};
         }
     }
 
@@ -682,6 +683,16 @@ public class MongoDS implements DataSource {
         );
         final Document doc = collection.find(filter).first();
         return doc == null ? null : doc.getString("inviter_id");
+    }
+
+    @Override
+    public void removeInviterId(String guildId, String memberId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_logs");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("member_id", memberId)
+        );
+        collection.deleteOne(filter);
     }
 
     @Override
@@ -700,20 +711,22 @@ public class MongoDS implements DataSource {
         );
 
         Bson update;
-        if (type == InviteType.TOTAL)
-            update = Updates.inc("total_invites", amount);
+        if (type == InviteType.TRACKED)
+            update = Updates.inc("tracked_invites", amount);
         else if (type == InviteType.FAKE)
             update = Updates.inc("fake_invites", amount);
         else if (type == InviteType.LEFT)
             update = Updates.inc("left_invites", amount);
-        else
+        else if (type == InviteType.ADDED)
             update = Updates.inc("added_invites", amount);
+        else
+            return new int[]{0, 0, 0, 0};
         final Document updatedDoc = collection.findOneAndUpdate(filter, update, new FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER));
 
         if (updatedDoc == null)
             return new int[]{0, 0, 0, 0};
 
-        return new int[]{updatedDoc.getInteger("total_invites", 0),
+        return new int[]{updatedDoc.getInteger("tracked_invites", 0),
                 updatedDoc.getInteger("fake_invites", 0),
                 updatedDoc.getInteger("left_invites", 0),
                 updatedDoc.getInteger("added_invites", 0)
@@ -732,13 +745,17 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public void logInvite(String guildId, String memberId, String inviterId) {
+    public void logInvite(String guildId, String memberId, String inviterId, String code) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_logs");
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
                 Filters.eq("member_id", memberId)
         );
-        Bson update = Updates.set("inviter_id", inviterId);
+        Bson update = Updates.combine(
+                Updates.set("inviter_id", inviterId),
+                Updates.set("invite_code", code),
+                Updates.set("time_stamp", Instant.now())
+        );
         collection.updateOne(filter, update, new UpdateOptions().upsert(true));
     }
 

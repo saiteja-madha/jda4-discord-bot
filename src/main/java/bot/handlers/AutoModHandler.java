@@ -170,7 +170,7 @@ public class AutoModHandler extends ListenerAdapter {
                                 BotUtils.sendEmbed(logChannel, embed.build());
                             else
                                 DataSource.INS.setAutomodLogChannel(guild.getId(), null);
-                        }, null);
+                        }, err -> { /* Ignore */ });
 
             } catch (Exception ex) { /* Ignore */ }
         }

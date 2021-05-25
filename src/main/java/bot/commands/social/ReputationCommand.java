@@ -28,17 +28,20 @@ public class ReputationCommand extends ICommand {
 
         if (mentionedMembers.isEmpty()) {
             ctx.reply("You need to mention a member whom you want to rep!");
+            this.clearCooldown(ctx);
             return;
         }
 
         Member target = mentionedMembers.get(0);
         if (target.getUser().isBot()) {
             ctx.reply("You cannot give reputation to a bot!");
+            this.clearCooldown(ctx);
             return;
         }
 
         if (target.equals(ctx.getMember())) {
             ctx.reply("You cannot give reputation to yourself!");
+            this.clearCooldown(ctx);
             return;
         }
 
@@ -50,6 +53,11 @@ public class ReputationCommand extends ICommand {
 
         ctx.reply(embed.build());
 
+    }
+
+    private void clearCooldown(CommandContext ctx) {
+        String cooldownKey = this.getCooldownKey(ctx);
+        ctx.getCmdHandler().invalidateCooldown(cooldownKey);
     }
 
 }
