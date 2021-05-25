@@ -143,7 +143,7 @@ public abstract class ICommand {
         );
     }
 
-    private String getCooldownKey(CommandContext ctx) {
+    public String getCooldownKey(CommandContext ctx) {
         return this.name + "|" + "U:" + ctx.getAuthor().getId();
     }
 

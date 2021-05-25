@@ -295,4 +295,8 @@ public class CommandHandler extends ListenerAdapter {
         return uses.getOrDefault(name, 0);
     }
 
+    public void invalidateCooldown(String key) {
+        cooldowns.remove(key);
+    }
+
 }
