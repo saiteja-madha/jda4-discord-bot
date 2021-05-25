@@ -21,15 +21,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 public class InviteHandler extends ListenerAdapter {
 
     private final Logger LOGGER = LoggerFactory.getLogger(InviteHandler.class);
     private final Map<String, Map<String, Integer>> inviteCache = new ConcurrentHashMap<>();
+    private static final long FAKE_INVITE_DAYS_OFFSET = 1;
 
     @Override
     public void onGuildReady(final GuildReadyEvent event) {
@@ -149,6 +153,13 @@ public class InviteHandler extends ListenerAdapter {
         return vanityUses;
     }
 
+    private boolean isFakeInvite(User user) {
+        final String avatar = user.getAvatarUrl();
+        final OffsetDateTime timeCreated = user.getTimeCreated();
+        final long days = DAYS.between(timeCreated, OffsetDateTime.now());
+        return days > FAKE_INVITE_DAYS_OFFSET && avatar == null;
+    }
+
     private void handleWelcome(Guild guild, User user) {
         // Invites tracking is disabled
         if (!this.shouldInvitesByTracked(guild)) {
@@ -219,7 +230,14 @@ public class InviteHandler extends ListenerAdapter {
                     LOGGER.error("GuildId: {} - No user found for invite {}", guild.getId(), inviteUsed.getCode());
                 } else {
                     DataSource.INS.logInvite(guild.getId(), user.getId(), inviter.getId(), inviteUsed.getCode());
-                    final int[] ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), 1, InviteType.TRACKED);
+
+                    int[] ints;
+                    // check possible fake invite
+                    if (isFakeInvite(user)) {
+                        ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), 1, InviteType.FAKE);
+                    } else {
+                        ints = DataSource.INS.incrementInvites(guild.getId(), inviter.getId(), 1, InviteType.TRACKED);
+                    }
 
                     // Handle Invite Ranks
                     this.addInviteRole(guild, inviter, ints);
@@ -328,7 +346,7 @@ public class InviteHandler extends ListenerAdapter {
     }
 
     private void sendGreetingWithoutInvite(Guild guild, User user, GreetingType type) {
-        this.sendGreeting(guild, user, null, new int[]{0, 0, 0}, type, false);
+        this.sendGreeting(guild, user, null, new int[]{0, 0, 0, 0}, type, false);
     }
 
     private void sendInviterGreeting(Guild guild, User user, User inviter, int[] invites, GreetingType type) {
