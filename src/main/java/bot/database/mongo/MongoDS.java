@@ -401,7 +401,7 @@ public class MongoDS implements DataSource {
     @Override
     public void checkTempMutes(JDA jda) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("tempmute_logs");
-        Bson filter = Filters.gt("unmute_time", Instant.now());
+        Bson filter = Filters.lt("unmute_time", Instant.now());
         FindIterable<Document> documents = collection.find(filter);
         for (Document doc : documents) {
             final String guildId = doc.getString("guild_id");
@@ -430,7 +430,7 @@ public class MongoDS implements DataSource {
     @Override
     public void checkTempBans(JDA jda) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("tempban_logs");
-        Bson filter = Filters.gt("unban_time", Instant.now());
+        Bson filter = Filters.lt("unban_time", Instant.now());
         FindIterable<Document> documents = collection.find(filter);
         for (Document doc : documents) {
             final String guildId = doc.getString("guild_id");
@@ -686,6 +686,16 @@ public class MongoDS implements DataSource {
     }
 
     @Override
+    public void removeInviterId(String guildId, String memberId) {
+        MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_logs");
+        Bson filter = Filters.and(
+                Filters.eq("guild_id", guildId),
+                Filters.eq("member_id", memberId)
+        );
+        collection.deleteOne(filter);
+    }
+
+    @Override
     public void clearInviteData(String guildId) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_data");
         Bson filter = Filters.eq("guild_id", guildId);
@@ -735,13 +745,17 @@ public class MongoDS implements DataSource {
     }
 
     @Override
-    public void logInvite(String guildId, String memberId, String inviterId) {
+    public void logInvite(String guildId, String memberId, String inviterId, String code) {
         MongoCollection<Document> collection = mongoClient.getDatabase("discord").getCollection("invite_logs");
         Bson filter = Filters.and(
                 Filters.eq("guild_id", guildId),
                 Filters.eq("member_id", memberId)
         );
-        Bson update = Updates.set("inviter_id", inviterId);
+        Bson update = Updates.combine(
+                Updates.set("inviter_id", inviterId),
+                Updates.set("invite_code", code),
+                Updates.set("time_stamp", Instant.now())
+        );
         collection.updateOne(filter, update, new UpdateOptions().upsert(true));
     }
 

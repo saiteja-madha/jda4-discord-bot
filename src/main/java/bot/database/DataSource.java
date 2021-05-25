@@ -100,10 +100,11 @@ public interface DataSource {
     // Invites
     int[] getInvites(String guildId, String memberId); // [total, fake, left]
     @Nullable String getInviterId(String guildId, String memberId);
+    void removeInviterId(String guildId, String memberId);
     int[] incrementInvites(String guildId, String memberId, int amount, InviteType type); // [total, fake, left, added]
     void clearInviteData(String guildId);
     void clearInvites(String guildId, String memberId);
-    void logInvite(String guildId, String memberId, String inviterId);
+    void logInvite(String guildId, String memberId, String inviterId, String code);
     void inviteTracking(String guildId, boolean isEnabled);
     void addInvitesRank(String guildId, String roleId, int inviteCount);
     void removeInvitesRank(String guildId, int inviteCount);
