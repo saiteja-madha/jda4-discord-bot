@@ -33,15 +33,18 @@ public abstract class GreetingBase extends ICommand {
                 "`{p}{i} thumbnail <ON | OFF>` : enable/disable " + text + " embed thumbnail\n" +
                 "`{p}{i} image <url | OFF>` : enable/disable " + text + " embed image\n" +
                 "`{p}{i} color <HexColor>` : setup " + text + " embed color\n\n" +
-                "**Replacements**\n```" +
-                "{server} - Server Name\n" +
-                "{member} - Member Name\n" +
-                "{@member} - Member Mention\n" +
-                "{count} - Server Member Count\n" +
-                "{inviter} - Inviter Name\n" +
-                "{@inviter} - Inviter Mention\n" +
-                "{invites} - Inviter invites\n" +
-                "```";
+                "**Replacements**\n" +
+                "`{server}` - Server Name\n" +
+                "`{count}` - Server Member Count\n" +
+                "`{member:name}` - Member Name\n" +
+                "`{member:mention}` - Member Mention\n" +
+                "`{inviter:name}` - Inviter Name\n" +
+                "`{inviter:mention}` - Inviter Mention\n" +
+                "`{invites}` - Inviter invites\n" +
+                "`{invites:total}` - Total invites\n" +
+                "`{invites:fake}` - Fake invites\n" +
+                "`{invites:left}` - Left invites\n" +
+                "";
         this.help = "setup " + text + " message in your discord server";
         this.multilineHelp = true;
         this.minArgsCount = 1;

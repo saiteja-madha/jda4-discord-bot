@@ -1,4 +1,4 @@
-package bot.commands.admin.counter;
+package bot.commands.admin;
 
 import bot.Constants;
 import bot.command.CommandCategory;
