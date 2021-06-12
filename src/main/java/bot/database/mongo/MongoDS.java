@@ -206,7 +206,9 @@ public class MongoDS implements DataSource {
         doc.append("guild_id", guildId)
                 .append("channel_id", channelId)
                 .append("message_id", messageId)
-                .append("unicode", unicode);
+                .append("unicode", unicode)
+                .append("time_stamp", Instant.now());
+
         collection.insertOne(doc);
     }
 
