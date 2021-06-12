@@ -4,6 +4,7 @@ import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.database.DataSource;
+import bot.handlers.InviteHandler;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -42,7 +43,7 @@ public class InviterCommand extends ICommand {
         EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                 .setDescription("**Inviter:** " + "<@" + inviterId + ">" + "\n" +
                         "**Inviter ID:** " + inviterId + "\n" +
-                        "**Inviter Invites:** Total: `" + invites[0] + "` Fake: `" + invites[2] + "` Left: `" + invites[1] + "`"
+                        "**Inviter Invites:** Total: `" + InviteHandler.getTotalInvites(invites) + "` Fake: `" + invites[1] + "` Left: `" + invites[2] + "`"
 
                 )
                 .setFooter("");
