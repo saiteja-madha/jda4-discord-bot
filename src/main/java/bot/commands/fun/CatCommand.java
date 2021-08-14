@@ -4,6 +4,7 @@ import bot.Constants;
 import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
+import com.fasterxml.jackson.databind.JsonNode;
 import me.duncte123.botcommons.messaging.EmbedUtils;
 import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -22,8 +23,9 @@ public class CatCommand extends ICommand {
 
     @Override
     public void handle(@NotNull CommandContext ctx) {
-        WebUtils.ins.getJSONObject("https://aws.random.cat/meow").async((json) -> {
-            String image = json.get("file").asText();
+        WebUtils.ins.getJSONArray("https://api.thecatapi.com/v1/images/search").async((json) -> {
+            final JsonNode item = json.get(0);
+            String image = item.get("url").asText();
 
             final EmbedBuilder embed = EmbedUtils.getDefaultEmbed()
                     .setImage(image)

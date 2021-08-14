@@ -1,6 +1,8 @@
 package bot.handlers;
 
 import bot.Bot;
+import bot.Config;
+import bot.command.CommandCategory;
 import bot.command.CommandContext;
 import bot.command.ICommand;
 import bot.commands.admin.FlagtrCommand;
@@ -259,6 +261,10 @@ public class CommandHandler extends ListenerAdapter {
         ICommand cmd = this.getCommand(invoke);
 
         if (cmd != null) {
+            if(cmd.getCategory() == CommandCategory.OWNER) {
+                if (!event.getMessage().getAuthor().getId().equals(Config.get("OWNER_ID"))) return;
+            }
+
             List<String> args = Arrays.asList(split).subList(1, split.length);
             CommandContext ctx = new CommandContext(event, args, invoke, prefix, this);
             uses.put(cmd.getName(), uses.getOrDefault(cmd.getName(), 0) + 1);
