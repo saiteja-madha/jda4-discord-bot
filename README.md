@@ -1,8 +1,5 @@
-<h1 align="center">Strange (JDA 4 Discord Bot)</h1>
+<h1 align="center">JDA 4 Discord Bot</h1>
 <p align="center">A cool multipurpose bot built using <a href="https://github.com/DV8FromTheWorld/JDA">Java Discord API</a></p>
-<p align="center">
-  <img style="text-align:center" width="200" src="https://raw.githubusercontent.com/saiteja-madha/strange-bot/master/assets/avatar.png" />
-</p>
 
 # Features
 - Powerful Moderation
